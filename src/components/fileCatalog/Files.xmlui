@@ -1,0 +1,62 @@
+ <!--
+  This component displays the contents of a particular folder and provides a context menu
+  to execute an action on a particular file or folder.
+
+  Properties:
+  - `data`: The file data to display
+  - `drive`: The ID of the drive containing the files
+  - `folder`: The ID of the folder containing the files
+  - `itemsSelectable`: Whether items can be selected
+  - `itemDisabledPredicate`: A predicate to determine if an item is disabled
+  - `loading`: Whether the component is loading
+  - `height`: The height of the component
+  - `shouldHideLinkUrl`: Whether to hide the link URL (for example, when in a modal)
+  - `actionsAvailable`: Whether actions (download, delete, rename) are available
+
+  Events:
+  - `requestNavigateToFolder`: Emitted when navigation to a folder is requested
+  - `downloadFiles`: Emitted when download of selected files is requested
+  - `deleteFileEntries`: Emitted when deletion of selected files is requested
+  - `startRenamingSelected`: Emitted when renaming of the selected item is requested
+-->
+<Component name="Files">
+  <script>
+    var sortedFiles = MwdHelpers.sortFiles(
+      $props.data,
+      appState.value.sortBy,
+      appState.value.sortDirection);
+  </script>
+  <!-- We obtain the view mode and sorting state from the AppState -->
+  <AppState id="appState" bucket="fileCatalogView" />
+  <!-- Selection state management using AppState -->
+  <AppState id="selectionState" bucket="fileCatalogSelection" />
+  <!-- We report any changes in the folder data -->
+  <ChangeListener
+    listenTo="{$props.data.value}"
+    onDidChange="emitEvent('itemsChanged', $props.data?.value)" />
+
+  <!-- Use the table or tiles view according to the current app state -->
+  <TableView  
+    when="{appState.value.view === 'table'}"    
+    fileEntries="{sortedFiles}"
+    itemDisabledPredicate="{$props.itemDisabledPredicate}"
+    loading="{$props.loading}"
+    height="{$props.height}"
+    shouldHideLinkUrl="{$props.shouldHideLinkUrl}"
+    actionsAvailable="{$props.actionsAvailable}"
+    itemsSelectable="{$props.itemsSelectable}"
+    onRequestNavigateToFolder="path => emitEvent('requestNavigateToFolder', path)"
+    onDownloadFiles="emitEvent('downloadFiles')"
+    onDeleteTriggered="emitEvent('deleteTriggered')"
+    onRenameTriggered="emitEvent('renameTriggered')"
+  />
+  <TilesView
+    when="{appState.value.view === 'tiles'}"
+    fileEntries="{sortedFiles}"
+    drive="{$props.drive}"
+    folder="{$props.folder}"
+    loading="{$props.loading}"
+    height="{$props.height}"
+    onSelectItem="itemId => emitEvent('selectItem', itemId)"
+  />
+</Component>

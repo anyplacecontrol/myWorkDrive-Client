@@ -1,0 +1,161 @@
+<!--
+  Table view for displaying files and folders in a tabular format.
+
+  Properties:
+  - `appState`: The application state containing view and sorting information
+  - `fileEntries`: The list of file entries to display
+  - `itemDisabledPredicate`: A function that takes an item and returns whether it is disabled
+  - `loading`: Whether the data is currently loading
+  - `height`: The height of the component
+  - `shouldHideLinkUrl`: Whether to hide the link URL
+  - `actionsAvailable`: Whether action buttons are available for each item
+  - `sortBy`: The field to sort by
+  - `sortDirection`: The direction to sort by
+  - `itemsSelectable`: Whether items are selectable
+
+  Events:
+  - `requestNavigateToFolder`: Emitted when navigation to a folder is requested
+  - `downloadFiles`: Emitted when download of selected files is requested
+  - `deleteFileEntries`: Emitted when deletion of selected files is requested
+  - `startRenamingSelected`: Emitted when renaming of the selected item is requested
+
+  Note: We pass an AppState bucket through the `appState` property to keep the
+  sorting state in sync with the parent component. When we display files in a modal,
+  we keep the sorting state local to that modal.
+-->
+<Component name="TableView">
+  <!-- We obtain the view mode and sorting state from the AppState -->
+  <AppState id="appState" bucket="fileCatalogView" />
+  <AppState id="selectionState" bucket="fileCatalogSelection" />
+  <Table
+    height="100%"
+    id="filesTable"
+    headerHeight="32px"
+    sortBy="{appState.value.sortBy}"
+    sortDirection="{appState.value.sortDirection}"
+    rowsSelectable="{$props.itemsSelectable !== false}"
+    syncWithAppState="{($props.shouldSyncWithAppState ?? true) ? selectionState : null}"
+    rowDisabledPredicate="{$props.itemDisabledPredicate}"
+    autoFocus="true"
+    items="{$props.fileEntries}"
+    loading="{$props.loading}"
+    iconSortAsc="arrowup"
+    iconSortDesc="arrowdown"
+    iconNoSort="-"
+    alwaysShowSelectionHeader="true"
+    onWillSort="(sortBy, direction) => {
+      appState.update({ sortBy, sortDirection: direction });
+      return true;
+    }"
+  >
+    <property name="noDataTemplate">
+      <EmptyDataView />
+    </property>
+
+    <Column
+      header="Name"
+      minWidth="{appGlobals.filesTableColumns.name}"
+      bindTo="name"
+      canSort="true"
+    >      
+      <Link      
+        to="{$props.shouldHideLinkUrl
+          ? null : {
+            pathname: '.',
+            queryParams: MwdHelpers.fileItemQueryParams($item)
+          }}"
+        testId="link-{$item.name}"
+        onClick="emitEvent('requestNavigateToFolder', $item.path);"
+      >
+      <Icon
+        name="{ $item.isFolder ? 'folder' : getFileExtension($item.name) }"
+        width="20"
+        height="20"
+        fallback="unknownfile"
+      />
+        <Text
+          paddingLeft="10px"
+          id="nameText"
+          value="{$item.name}"
+          maxLines="1"
+        />
+      </Link>
+    </Column>
+    <Column
+      header="Type"
+      bindTo="type"
+      width="{appGlobals.filesTableColumns.type}"
+      canSort="true"
+    >
+      <Link>
+        <Text value="{ $item.type}" />
+      </Link>
+    </Column>
+    <Column
+      header="Last modified"
+      bindTo="modified"
+      width="{appGlobals.filesTableColumns.lastModified}"
+      canSort="true"
+    >
+      <Link>
+        <Text value="{ formatDate($item.modified) }" />
+      </Link>
+    </Column>
+    <Column
+      header="Size"
+      bindTo="size"
+      width="{appGlobals.filesTableColumns.size}"
+      canSort="true"
+    >
+      <Link>
+        <Text
+          value="{ $item.size==null ? '' : formatFileSizeInBytes($item.size) }"
+          maxLines="1"
+        />
+      </Link>
+    </Column>
+    <Column
+      header="Creation date"
+      bindTo="created"
+      width="{appGlobals.filesTableColumns.created}"
+      canSort="true"
+    >
+      <Link>
+        <Text value="{ formatDate($item.created) }" />
+      </Link>
+    </Column>
+    <Column
+      id="actions"
+      header=" "
+      width="{appGlobals.filesTableColumns.actions}"
+      when="{$props.actionsAvailable !== false}"
+      canResize="false"
+      pinTo="right"
+    >
+      <Stack horizontalAlignment="center">
+        <DropdownMenu
+          onWillOpen="selectionState.update({ selectedIds: [$item.id] })"
+        >
+          <property name="triggerTemplate">
+            <Button icon="dotmenuhorizontal" variant="ghost" />
+          </property>
+          <MenuItem onClick="emitEvent('downloadFiles')">
+            <Icon name="download" />
+            Download
+          </MenuItem>
+          <MenuItem onClick="emitEvent('deleteTriggered')">
+            <Icon name="trash" />
+            Delete
+          </MenuItem>
+          <MenuItem
+            when="{selectionState.value.selectedIds.length === 1}"
+            onClick="emitEvent('renameTriggered')"
+          >
+            <Icon name="rename" />
+            Rename
+          </MenuItem>
+        </DropdownMenu>
+      </Stack>
+    </Column>
+  </Table>
+</Component>

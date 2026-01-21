@@ -1,0 +1,10 @@
+<!--
+  This component is used to display a message when a drive or folder is empty.
+-->
+<Component name="EmptyDataView">
+  <CVStack gap="$gap-tight" padding="$padding-loose" testId="empty-folder-view">
+    <Icon name="empty-folder" width="300px" height="280px"/>
+    <Text fontSize="$fontSize-xl">This folder is empty.</Text>
+    <Text fontSize="$fontSize-xl">Drop some files here!</Text>
+  </CVStack>
+</Component>

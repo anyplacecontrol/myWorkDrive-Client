@@ -1,0 +1,46 @@
+<Component name="FoldersTree">
+  <!-- Panel with fixed toolbar (46px) and scrollable tree area below -->
+  <VStack height="100%" overflow="hidden">
+    <HStack
+      height="46px"
+      verticalAlignment="center"
+      paddingHorizontal="$space-4"
+      gap="0"
+      borderBottom="1px solid $borderColor"
+    >
+      <TextBox
+        height="36px"
+        canShrink="true"
+        width="100%"
+        testId="tree-search"
+        placeholder="Search"
+        startIcon="search"
+      />
+      <SpaceFiller />
+    </HStack>
+
+    <!-- Tree container: fills remaining space and scrolls independently -->
+   
+      <Tree
+        testId="tree"
+        dataFormat="hierarchy"
+        defaultExpanded="all"
+        overflowX="hidden"
+        data='{[
+      {
+        id: 1, icon: "folder", name: "Root Item 1",
+        children: [
+          { id: 2, icon: "code", name: "Child Item 1.1" },
+          { id: 3, icon: "folder", name: "Child Item 1.2",
+            children: [
+              { id: 4, icon: "code", name: "Grandchild Item 1.2.1"}
+            ],
+          }
+        ],
+      },
+    ]}'
+      >
+      </Tree>
+   
+  </VStack>
+</Component>

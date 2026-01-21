@@ -1,0 +1,69 @@
+ <!--
+  This component displays a modal dialog with the content of a file, including a
+  preview and options to download or delete the file.
+
+  Properties:
+  - `drive`: The drive containing the file
+  - `folder`: The folder containing the file
+  - `file`: The file to display
+-->
+<Component name="FileContentModal">
+  <script>
+    var filePath = $props.drive + 
+      $props.folder + ($props.folder.endsWith("/") ? "" : "/") + 
+      $props.file;
+  </script>
+  <ModalDialog
+    when="{$props.file}"
+    id="filePreviewModal"
+    fullScreen="true"
+    gap="0"
+    closeButtonVisible="false"
+    onClose="Actions.navigate(-1)">
+    <DataSource
+      id="file"
+      when="{filePath && !deleteButton.clickInProgress}"
+      url="/GetFileInfo"
+      queryParams="{{ path: filePath }}" />
+    <HStack
+      testId="preview-header"
+      padding="$padding-tight"
+      boxShadow="$boxShadow-md"
+      zIndex="1"
+      canShrink="false">
+      <Button
+        label="Download"
+        variant="ghost"
+        id="downloadButton"
+        onClick="Actions.download({
+          url: '/ReadFile',
+          queryParams: {
+            path: filePath,
+            startPosition: 0,
+            count: file.value.size,
+          },
+          fileName: $props.file,
+        })" />
+      <Button label="Delete" variant="ghost" id="deleteButton">
+        <event name="click">
+          <APICall
+            id="deleteAction"
+            url="/DeleteFile"
+            method="delete"
+            queryParams="{{ path: filePath }}"
+            confirmMessage="Are you sure you want to delete this file?"
+            confirmButtonLabel="Delete"
+            onSuccess="filePreviewModal.close()">          
+          </APICall>
+        </event>
+      </Button>
+      <SpaceFiller />
+      <Button
+        id="closeButton"
+        icon="close"
+        variant="ghost"
+        onClick="filePreviewModal.close()" />
+    </HStack>
+    <FilePreview data="/GetFileInfo?path={filePath}" />
+  </ModalDialog>
+</Component>

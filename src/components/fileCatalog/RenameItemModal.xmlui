@@ -1,0 +1,34 @@
+ <!-- 
+  This component represents a modal dialog that allows the user to rename an item.
+
+  Properties:
+    initialValue: The initial value of the input field
+-->
+<Component
+  name="RenameItemModal"
+  method.open="renameModal.open()"
+  method.close="renameModal.close()">
+  <ModalDialog id="renameModal" title="Rename">
+    <!-- The form that allows the user to rename the item. -->
+    <Form
+      id="renameForm"
+      data="{{name: $props.initialValue}}"
+      onSubmit="(data) => emitEvent('requestSave', data.name);">
+      <!-- The input field that allows the user to enter the new name. -->
+      <FormItem
+        bindTo="name"
+        autoFocus="true"
+        required="true"
+        onValidate="(value) => {
+          if ((value && value.trim()) === ($props.originalName && $props.originalName.trim())) {
+            return {
+              isValid: false,
+              severity: 'error',
+              invalidMessage: 'The specified name is the same as the current name.',
+            };
+          }
+          return true;
+        }" />
+    </Form>
+  </ModalDialog>
+</Component>

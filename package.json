@@ -1,0 +1,24 @@
+{
+  "name": "@nsoftware/cbfs",
+  "private": true,
+  "version": "0.8.0",
+  "scripts": {
+    "start": "xmlui start --withMock=false",
+    "start:backend": "node scripts/start-backend.js",
+    "start:dev": "npm run start:backend && npm run start",
+    "build": "xmlui build",
+    "preview": "xmlui preview",
+    "build-prod": "npm run build -- --prod --withMock=true",
+    "release-ci": "npm run build -- --withMock --withHostingMetaFiles && xmlui zip-dist",
+    "release-prod": "npm run build-prod && xmlui zip-dist"
+  },
+  "dependencies": {
+    "xmlui": "^0.11.29",
+    "xmlui-pdf": "0.1.11"
+  },
+  "devDependencies": {
+    "@types/node": "22.9.0",
+    "serve": "14.2.0",
+    "swagger-cli": "^4.0.4"
+  }
+}

@@ -1,0 +1,30 @@
+<!--
+  This component displays the content of a root file catalog.
+
+  Properties:
+    folderId: The ID of the folder to display
+    viewAs: The view mode to display the files in. Can be 'table' or 'tiles'
+    itemDisabledPredicate: A function that takes an item and returns whether it is disabled
+    sortBy: The field to sort by
+    sortDirection: The direction to sort by
+    itemsSelectable: Whether items are selectable
+    actionsAvailable: The actions available for the items
+    shouldHideLinkUrl: Whether to hide the link URL
+    height: The height of the component
+-->
+<Component name="MyFiles" method.reload="files.fetch_datasource()">
+  <Files
+    id="files"
+    data="/drives/me/items/{$props.folderId}/children"
+    folderId="{$props.folderId}"
+    itemDisabledPredicate="{$props.itemDisabledPredicate}"
+    itemsSelectable="{$props.itemsSelectable}"
+    actionsAvailable="{$props.actionsAvailable}"
+    shouldHideLinkUrl="{$props.shouldHideLinkUrl}"
+    height="{$props.height}"
+    onRequestNavigateToFolder="(targetId) => emitEvent('requestNavigateToFolder', targetId)"
+    onRequestChangeSorting="(by, newDirection)=>emitEvent('requestChangeSorting', by, newDirection)"
+    onSelectItem="(itemId)=>emitEvent('selectItem', itemId)"
+    onToggleItem="(itemId)=>emitEvent('toggleItem', itemId)"
+  />
+</Component>

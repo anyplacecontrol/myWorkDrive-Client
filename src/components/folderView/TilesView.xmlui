@@ -1,0 +1,78 @@
+ <!--
+  This component displays a list of items as tiles. Each item is displayed as a button with a checkbox
+
+  Properties:
+  - `fileEntries`: The list of items to display
+  - `drive`: The drive containing the items
+  - `folder`: The folder containing the items
+  - `loading`: A boolean to indicate if the items are still loading
+  - `height`: The height of the tiles
+  - `folderId`: The id of the folder
+-->
+<Component name="TilesView">
+  <!-- We obtain the view mode and sorting state from the AppState -->
+  <AppState id="appState" bucket="fileCatalogView" />
+  <AppState id="selectionState" bucket="fileCatalogSelection" />
+  <Spinner when="{$props.loading}" />
+  <EmptyDataView when="{$props.fileEntries.length === 0 && !$props.loading}" />
+  <!--
+    We use a FlowLayout to allow as many items as possible to be displayed in a row. The items that do
+    not fit into a row will break into the next row.
+  -->
+  <HStack
+    when="{$props.fileEntries.length > 0}"
+    height="{$props.height}"
+    wrapContent="true"
+    overflowY="auto">
+    <Items items="{$props.fileEntries}">
+      <!-- Each file or folder item is displayed as a button so that we can select/unselect them. -->
+      <Button
+        variant="ghost"
+        themeColor="secondary"
+        onClick="selectionState.update({ selectedIds: [$item.id] })">
+        <CVStack width="{appGlobals.fileTileWidth}px">
+          <!-- A checkbox is used to display the selected/unselected state of the item. -->
+          <Checkbox
+            id="selectionFlag"
+            initialValue="{selectionState.listIncludes('selectedIds', $item.id)}"
+            marginLeft="auto"
+            onClick="() => {
+              if (!selectionFlag.value) {
+                selectionState.appendToList('selectedIds', $item.id);
+              } else {
+                selectionState.removeFromList('selectedIds', $item.id);
+              }
+            }" />
+          <!-- This link will navigate to the folder's content when clicked. -->
+          <Link
+            when="{$item.isFolder}"
+            testId="link-{$item.name}"
+            to="{{
+              pathname: '.',
+              queryParams: MwdHelpers.fileItemQueryParams($item)
+            }}">
+            <TileItem
+              id="{$item.id}"
+              icon="{$item.file.childCount === 0 ? 'emptyfolder' : 'folder'}"
+              title="{$item.name}"
+              subInfo="{getDateUntilNow($item.modified)}" />
+          </Link>
+          <!-- This link will navigate to the file's preview when clicked. -->
+          <Link
+            when="{!$item.isFolder}"
+            testId="link-{$item.name}"
+            to="{{
+              pathname: '.',
+              queryParams: MwdHelpers.fileItemQueryParams($item)
+            }}">
+            <TileItem
+              id="{$item.id}"
+              icon="{getFileExtension($item.name, $item.mimeType) || 'unknownfile'}"
+              subInfo="{getDateUntilNow($item.modified)}"
+              title="{$item.name}" />
+          </Link>
+        </CVStack>
+      </Button>
+    </Items>
+  </HStack>
+</Component>

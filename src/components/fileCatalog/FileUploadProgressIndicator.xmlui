@@ -1,0 +1,14 @@
+<!-- 
+  This component displays a progress bar for file uploads.
+
+  Properties:
+    items: File items to display progress for
+-->
+<Component name="FileUploadProgressIndicator">
+  <VStack 
+    id="file-upload-progress" 
+    verticalAlignment="center" >
+      <Text value="Uploading {items.length > 1 ? items.length + ' files' : '1 file'}"/>
+      <ProgressBar value="{progress}"/>
+  </VStack>
+</Component>

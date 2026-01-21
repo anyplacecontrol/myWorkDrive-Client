@@ -1,0 +1,46 @@
+ <!-- 
+  This component displays a list of breadcrumbs for a particular folder.
+
+  Properties:
+  - `drive`: The ID of the drive containing the folder
+  - `folder`: The path of the folder to display
+  - `breadcrumbRootName`: The name of the root breadcrumb
+  - `shouldHideLinkUrl`: Whether to hide the link URL (default: false)
+-->
+<Component name="FolderBreadcrumbs">
+  <HStack gap="$gap-tight" verticalAlignment="center" width="100%" overflowX="hidden">
+    <Link
+      canShrink="true"
+      testId="file-catalog-breadcrumb-item-{$props.breadcrumbRootName}"
+      to="{ $props.shouldHideLinkUrl 
+            ? null 
+            : {
+                queryParams: {
+                  drive: $props.drive,
+                  folder: '/',
+              }
+          }}"
+      onClick="emitEvent('requestNavigateToFolder', '')">
+      <Text value="{$props.breadcrumbRootName}" maxLines="1" />
+    </Link>
+    <Items items="{$props.folder.split('/').slice(1)}">
+      <Fragment>
+        <Icon name="chevronright" size="sm" />
+        <Link
+          canShrink="true"
+          to="{ $props.shouldHideLinkUrl 
+            ? null 
+            : {
+                queryParams: {
+                  drive: $props.drive,
+                  folder: '/' + $props.folder.split('/').slice(1, $itemIndex + 2).join('/'),
+              }
+          }}"
+          onClick="emitEvent('requestNavigateToFolder', '/' + $props.folder.split('/').slice(1, $itemIndex + 2).join('/'))"
+          testId="file-catalog-breadcrumb-item-{$itemIndex}">
+          <Text value="{$item}" maxLines="1" />
+        </Link>
+      </Fragment>
+    </Items>
+  </HStack>
+</Component>

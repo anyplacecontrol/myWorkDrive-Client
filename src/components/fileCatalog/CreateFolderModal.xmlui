@@ -1,0 +1,42 @@
+ <!--
+  This component is a modal dialog that allows the user to create a new folder.
+-->
+<Component
+  name="CreateFolderModal"
+  method.open="modal.open()"
+  method.close="modal.close()">
+  <ModalDialog
+    title="Create a folder"
+    testId="create-folder-modal"
+    id="modal">
+    <Form
+      id="createForm"
+      saveLabel="Create"
+      saveInProgressLabel="Creating..."
+      onSubmit="(data) => {
+          try {
+            Actions.callApi({
+              url: '/CreateFile',
+              method: 'post',
+              body: {
+                name: data.name,
+                path: $props.drive + $props.parentFolder,
+                conflictBehavior: 'fail'
+              },
+            });
+            modal.close();
+          } catch (error) {
+            if (error.statusCode === 409) {
+              signError('Folder ' + name + ' already exists');
+            } else {
+              signError(error.details.message || error.message);
+            }
+          }
+        }">
+      <FormItem
+        bindTo="name"
+        autoFocus="true"
+        required="true" />
+    </Form>
+  </ModalDialog>
+</Component>

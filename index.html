@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      window.__PUBLIC_PATH = "/";
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/index.ts"></script>
+    <script>
+      window.MwdHelpers = {
+        // --- Converts a FileitemInfo into query parameters for navigation
+        fileItemQueryParams: (item) => {
+          const segments = item.path.split(":");
+          const drive =
+            segments.length === 4
+              ? ":" + segments.slice(1, 3).join(":") + ":"
+              : path;
+          const filePath =
+            segments.length === 4 ? segments.slice(3).join(":") : path;
+          if (item.isFolder) {
+            return { drive, folder: filePath };
+          }
+          const fileSegments = filePath.split("/");
+          return {
+            drive,
+            folder: fileSegments.slice(0, -1).join("/"),
+            file: fileSegments[fileSegments.length - 1],
+          };
+        },
+
+        // --- Get the file extension from the full file path
+        getFileExtension: (filePath) =>
+          filePath?.includes(".")
+            ? filePath?.split(".").pop()?.toLowerCase()
+            : undefined,
+
+        // --- Get the object property by path (e.g. "a.b[0].c")
+        getPropertyByPath: (object, path) => {
+          if (!object || typeof object !== "object") {
+            return undefined;
+          }
+
+          if (!path || typeof path !== "string") {
+            return undefined;
+          }
+
+          const pathArray = path
+            .replace(/\[(\d+)\]/g, ".$1")
+            .split(".")
+            .filter(Boolean);
+
+          let result = object;
+
+          for (const key of pathArray) {
+            if (result == null || typeof result !== "object") {
+              return undefined;
+            }
+            result = result[key];
+          }
+
+          return result;
+        },
+
+        sortFiles: (files, sortBy, direction) => {
+          if (!files) return [];
+          if (sortBy === undefined) return files.slice();
+          const sorted = files.slice().toSorted((a, b) => {
+            const compMin = direction === "ascending" ? -1 : 1;
+            const compMax = direction === "ascending" ? 1 : -1;
+
+            if (sortBy === "type") {
+              const _a = MwdHelpers.getFileExtension(a.name) || "";
+              const _b = MwdHelpers.getFileExtension(b.name) || "";
+              return _a > _b ? compMax : _b > _a ? compMin : 0;
+            } else {
+              return MwdHelpers.getPropertyByPath(a, sortBy) >
+                MwdHelpers.getPropertyByPath(b, sortBy)
+                ? compMax
+                : MwdHelpers.getPropertyByPath(b, sortBy) >
+                  MwdHelpers.getPropertyByPath(a, sortBy)
+                ? compMin
+                : 0;
+            }
+          });
+          return sorted;
+        },
+      };
+    </script>
+  </body>
+</html>

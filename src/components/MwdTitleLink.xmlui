@@ -1,0 +1,7 @@
+<!-- 
+  Properties:
+    title: Title to displaye
+-->
+<Component name="MwdTitleLink">
+  <Link to="/" borderLeft="1px solid $color-border" padding="$space-3">{$props.title}</Link>
+</Component>

@@ -1,0 +1,51 @@
+<!-- The current app works with a wired-id user only. It uses a single drive. -->
+<App
+  layout="vertical-full-header"
+  loggedInUser="{{ id: 'user_1234', displayName: 'Tim Test'}}"
+  scrollWholePage="false"
+  paddingVertical="0"
+  var.currentDrive=":sh:Documents:"
+>
+  <AppHeader padding="0">
+    <!-- Breadcrumb navigation to show the current folder path -->
+    <FolderBreadcrumbs
+      drive="{defaultTo($queryParams.drive, currentDrive)}"
+      folder="{defaultTo($queryParams.folder, '/')}"
+      breadcrumbRootName="Root"
+    />
+
+    <property name="profileMenuTemplate">
+      <DropdownMenu>
+        <property name="triggerTemplate">
+          <Avatar size="xs" name="{loggedInUser.displayName}" />
+        </property>
+        <!-- Add the list of users here if user switching is implemented -->
+        <ContentSeparator />
+        <MenuItem label="Log out" />
+      </DropdownMenu>
+    </property>
+  </AppHeader>
+
+  <Pages fallbackPath="/my-files">
+    <!-- We have a single main page for browsing files -->
+    <Page url="/my-files" padding="0">
+    <HSplitter initialPrimarySize="250px">
+      <FoldersTree/>
+      <FileCatalog
+        drive="{defaultTo($queryParams.drive, currentDrive)}"
+        folder="{defaultTo($queryParams.folder, '/')}"
+        file="{defaultTo($queryParams.file, '')}"   
+      />
+      </HSplitter>
+    </Page>
+    <!-- We overlay a modal when a file is to be viewed -->
+    <FileContentModal
+      drive="{defaultTo($queryParams.drive, currentDrive)}"
+      folder="{defaultTo($queryParams.folder, '/')}"
+      file="{$queryParams.file}"
+    />
+  </Pages>
+  <Footer height="46px">
+    <MwdFooter />
+  </Footer>
+</App>
