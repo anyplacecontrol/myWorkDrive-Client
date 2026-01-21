@@ -1,4 +1,4 @@
- <!-- 
+<!--
   This component displays a list of breadcrumbs for a particular folder.
 
   Properties:
@@ -8,38 +8,41 @@
   - `shouldHideLinkUrl`: Whether to hide the link URL (default: false)
 -->
 <Component name="FolderBreadcrumbs">
-  <HStack gap="$gap-tight" verticalAlignment="center" width="100%" overflowX="hidden">
-    <Link
+  <HStack
+    gap="$gap-tight"
+    verticalAlignment="center"
+    width="100%"
+    overflowX="hidden"
+  >
+    <SafeLink
       canShrink="true"
       testId="file-catalog-breadcrumb-item-{$props.breadcrumbRootName}"
-      to="{ $props.shouldHideLinkUrl 
-            ? null 
-            : {
+      to="{{
                 queryParams: {
                   drive: $props.drive,
                   folder: '/',
               }
           }}"
-      onClick="emitEvent('requestNavigateToFolder', '')">
+      onClick="emitEvent('requestNavigateToFolder', '')"
+    >
       <Text value="{$props.breadcrumbRootName}" maxLines="1" />
-    </Link>
+    </SafeLink>
     <Items items="{$props.folder.split('/').slice(1)}">
       <Fragment>
         <Icon name="chevronright" size="sm" />
-        <Link
+        <SafeLink
           canShrink="true"
-          to="{ $props.shouldHideLinkUrl 
-            ? null 
-            : {
+          to="{{
                 queryParams: {
                   drive: $props.drive,
                   folder: '/' + $props.folder.split('/').slice(1, $itemIndex + 2).join('/'),
               }
           }}"
           onClick="emitEvent('requestNavigateToFolder', '/' + $props.folder.split('/').slice(1, $itemIndex + 2).join('/'))"
-          testId="file-catalog-breadcrumb-item-{$itemIndex}">
+          testId="file-catalog-breadcrumb-item-{$itemIndex}"
+        >
           <Text value="{$item}" maxLines="1" />
-        </Link>
+        </SafeLink>
       </Fragment>
     </Items>
   </HStack>

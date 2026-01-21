@@ -30,11 +30,11 @@
     <!-- We have a single main page for browsing files -->
     <Page url="/my-files" padding="0">
     <HSplitter initialPrimarySize="250px">
-      <FoldersTree/>
+      <FoldersTree drive="{defaultTo($queryParams.drive, currentDrive)}" />
       <FileCatalog
         drive="{defaultTo($queryParams.drive, currentDrive)}"
         folder="{defaultTo($queryParams.folder, '/')}"
-        file="{defaultTo($queryParams.file, '')}"   
+        file="{defaultTo($queryParams.file, '')}"
       />
       </HSplitter>
     </Page>

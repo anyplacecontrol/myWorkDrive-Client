@@ -1,4 +1,7 @@
+
 <Component name="FoldersTree">
+
+
   <!-- Panel with fixed toolbar (46px) and scrollable tree area below -->
   <VStack height="100%" overflow="hidden">
     <HStack
@@ -20,27 +23,17 @@
     </HStack>
 
     <!-- Tree container: fills remaining space and scrolls independently -->
-   
+
       <Tree
+        id="tree"
         testId="tree"
         dataFormat="hierarchy"
-        defaultExpanded="all"
+        itemClickExpands
         overflowX="hidden"
-        data='{[
-      {
-        id: 1, icon: "folder", name: "Root Item 1",
-        children: [
-          { id: 2, icon: "code", name: "Child Item 1.1" },
-          { id: 3, icon: "folder", name: "Child Item 1.2",
-            children: [
-              { id: 4, icon: "code", name: "Grandchild Item 1.2.1"}
-            ],
-          }
-        ],
-      },
-    ]}'
-      >
+        data="{treeData}"
+        onLoadChildren="loadChildren"
+        onNodeDidCollapse="onNodeCollapse">
       </Tree>
-   
+
   </VStack>
 </Component>

@@ -1,0 +1,24 @@
+
+<Component name="SafeLink">
+  <!-- Render the navigable Link when links are allowed -->
+  <Link
+    when="{ !$props.shouldHideLinkUrl }"
+    canShrink="{$props.canShrink}"
+    to="{$props.to}"
+    testId="{$props.testId}"
+  >
+    <Slot />
+  </Link>
+
+  <!-- Render a non-navigation Link (to=null) when links must be hidden;
+       parent's onClick can handle navigation or other side-effects. -->
+  <Link
+    when="{ $props.shouldHideLinkUrl }"
+    to="{ null }"
+    testId="{$props.testId}"
+    onClick="{$props.onClick}"
+    canShrink="{$props.canShrink}"
+  >
+    <Slot />
+  </Link>
+</Component>

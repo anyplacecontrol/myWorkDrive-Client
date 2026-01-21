@@ -57,15 +57,15 @@
       minWidth="{appGlobals.filesTableColumns.name}"
       bindTo="name"
       canSort="true"
-    >      
-      <Link      
-        to="{$props.shouldHideLinkUrl
-          ? null : {
+    >
+      <SafeLink
+        shouldHideLinkUrl="{$props.shouldHideLinkUrl}"
+        to="{{
             pathname: '.',
             queryParams: MwdHelpers.fileItemQueryParams($item)
           }}"
         testId="link-{$item.name}"
-        onClick="emitEvent('requestNavigateToFolder', $item.path);"
+        onClick="emitEvent('requestNavigateToFolder', $item.path)"
       >
       <Icon
         name="{ $item.isFolder ? 'folder' : getFileExtension($item.name) }"
@@ -79,7 +79,7 @@
           value="{$item.name}"
           maxLines="1"
         />
-      </Link>
+      </SafeLink>
     </Column>
     <Column
       header="Type"

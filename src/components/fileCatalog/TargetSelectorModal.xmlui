@@ -42,7 +42,7 @@
         folder="{folder}"
         shouldHideLinkUrl
         breadcrumbRootName="Root"
-        onRequestNavigateToFolder="(target) => folder = $props.drive + (target || '/')" />
+        onRequestNavigateToFolder="(target) => {console.log(target);folder = $props.drive + (target || '/')}" />
       <!-- Use the table or tiles view according to the current app state -->
       <TableView
         fileEntries="{fileCatalogData.value}"
