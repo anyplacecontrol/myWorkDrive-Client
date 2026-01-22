@@ -37,12 +37,21 @@ The backend API server can be configured through platform-specific `appsettings.
 - `appsettings.json` - Base configuration (no BasePath set)
 - `appsettings.Linux.json` - Linux-specific settings (BasePath: `/tmp/mwd`)
 - `appsettings.macOS.json` - macOS-specific settings (BasePath: `~/mwd`)
-- `appsettings.Windows.json` - Windows-specific settings (BasePath: `C:\tmp\mwd`)
+- `appsettings.Windows.json` - Windows-specific settings (BasePath: `C:\temp\mock`)
+
+#### New Windows mock server (net9.0)
+
+- A newer Windows-only mock server release is available as `backend/mock-server-net9.0.zip`.
+- To use it, unzip the archive into `backend/net9.0` so the folder contains the `MWDMockServer.exe` and related files.
+- Run the backend only with: `npm run start:backend-windows`.
+- Run both backend (Windows exe) and frontend with: `npm run start:dev-windows`.
+
+This option starts the published .NET 9.0 mock server executable instead of building/running the project source.
 
 #### Server Configuration Parameters
 
 **ServerConfiguration Section:**
-- **ApiPort** (default: `5001`): The port number on which the API server listens
+- **ApiPort** (default: `8357`): The port number on which the API server listens
 - **BasePath**: The root directory path for file operations and storage
   - Linux: `/tmp/mwd`
   - macOS: `~/mwd` (user's home directory)

@@ -56,7 +56,7 @@ Edit `appsettings.json` to customize:
 ```json
 {
   "ServerConfiguration": {
-    "ApiPort": 5001,
+    "ApiPort": 8357,
     "BasePath": "/your/custom/path",
     "UseHttps": false
   }

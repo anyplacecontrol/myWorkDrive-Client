@@ -36,26 +36,26 @@ namespace MockServerAPITests
                         var platformConfigFile = CrossPlatformHelper.GetPlatformSpecificConfigFile();
                         config.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
                         config.AddJsonFile(platformConfigFile, optional: true, reloadOnChange: true);
-                        
+
                         // Override with test-specific settings - use platform appropriate temp path
                         var testBasePath = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
                             ? @"C:\temp\mwd"
                             : "/tmp/mwd";
-                            
+
                         config.AddInMemoryCollection(new Dictionary<string, string>
                         {
                             ["ServerConfiguration:BasePath"] = testBasePath,
-                            ["ServerConfiguration:ApiPort"] = "5001",
+                            ["ServerConfiguration:ApiPort"] = "8357",
                             ["ServerConfiguration:PathFormat"] = "scheme"
                         });
                     });
-                    
+
                     builder.ConfigureServices(services =>
                     {
                         // Additional test-specific service configuration if needed
                     });
                 });
-                
+
             _client = _factory.CreateClient();
             _client.BaseAddress = new Uri("http://localhost/");
             _client.DefaultRequestHeaders.Accept.Clear();
@@ -107,11 +107,11 @@ namespace MockServerAPITests
             {
                 Directory.CreateDirectory(testPath);
             }
-            
+
             // Ensure shares directories exist for new path format tests
             EnsureShareDirectories();
         }
-        
+
         protected void EnsureShareDirectories()
         {
             var basePath = Program.BASE_PATH ?? PathHelper.GetDefaultBasePath();
@@ -142,7 +142,7 @@ namespace MockServerAPITests
 
         protected void AssertSuccessStatusCode(HttpResponseMessage response, string? context = null)
         {
-            Assert.IsTrue(response.IsSuccessStatusCode, 
+            Assert.IsTrue(response.IsSuccessStatusCode,
                 $"{context ?? "Request"} failed. Status: {response.StatusCode}, Reason: {response.ReasonPhrase}");
         }
 

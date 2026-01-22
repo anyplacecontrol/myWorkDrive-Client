@@ -5,8 +5,11 @@
   "scripts": {
     "start": "xmlui start --withMock=false",
     "start:backend": "cd backend/ClientAPIServer && dotnet run",
-    "start:backend-new": "node scripts/start-backend.js",
-    "start:dev": "npm run start:backend && npm run start",
+    "start:dev": "npm run start & npm run start:backend",
+
+    "start:backend-windows": "node scripts/start-backend.js",
+    "start:dev-windows": "npm run start:backend-new && npm run start",
+
     "build": "xmlui build",
     "preview": "xmlui preview",
     "build-prod": "npm run build -- --prod --withMock=true",

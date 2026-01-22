@@ -19,30 +19,30 @@ namespace MWDMockServer
         static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-            
+
             // Load platform-specific configuration
             var platformConfigFile = CrossPlatformHelper.GetPlatformSpecificConfigFile();
             builder.Configuration.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
             builder.Configuration.AddJsonFile(platformConfigFile, optional: true, reloadOnChange: true);
-            
+
             // Load configuration
             var configuration = builder.Configuration;
-            
+
             // Get server configuration from appsettings.json
             var serverConfig = configuration.GetSection("ServerConfiguration");
-            API_PORT = serverConfig.GetValue<int>("ApiPort", 5001);
-            
+            API_PORT = serverConfig.GetValue<int>("ApiPort", 8357);
+
             // Get default share configuration
             var defaultShare = serverConfig.GetValue<string>("DefaultShare", "Documents");
-            
+
             // Get path format configuration ("scheme" or "share")
             var pathFormat = serverConfig.GetValue<string>("PathFormat", "scheme");
-            
+
             // Initialize PathHelper with configuration
 #if MOCK_SERVER
             PathHelper.Initialize(configuration);
 #endif
-            
+
             // Get base path from config or use platform-specific default
             var configBasePath = serverConfig.GetValue<string>("BasePath");
             if (string.IsNullOrEmpty(configBasePath))
@@ -53,15 +53,15 @@ namespace MWDMockServer
             {
                 BASE_PATH = PathHelper.ExpandPath(configBasePath);
             }
-            
+
             // Ensure base path exists
             if (!Directory.Exists(BASE_PATH))
             {
                 Directory.CreateDirectory(BASE_PATH);
             }
-            
+
             BASE_API = $"http://localhost:{API_PORT}/api/v3/";
-            
+
             Console.WriteLine($"Starting MWD Mock Server:");
             Console.WriteLine($"  Port: {API_PORT}");
             Console.WriteLine($"  Base Path: {BASE_PATH}");
@@ -70,7 +70,7 @@ namespace MWDMockServer
             builder.Services.AddControllers();
             builder.Services.AddOpenApi();
             builder.Services.AddMemoryCache();
-            
+
             // Add CORS services
             builder.Services.AddCors(options =>
             {
@@ -104,7 +104,7 @@ namespace MWDMockServer
             ClientAPIHandler.DefaultShare = defaultShare;
             ClientAPIHandler.PathFormat = pathFormat;
             ClientAPIHandler.GetInstance(); // Force initialization with correct BasePath
-            
+
             // Initialize ShareManager with the base path
             ShareManager.InitializeShares(BASE_PATH);
 
@@ -188,7 +188,7 @@ namespace MWDMockServer
 
                 var content = new StringContent(JsonConvert.SerializeObject(createData), Encoding.UTF8, "application/json");
                 var createResponse = await client.PostAsync(BASE_API + "CreateFile", content);
-                
+
                 if (!createResponse.IsSuccessStatusCode)
                     throw new Exception("RunSimpleFileTest: Create file failed");
 
@@ -201,7 +201,7 @@ namespace MWDMockServer
 
                 var infoContent = await infoResponse.Content.ReadAsStringAsync();
                 var fileInfo = JsonConvert.DeserializeObject<Dictionary<string, object>>(infoContent);
-                
+
                 if (fileInfo == null || !fileInfo.ContainsKey("name") || fileInfo["name"].ToString() != fileName)
                     throw new Exception("RunSimpleFileTest: File info validation failed");
 
@@ -242,7 +242,7 @@ namespace MWDMockServer
 
                 var content = new StringContent(JsonConvert.SerializeObject(createData), Encoding.UTF8, "application/json");
                 var createResponse = await client.PostAsync(BASE_API + "CreateFile", content);
-                
+
                 if (!createResponse.IsSuccessStatusCode)
                     throw new Exception("RunSimpleFolderTest: Create folder failed");
 
@@ -255,7 +255,7 @@ namespace MWDMockServer
 
                 var infoContent = await infoResponse.Content.ReadAsStringAsync();
                 var folderInfo = JsonConvert.DeserializeObject<Dictionary<string, object>>(infoContent);
-                
+
                 if (folderInfo == null || !folderInfo.ContainsKey("name") || folderInfo["name"].ToString() != folderName)
                     throw new Exception("RunSimpleFolderTest: Folder info validation failed");
 

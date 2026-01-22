@@ -1,7 +1,7 @@
 #!/bin/bash
 # Simple bash script to test SetFileInfo boundary values
 
-BASE_URL="http://localhost:5001"
+BASE_URL="http://localhost:8357"
 SESSION_ID="test-session-123"
 TEST_FILE="setfileinfo_test_file.txt"
 

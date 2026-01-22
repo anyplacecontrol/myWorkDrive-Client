@@ -106,9 +106,7 @@ function waitForAny(urls, opts = {}) {
       const healthEnv = process.env.BACKEND_HEALTH_URL;
       const urls = healthEnv ? healthEnv.split(',') : [
         'http://localhost:8357/',
-        'http://localhost:5001/',
-        'http://localhost:8357/api/v3/',
-        'http://localhost:5001/api/v3/'
+        'http://localhost:8357/api/v3/'
       ];
       const ok = await waitForAny(urls);
       if (!ok) {
@@ -130,9 +128,7 @@ function waitForAny(urls, opts = {}) {
       const healthEnv = process.env.BACKEND_HEALTH_URL;
       const urls = healthEnv ? healthEnv.split(',') : [
         'http://localhost:8357/',
-        'http://localhost:5001/',
         'http://localhost:8357/api/v3/',
-        'http://localhost:5001/api/v3/'
       ];
       const ok = await waitForAny(urls);
       if (!ok) {
@@ -155,9 +151,7 @@ function waitForAny(urls, opts = {}) {
       const healthEnv = process.env.BACKEND_HEALTH_URL;
       const urls = healthEnv ? healthEnv.split(',') : [
         'http://localhost:8357/',
-        'http://localhost:5001/',
-        'http://localhost:8357/api/v3/',
-        'http://localhost:5001/api/v3/'
+        'http://localhost:8357/api/v3/'
       ];
       const ok = await waitForAny(urls);
       if (!ok) {

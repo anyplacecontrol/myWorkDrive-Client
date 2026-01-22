@@ -64,7 +64,7 @@ namespace APIServer
         public const string UNLOCK_FILE = PATH_BASE + "UnlockFile";
         public const string WRITE_FILE = PATH_BASE + "WriteFile";
         public const string WRITE_FILE_BLOCK = PATH_BASE + "WriteFileBlock";
-        
+
         // New API endpoints from updated specification
         public const string GET_ITEM_TYPE = PATH_BASE + "GetItemType";
         public const string ZIP_FILES = PATH_BASE + "ZipFiles";
@@ -110,13 +110,13 @@ namespace APIServer
 #if MOCK_SERVER
         // Mock server upload session tracking
         private static readonly Dictionary<string, UploadSession> _uploadSessions = new Dictionary<string, UploadSession>();
-        
+
         // Static collections for new endpoint mock data
         private static readonly Dictionary<string, Dictionary<string, object>> _bookmarks = new();
         private static readonly List<string> _recentFiles = new();
         private static readonly Dictionary<string, ZipReferenceData> _zipReferences = new();
         private static int _nextBookmarkId = 1;
-        
+
         private class UploadSession
         {
             public string UploadId { get; set; }
@@ -157,7 +157,7 @@ namespace APIServer
 
                 return PathHelper.ToSystemPath(path, BasePath);
             }
-            
+
 
             switch (parsedPath.Type)
             {
@@ -166,17 +166,17 @@ namespace APIServer
                     var actualPath = PublicLinkManager.ResolveLinkPath(parsedPath.LinkId);
                     if (actualPath == null)
                         throw new Exception($"Invalid link ID: {parsedPath.LinkId}");
-                    
+
                     // Parse the resolved path
                     var resolvedParsed = PathResolver.ParsePath(actualPath);
                     if (resolvedParsed == null)
                         throw new Exception($"Invalid resolved path: {actualPath}");
-                        
+
                     // Get the share from the resolved path
                     var linkShare = ShareManager.GetShare(resolvedParsed.ShareName);
                     if (linkShare == null)
                         throw new Exception($"Share not found: {resolvedParsed.ShareName}");
-                    
+
                     // For link-based paths, if the relative path is just "/", use the resolved path's relative path
                     // Otherwise, combine them
                     var linkRelativePath = parsedPath.RelativePath?.TrimStart('/') ?? "";
@@ -206,7 +206,7 @@ namespace APIServer
 
                         return PathHelper.ToSystemPath(path, BasePath);
                     }
-                    
+
                     // Handle the case where the "ShareName" is actually a filename/dirname in the root directory
                     // This happens when someone requests "/filename.ext" or "/dirname" which gets parsed as ShareName="filename.ext"/"dirname"
                     // Only treat as root-level item if it's not a known share and RelativePath is "/"
@@ -217,11 +217,11 @@ namespace APIServer
 
                         return Path.Combine(BasePath, parsedPath.ShareName);
                     }
-                    
+
                     var share = ShareManager.GetShare(parsedPath.ShareName);
                     if (share == null)
                         throw new Exception($"Share not found: {parsedPath.ShareName}");
-                    
+
                     var relativePath = parsedPath.RelativePath ?? "/";
                     return PathHelper.ToSystemPath(relativePath, share.PhysicalPath);
 
@@ -522,7 +522,7 @@ namespace APIServer
                     session.IsCancelled = true;
                 }
             }
-            
+
             apiContext.HttpStatusCode = StatusCodes.Status204NoContent;
             return SendResponseAsync(apiContext, (string)null, (string)null, cancellationToken);
 #endif
@@ -567,20 +567,20 @@ namespace APIServer
                     apiContext.SetError(APIErrorCodes.INVALID_PARAMETER_VALUE, "Invalid upload ID");
                     return Task.CompletedTask;
                 }
-                
+
                 if (session.IsCancelled)
                 {
                     apiContext.SetError(APIErrorCodes.BACKEND_OPERATION_FAILED, "Upload session was cancelled");
                     return Task.CompletedTask;
                 }
-                
+
                 // Remove the session after completion
                 _uploadSessions.Remove(uploadId);
             }
-            
+
             var fullPath = GetFullPath(session.FilePath);
             var fileInfo = new FileInfo(fullPath);
-            
+
             var responseInfo = new Dictionary<string, object>
             {
                 ["name"] = Path.GetFileName(session.FilePath),
@@ -589,7 +589,7 @@ namespace APIServer
                 ["size"] = fileInfo.Exists ? fileInfo.Length : 0L,
                 ["modified"] = DateTime.UtcNow.ToString("o")
             };
-            
+
             apiContext.HttpStatusCode = StatusCodes.Status200OK;
             apiContext.ResponseObject = responseInfo;
 #endif
@@ -790,7 +790,7 @@ namespace APIServer
             string path = string.Empty;
             if (!PickParameter(apiContext, APIConstants.REQUEST_PARAM_PATH, true, true, null, out path))
                 return;
-                
+
 
             string filename = null;
             PickParameter(apiContext, APIConstants.REQUEST_PARAM_NAME, false, false, string.Empty, out filename);
@@ -905,7 +905,7 @@ namespace APIServer
             string path = string.Empty;
             if (!PickParameter(apiContext, APIConstants.REQUEST_PARAM_PATH, true, true, null, out path))
                 return;
-                
+
             var mockVersions = new List<Dictionary<string, object>>
             {
                 new Dictionary<string, object>
@@ -925,7 +925,7 @@ namespace APIServer
                     ["shadowPath"] = path + ".v2"
                 }
             };
-            
+
             apiContext.ResponseObject = mockVersions;
 #endif
 
@@ -1001,7 +1001,7 @@ namespace APIServer
             {
                 path = "/";
             }
-            
+
             var fullPath = GetFullPath(path);
             var dirInfo = new DirectoryInfo(fullPath);
             if (!dirInfo.Exists)
@@ -1158,7 +1158,7 @@ namespace APIServer
                 apiContext.HttpStatusCode = StatusCodes.Status201Created;
                 return SendResponseAsync(apiContext, (string)null, (string)null, cancellationToken);
             }
-            
+
             return Task.CompletedTask;
 #endif
         }
@@ -1363,14 +1363,14 @@ namespace APIServer
                 return;
 
             path = StandardizePath(path);
-            
+
             FileSystemInfo fsInfo = File.Exists(path) ? new FileInfo(path) : (FileSystemInfo)new DirectoryInfo(path);
             if (!fsInfo.Exists)
             {
                 apiContext.SetError(APIErrorCodes.PATH_NOT_FOUND, string.Format(APITextMessages.ERROR_PATH_NOT_FOUND_S, path));
                 return;
             }
-            
+
             apiContext.HttpStatusCode = StatusCodes.Status200OK;
             apiContext.ResponseObject = FileSystemInfoToDictionary(fsInfo, false, true);
             return;
@@ -1499,7 +1499,7 @@ namespace APIServer
 #else
             byte[] buffer;
             path = StandardizePath(path);
-            
+
             // Convert logical API path to physical file system path
             var fullPath = GetFullPath(path);
 
@@ -1793,7 +1793,7 @@ namespace APIServer
                 io.DeleteFile(itemPath);
 #else
             path = StandardizePath(path);
-            
+
             // Convert logical API path to physical file system path
             var fullPath = GetFullPath(path);
             FileSystemInfo fsInfo = (isFolder) ? new DirectoryInfo(fullPath) : new FileInfo(fullPath);
@@ -1892,22 +1892,22 @@ namespace APIServer
                     return Task.CompletedTask;
                 }
             }
-            
-            string status = session.IsCancelled ? "Cancelled" : 
+
+            string status = session.IsCancelled ? "Cancelled" :
                            (session.BytesUploaded >= session.TotalSize) ? "Complete" : "InProgress";
-            
+
             Dictionary<string, object> dict = new Dictionary<string, object>
             {
                 { "status", status },
                 { "progress", session.BytesUploaded },
                 { "totalSize", session.TotalSize }
             };
-            
+
             if (session.IsCancelled)
             {
                 dict.Add("error", "Upload was cancelled");
             }
-            
+
             apiContext.HttpStatusCode = StatusCodes.Status200OK;
             apiContext.ResponseObject = dict;
 #endif
@@ -2062,7 +2062,7 @@ namespace APIServer
                     }
                 };
             }
-            
+
             // Add lock details if requested
             if (includeLockDetails ?? false)
             {
@@ -2081,7 +2081,7 @@ namespace APIServer
                     }
                 };
             }
-            
+
             apiContext.ResponseObject = lockInfoSummary;
 #endif
             return Task.CompletedTask;
@@ -2151,7 +2151,7 @@ namespace APIServer
             // Mock server implementation - generate a mock transfer link
             var mockLink = $"http://localhost/transfer/{Guid.NewGuid():N}";
             var expiresOn = DateTime.UtcNow.AddHours(6);
-            
+
             Dictionary<string, object> response = new Dictionary<string, object>
             {
                 { "link", mockLink },
@@ -2651,7 +2651,7 @@ namespace APIServer
 
                 _uploadSessions[uploadId] = session;
             }
-            
+
             apiContext.HttpStatusCode = StatusCodes.Status200OK;
             if (plainResult)
             {
@@ -2843,7 +2843,7 @@ namespace APIServer
 #else
             // Mock server implementation
             var stream = InternalGetInputStream(apiContext);
-            
+
             UploadSession session;
             lock (_uploadSessions)
             {
@@ -2852,17 +2852,17 @@ namespace APIServer
                     apiContext.SetError(APIErrorCodes.INVALID_PARAMETER_VALUE, "Invalid upload ID");
                     return;
                 }
-                
+
                 if (session.IsCancelled)
                 {
                     apiContext.SetError(APIErrorCodes.BACKEND_OPERATION_FAILED, "Upload session cancelled");
                     return;
                 }
             }
-            
+
             var fullPath = GetFullPath(session.FilePath);
             long written = 0;
-            
+
             try
             {
                 // Ensure the file exists and is of the right size
@@ -2875,26 +2875,26 @@ namespace APIServer
                         fs.SetLength(session.TotalSize);
                     }
                 }
-                
+
                 // Write the block
                 using (var fs = new FileStream(fullPath, FileMode.Open, FileAccess.Write, FileShare.Read))
                 {
                     fs.Position = (long)startPosition;
-                    
+
                     // Copy stream and count bytes
                     var buffer = new byte[4096];
                     int bytesRead;
                     long totalBytes = 0;
-                    
+
                     while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length, cancellationToken)) > 0)
                     {
                         await fs.WriteAsync(buffer, 0, bytesRead, cancellationToken);
                         totalBytes += bytesRead;
                     }
-                    
+
                     written = totalBytes;
                 }
-                
+
                 // Update bytes uploaded
                 lock (_uploadSessions)
                 {
@@ -3045,7 +3045,7 @@ namespace APIServer
             // Add isFolder and size fields for both mock and real servers
             bool isFolder;
             long size;
-            
+
 #if !MOCK_SERVER
             isFolder = fsInfo.IsFolder;
             size = fsInfo.Length;
@@ -3074,7 +3074,7 @@ namespace APIServer
             {
                 // For mock server, add isLocked field and mock lock information
                 result.Add("isLocked", true);
-                
+
                 // Also add a mock locks array
                 var mockLocks = new List<Dictionary<string, object>>
                 {
@@ -3454,7 +3454,7 @@ namespace APIServer
 
             // Convert logical path to physical path
             string physicalBasePath = GetFullPath(path);
-            
+
             // maybe the extension is not set but comes in a filename, in which case we split the filename
             if (createContent && string.IsNullOrEmpty(extension))
             {
@@ -3747,7 +3747,7 @@ namespace APIServer
                 // Ensure parent directory exists
                 if (!Directory.Exists(physicalBasePath))
                     Directory.CreateDirectory(physicalBasePath);
-                    
+
                 DirectoryInfo dirInfo = Directory.CreateDirectory(Path.Combine(physicalBasePath, currentName));
                 return Task.FromResult((FileSystemInfo)dirInfo);
             }
@@ -3956,7 +3956,7 @@ namespace APIServer
         private static Task<FileSystemInfo> InternalGetFileInformationNoPostProcessingAsync(APIContext apiContext, string path, bool? isFolder, CancellationToken cancellationToken)
         {
             FileSystemInfo result = null;
-            
+
             // Convert logical API path to physical file system path
             var fullPath = GetFullPath(path);
 
@@ -4506,7 +4506,7 @@ namespace APIServer
 #endregion
 
         #region New Enhanced Handlers
-        
+
         private static async Task HandleListSharesAsync(APIContext apiContext, CancellationToken cancellationToken = default)
         {
 #if MOCK_SERVER
@@ -4532,9 +4532,9 @@ namespace APIServer
         private static async Task HandleListBookmarksAsync(APIContext apiContext, CancellationToken cancellationToken = default)
         {
 #if MOCK_SERVER
-            var maxResults = apiContext.RequestParameters.TryGetValue("maxResults", out var maxObj) && 
+            var maxResults = apiContext.RequestParameters.TryGetValue("maxResults", out var maxObj) &&
                            long.TryParse(maxObj?.ToString(), out var max) ? (int)max : int.MaxValue;
-            
+
             var bookmarksList = _bookmarks.Values.Take(maxResults).ToList();
             apiContext.HttpStatusCode = StatusCodes.Status200OK;
             apiContext.ResponseObject = bookmarksList;
@@ -4545,7 +4545,7 @@ namespace APIServer
         {
 #if MOCK_SERVER
             string path = apiContext.RequestParameters.TryGetValue("path", out var pathObj) ? pathObj?.ToString() : null;
-            
+
             if (string.IsNullOrEmpty(path))
             {
                 apiContext.SetError(APIErrorCodes.MISSING_PARAMETER_VALUE, "Path parameter is required");
@@ -4570,7 +4570,7 @@ namespace APIServer
         {
 #if MOCK_SERVER
             string path = apiContext.RequestParameters.TryGetValue("path", out var pathObj) ? pathObj?.ToString() : null;
-            
+
             if (string.IsNullOrEmpty(path))
             {
                 apiContext.SetError(APIErrorCodes.MISSING_PARAMETER_VALUE, "Path parameter is required");
@@ -4587,7 +4587,7 @@ namespace APIServer
         {
 #if MOCK_SERVER
             string path = apiContext.RequestParameters.TryGetValue("path", out var pathObj) ? pathObj?.ToString() : null;
-            
+
             if (string.IsNullOrEmpty(path))
             {
                 apiContext.SetError(APIErrorCodes.MISSING_PARAMETER_VALUE, "Path parameter is required");
@@ -4595,7 +4595,7 @@ namespace APIServer
             }
 
             var fullPath = GetFullPath(path);
-            
+
             string itemType;
             if (File.Exists(fullPath))
             {
@@ -4622,7 +4622,7 @@ namespace APIServer
         {
 #if MOCK_SERVER
             string path = apiContext.RequestParameters.TryGetValue("path", out var pathObj) ? pathObj?.ToString() : null;
-            
+
             if (string.IsNullOrEmpty(path))
             {
                 apiContext.SetError(APIErrorCodes.MISSING_PARAMETER_VALUE, "Path parameter is required");
@@ -4638,11 +4638,11 @@ namespace APIServer
                 ["created"] = DateTime.UtcNow,
                 ["expires"] = DateTime.UtcNow.AddDays(30),
                 ["hasPassword"] = apiContext.RequestParameters.ContainsKey("password"),
-                ["allowDownloading"] = apiContext.RequestParameters.TryGetValue("allowDownloading", out var downloadObj) && 
+                ["allowDownloading"] = apiContext.RequestParameters.TryGetValue("allowDownloading", out var downloadObj) &&
                                      bool.TryParse(downloadObj?.ToString(), out var download) && download,
-                ["allowUploading"] = apiContext.RequestParameters.TryGetValue("allowUploading", out var uploadObj) && 
+                ["allowUploading"] = apiContext.RequestParameters.TryGetValue("allowUploading", out var uploadObj) &&
                                    bool.TryParse(uploadObj?.ToString(), out var upload) && upload,
-                ["allowEditing"] = apiContext.RequestParameters.TryGetValue("allowEditing", out var editObj) && 
+                ["allowEditing"] = apiContext.RequestParameters.TryGetValue("allowEditing", out var editObj) &&
                                  bool.TryParse(editObj?.ToString(), out var edit) && edit,
                 ["maxNumberOfDownloads"] = 0,
                 ["currentDownloads"] = 0,
@@ -4673,7 +4673,7 @@ namespace APIServer
         {
 #if MOCK_SERVER
             string link = apiContext.RequestParameters.TryGetValue("link", out var linkObj) ? linkObj?.ToString() : null;
-            
+
             if (string.IsNullOrEmpty(link))
             {
                 apiContext.SetError(APIErrorCodes.MISSING_PARAMETER_VALUE, "Link parameter is required");
@@ -4701,7 +4701,7 @@ namespace APIServer
             {
                 // Single link deletion
                 string link = apiContext.RequestParameters.TryGetValue("link", out var linkObj) ? linkObj?.ToString() : null;
-                
+
                 if (string.IsNullOrEmpty(link))
                 {
                     apiContext.SetError(APIErrorCodes.MISSING_PARAMETER_VALUE, "Link parameter is required");
@@ -5038,7 +5038,7 @@ namespace APIServer
 
                     case "link":
                         // Create a temporary link (mock implementation)
-                        zipReference = $"http://localhost:5001/temp/zip/{Guid.NewGuid():N}.zip";
+                        zipReference = $"http://localhost:8357/temp/zip/{Guid.NewGuid():N}.zip";
                         apiContext.HttpStatusCode = missingFiles.Count > 0 ? 206 : StatusCodes.Status200OK;
                         apiContext.Response.ContentType = "text/plain";
                         await apiContext.Response.WriteAsync(zipReference, cancellationToken);
@@ -5047,7 +5047,7 @@ namespace APIServer
 
                     case "redirect":
                         // Return 302 redirect to download link
-                        zipReference = $"http://localhost:5001/temp/zip/{Guid.NewGuid():N}.zip";
+                        zipReference = $"http://localhost:8357/temp/zip/{Guid.NewGuid():N}.zip";
                         apiContext.HttpStatusCode = 302;
                         apiContext.Response.Headers["Location"] = zipReference;
                         apiContext.ResponseSent = true;
@@ -5089,7 +5089,7 @@ namespace APIServer
         {
 #if MOCK_SERVER
             string message = apiContext.RequestParameters.TryGetValue("message", out var msgObj) ? msgObj?.ToString() : null;
-            
+
             if (string.IsNullOrEmpty(message))
             {
                 apiContext.SetError(APIErrorCodes.MISSING_PARAMETER_VALUE, "Message parameter is required");
@@ -5097,7 +5097,7 @@ namespace APIServer
             }
 
             Console.WriteLine($"[API LOG] {DateTime.UtcNow:yyyy-MM-dd HH:mm:ss} - {message}");
-            
+
             apiContext.HttpStatusCode = 200;
             apiContext.ResponseObject = new Dictionary<string, object> { ["status"] = "logged" };
 #endif
@@ -5157,7 +5157,7 @@ namespace APIServer
         private static async Task HandleListRecentFilesAsync(APIContext apiContext, CancellationToken cancellationToken = default)
         {
 #if MOCK_SERVER
-            var maxResults = apiContext.RequestParameters.TryGetValue("maxResults", out var maxObj) && 
+            var maxResults = apiContext.RequestParameters.TryGetValue("maxResults", out var maxObj) &&
                            long.TryParse(maxObj?.ToString(), out var max) ? (int)max : 100;
 
             var results = new List<Dictionary<string, object>>();
@@ -5212,7 +5212,7 @@ namespace APIServer
         {
 #if MOCK_SERVER
             string link = apiContext.RequestParameters.TryGetValue("link", out var linkObj) ? linkObj?.ToString() : null;
-            
+
             if (string.IsNullOrEmpty(link))
             {
                 apiContext.SetError(APIErrorCodes.MISSING_PARAMETER_VALUE, "Link parameter is required");

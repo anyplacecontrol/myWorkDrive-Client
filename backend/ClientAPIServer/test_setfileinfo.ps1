@@ -2,7 +2,7 @@
 # This script tests the fixed SetFileInfo implementation for size and datetime validation
 
 param(
-    [string]$BaseUrl = "http://localhost:5001",
+    [string]$BaseUrl = "http://localhost:8357",
     [string]$SessionId = "test-session-123"
 )
 
