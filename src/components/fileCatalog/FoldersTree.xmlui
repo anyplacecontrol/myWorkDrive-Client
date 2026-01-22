@@ -32,7 +32,8 @@
         overflowX="hidden"
         data="{treeData}"
         onLoadChildren="loadChildren"
-        onNodeDidCollapse="onNodeCollapse">
+        onNodeDidCollapse="onNodeCollapse"
+        onSelectionDidChange="onTreeSelectionDidChange">
       </Tree>
 
   </VStack>

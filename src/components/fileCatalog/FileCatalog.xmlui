@@ -55,8 +55,8 @@
         onCopyTriggered="copyModal.open()" />
       <!--
         Display the files and allow navigating in the folder structure. Also, provide
-        context menu actions for each file and folder
-      -->
+        context menu actions for each file and folder -->
+
       <Files
         id="fileCatalogContent"
         data="{fileCatalogData}"
@@ -66,8 +66,9 @@
         onDownloadFiles="downloadFiles"
         onDeleteTriggered="deleteFileEntries"
         onRenameTriggered="renameModal.open()" />
+
     </FileUploadDropZone>
-  <!-- Modal for file copy operation to select the copy target folder -->
+  <!-- Modal for file copy operation to select the copy target folder
   <TargetSelectorModal
     id="copyModal"
     drive="{$props.drive}"
@@ -76,7 +77,8 @@
     sortBy="{sorting.sortBy}"
     sortingDirection="{sorting.sortingDirection}"
     onRequestSave="doCopyItems" />
-  <!-- Modal for file move operation to select the move target folder -->
+-->
+  <!-- Modal for file move operation to select the move target folder
   <TargetSelectorModal
     id="moveModal"
     drive="{$props.drive}"
@@ -85,6 +87,7 @@
     sortBy="{sorting.sortBy}"
     sortingDirection="{sorting.sortingDirection}"
     onRequestSave="doMoveItems" />
+    -->
   <!-- Modal for renaming a single selected item -->
   <RenameItemModal
     id="renameModal"

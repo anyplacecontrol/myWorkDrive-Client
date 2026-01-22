@@ -7,7 +7,35 @@ var treeData = [
     dynamic: true,
   },
 ];
-var isCollapseSync = false;
+
+function navigateToNode(node) {
+  if (!node || !node.id) return;
+  const queryParams = MwdHelpers.fileItemQueryParams({
+    path: node.id,
+    isFolder: true,
+  });
+  const entries = Object.entries(queryParams || {});
+  const parts = [];
+  for (let i = 0; i < entries.length; i++) {
+    const key = entries[i][0];
+    const value = entries[i][1];
+    if (value == null || value === "") {
+      continue;
+    }
+    parts.push(encodeURIComponent(key) + "=" + encodeURIComponent(String(value)));
+  }
+  const queryString = parts.join("&");
+  const targetUrl = queryString ? `/my-files?${queryString}` : "/my-files";
+  console.log("Navigating to:", targetUrl);
+  Actions.navigate(targetUrl);
+}
+
+function onTreeSelectionDidChange(event) {
+  console.log("Tree selection changed:", event);
+  if (!event || !event.newNode) return;
+  navigateToNode(event.newNode);
+}
+
 
 function mapFolderItemsToNodes(items) {
   return (items || [])
@@ -39,9 +67,9 @@ function findAndUpdate(nodes, targetId, updater) {
 function loadChildren(node) {
   const response = Actions.callApi({
     method: "get",
-    url: "/ListFolder",
-    queryParams: { path: node.id },
+    url: `/ListFolder?path=${node.id}`,
   });
+
   const items = Array.isArray(response) ? response : [];
   const mapped = mapFolderItemsToNodes(items);
 
@@ -57,10 +85,6 @@ function loadChildren(node) {
 }
 
 function onNodeCollapse(node) {
-  if (isCollapseSync) {
-    return;
-  }
-  isCollapseSync = true;
   // Remove children from local treeData because of potential filesystem change
   try {
     findAndUpdate(treeData, node.id, (n) => {
@@ -72,5 +96,4 @@ function onNodeCollapse(node) {
 
   tree.collapseNode(node.id);
   tree.markNodeUnloaded(node.id);
-  isCollapseSync = false;
 }
