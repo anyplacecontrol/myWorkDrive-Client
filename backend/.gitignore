@@ -1,2 +1,4 @@
 # Ignore all files inside net9.0 directory
 net9.0/
+ClientAPIServer/bin
+ClientAPIServer/obj

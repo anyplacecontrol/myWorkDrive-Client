@@ -1,0 +1,2731 @@
+openapi: 3.1.0
+x-stoplight:
+  id: zi9br0e2klz2k
+info:
+  title: uniform-client-server-api
+  version: '3.0'
+  summary: MWD client-server API
+  description: |-
+    A uniform REST API for client-server communication. 
+
+    All request parameters can be passed as a set of query parameters, a JSON object with properties, or as a web form. In the latter cases, each documented query parameter can be passed as a JSON object's property or as a form field respectively.
+
+    Authentication is performed using the standard Authorization header with the "SessionID" scheme (and the "Bearer"/token scheme later).
+servers:
+  - url: 'http://localhost:80'
+paths:
+  /api/v3/CheckSession:
+    parameters: []
+    get:
+      summary: Check Session
+      tags: []
+      responses:
+        '200':
+          description: OK
+        '500':
+          description: Internal Server Error
+      operationId: cs-session-check
+      description: Checks if the session is still active. The session ID is taken from the Authorization header.
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+  /api/v3/QueryQuotas:
+    get:
+      summary: Get Total and Free Space
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: object
+                description: The result of the operation
+                properties:
+                  totalBytes:
+                    type: integer
+                    format: int64
+                    minimum: 0
+                  freeBytes:
+                    type: integer
+                    format: int64
+                    minimum: 0
+                  availableBytes:
+                    type: integer
+                    minimum: 0
+                    format: int64
+                required:
+                  - totalBytes
+                  - freeBytes
+                  - availableBytes
+      operationId: cs-queryquotas
+      description: This endpoint returns information about available and total space on the medium behind he given path.
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/path-info'
+    parameters: []
+  /api/v3/ListFolder:
+    get:
+      summary: List Folder Contents
+      operationId: cs-folder-list
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FileItemInfo'
+          headers:
+            ETag:
+              schema:
+                type: string
+              description: 'The ETag of the provided listing if one was provided, or the known ETag if a new listing was not provided'
+        '304':
+          description: The listing on the server does not differ from the one known to the client as calculated by the ETag value
+        '400':
+          $ref: '#/components/responses/400-Bad-Request-Generic'
+        '401':
+          $ref: '#/components/responses/401-Not-Authorized'
+        '403':
+          $ref: '#/components/responses/403-Forbidden'
+        '404':
+          $ref: '#/components/responses/404-Not-Found-Generic'
+        '500':
+          $ref: '#/components/responses/500-Internal-Server-Error-Generic'
+      description: 'Lists the contents of the folder '
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - schema:
+            type: string
+          in: query
+          name: path
+          description: The path of the folder that is to be listed
+          required: true
+        - schema:
+            type: boolean
+            default: false
+          in: query
+          name: includeLocks
+          description: 'If specified, requests lock information to be included within file information'
+          allowEmptyValue: true
+        - schema:
+            type: boolean
+            default: false
+          in: query
+          name: skipHidden
+          description: Specifies whether hidden files should be included or skipped
+          allowEmptyValue: true
+        - schema:
+            type: string
+          in: header
+          name: ETag
+          description: 'If specified, requests the server to provide the new listing only if the ETag calculated by the server for the new listing differs from the value in this header'
+    parameters: []
+  /api/v3/GetFileCapabilities:
+    get:
+      summary: Retrieve File Capabilities
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  value:
+                    type:
+                      - string
+                      - integer
+                      - number
+                      - boolean
+                      - object
+        '400':
+          $ref: '#/components/responses/400-Bad-Request-Generic'
+        '401':
+          $ref: '#/components/responses/401-Not-Authorized'
+        '403':
+          $ref: '#/components/responses/403-Forbidden'
+        '404':
+          $ref: '#/components/responses/404-Not-Found-Generic'
+        '500':
+          $ref: '#/components/responses/500-Internal-Server-Error-Generic'
+      operationId: file-get-capabilities
+      description: |
+        Checks if a file or folder has certain capabilities or permits certain operations. The endpoint is used to query heavyweight properties of an item that should not be returned in a regular listing due to the high computational cost.
+
+        A query should contain one or several capabilities (several values are separated with a comma).
+
+        The following capabilities can be queried:
+        * writePermissions - the user has write permissions on the specified file.
+        * folderAccessible - the specified folder is accessible to the user
+      parameters:
+        - schema:
+            type: string
+            enum:
+              - writePermissions
+              - folderAccessible
+          in: query
+          name: query
+          description: Specifies the capability to query
+          required: true
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/path-info'
+    parameters: []
+  /api/v3/CreateFile:
+    post:
+      summary: Create File or Folder
+      tags: []
+      responses:
+        '200':
+          $ref: '#/components/responses/200-FileItemInfo-Overwritten'
+        '201':
+          $ref: '#/components/responses/201-FileItemInfo-Created'
+        '400':
+          $ref: '#/components/responses/400-Bad-Request-Generic'
+        '401':
+          $ref: '#/components/responses/401-Not-Authorized'
+        '403':
+          $ref: '#/components/responses/403-Forbidden'
+        '404':
+          $ref: '#/components/responses/404-Not-Found-Generic'
+        '409':
+          description: A file or folder with a given name already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileItemInfo'
+        '500':
+          $ref: '#/components/responses/500-Internal-Server-Error-Generic'
+      operationId: cs-item-create
+      description: |-
+        Creates a new file or folder and returns information about the created item. If an item exists, returns information about the existing entry. 
+
+        If `extension` is specified and `name` is not, a newly created file gets an automatically assigned name with the given extension.
+        If `createContent` is specified and the file extension (specified either in `name` or `extension`) is recognized, the file is pre-populated with content according to the extension.
+
+        The recent files list is updated by default.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                path:
+                  type: string
+                  description: 'The path of the folder, in which a new item should be created. May be empty or omitted, if a file or directory is created in the root.'
+                createFile:
+                  type: boolean
+                  description: 'When specified, indicates that a file rather than folder must be created'
+                name:
+                  type: string
+                  description: 'The name for the new item including an extension. If the value of the `extension` property is specified, the `name` property may be omitted.'
+                extension:
+                  type: string
+                  description: 'The extension of the file to be created (without a leading ''.'' aka dot). If the exension is specified and the name is not specified, a new name is generated depending on the extension and the alue of `createContent`. '
+                createContent:
+                  type: boolean
+                  description: 'When specified as `true` and a file is to be created, indicates that the file should be populated with data that corresponds to the file type.'
+                conflictBehavior:
+                  $ref: '#/components/schemas/ConflictBehavior'
+        description: ''
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/updateRecents'
+    parameters: []
+  /api/v3/DeleteFile:
+    post:
+      summary: Delete File
+      operationId: cs-item-delete-file
+      responses:
+        '204':
+          $ref: '#/components/responses/204-No-Content'
+        '400':
+          $ref: '#/components/responses/400-Bad-Request-Generic'
+        '401':
+          $ref: '#/components/responses/401-Not-Authorized'
+        '403':
+          $ref: '#/components/responses/403-Forbidden'
+        '404':
+          $ref: '#/components/responses/404-Not-Found-Generic'
+        '409':
+          $ref: '#/components/responses/409-Conflict'
+        '417':
+          $ref: '#/components/responses/417-Directory-Not-Empty'
+        '500':
+          $ref: '#/components/responses/500-Internal-Server-Error-Generic'
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - schema:
+            type: string
+          in: query
+          name: path
+          description: The path of the item to be deleted
+          required: true
+      description: |-
+        Deletes the specified file.
+
+        The recent files list is always updated (deleted files are removed from the list).
+    parameters: []
+  /api/v3/DeleteFolder:
+    post:
+      summary: Delete Folder
+      operationId: cs-item-delete-folder
+      responses:
+        '204':
+          $ref: '#/components/responses/204-No-Content'
+        '400':
+          $ref: '#/components/responses/400-Bad-Request-Generic'
+        '401':
+          $ref: '#/components/responses/401-Not-Authorized'
+        '403':
+          $ref: '#/components/responses/403-Forbidden'
+        '404':
+          $ref: '#/components/responses/404-Not-Found-Generic'
+        '409':
+          $ref: '#/components/responses/409-Conflict'
+        '417':
+          $ref: '#/components/responses/417-Directory-Not-Empty'
+        '500':
+          $ref: '#/components/responses/500-Internal-Server-Error-Generic'
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - schema:
+            type: string
+          in: query
+          name: path
+          description: The path of the item to be deleted
+          required: true
+      description: Deletes the specified folder
+    parameters: []
+  /api/v3/ReadFile:
+    get:
+      summary: Read File Data
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+                description: Requested data
+        '400':
+          $ref: '#/components/responses/400-Bad-Request-Generic'
+        '401':
+          $ref: '#/components/responses/401-Not-Authorized'
+        '403':
+          $ref: '#/components/responses/403-Forbidden'
+        '404':
+          $ref: '#/components/responses/404-Not-Found-Generic'
+        '500':
+          $ref: '#/components/responses/500-Internal-Server-Error-Generic'
+      operationId: cs-item-read-file
+      description: Reads the specified amount of data from the file.
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - schema:
+            type: string
+          in: query
+          name: path
+          description: The path of the file to read
+          required: true
+        - schema:
+            type: integer
+            format: int64
+            minimum: 0
+          in: query
+          name: startPosition
+          required: true
+          description: The starting position to read from
+        - schema:
+            type: integer
+            format: int32
+          in: query
+          name: count
+          required: true
+          description: The number of bytes to read
+        - schema:
+            type: boolean
+          in: query
+          name: lockFile
+          required: false
+          description: 'If provided, specifies whether to lock the file after the data are read'
+          allowEmptyValue: true
+        - $ref: '#/components/parameters/updateRecents'
+    parameters: []
+  /api/v3/WriteFile:
+    post:
+      summary: Write Data to File
+      tags: []
+      responses:
+        '200':
+          $ref: '#/components/responses/200-FileItemInfo'
+        '400':
+          $ref: '#/components/responses/400-Bad-Request-Generic'
+        '401':
+          $ref: '#/components/responses/401-Not-Authorized'
+        '403':
+          $ref: '#/components/responses/403-Forbidden'
+        '404':
+          $ref: '#/components/responses/404-Not-Found-Generic'
+        '409':
+          $ref: '#/components/responses/409-Conflict'
+        '500':
+          $ref: '#/components/responses/500-Internal-Server-Error-Generic'
+      operationId: cs-item-write-file
+      description: This endpoint writes the block of data to the file and optionally returns file information.
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/path-update'
+        - schema:
+            type: integer
+            format: int64
+            minimum: 0
+          in: query
+          name: startPosition
+          description: The starting position to write at
+          required: true
+        - schema:
+            type: integer
+            format: int64
+          in: query
+          name: totalLength
+          description: 'The intended length of the file (this is not the length of the data being written, as this one is taken from the header). May be omitted. Makes sense if the file size is set to the final value at the start of uploading.'
+        - schema:
+            type: boolean
+          in: query
+          name: unlockAfterWrite
+          description: Whether the file should be unlocked after writing all the data
+          required: true
+        - schema:
+            type: boolean
+            default: false
+          in: query
+          name: returnFileInfo
+          description: Whether new file information should be returned after writing is complete
+          required: false
+        - $ref: '#/components/parameters/Content-Length'
+        - $ref: '#/components/parameters/updateRecents'
+    parameters: []
+  /api/v3/GetItemType:
+    get:
+      summary: Get Item Type
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  value:
+                    type: string
+                    enum:
+                      - file
+                      - folder
+                      - unknown
+                required:
+                  - value
+        '400':
+          $ref: '#/components/responses/400-Bad-Request-Generic'
+        '401':
+          $ref: '#/components/responses/401-Not-Authorized'
+        '403':
+          $ref: '#/components/responses/403-Forbidden'
+        '404':
+          $ref: '#/components/responses/404-Not-Found-Generic'
+        '500':
+          $ref: '#/components/responses/500-Internal-Server-Error-Generic'
+      operationId: cs-item-get-type
+      description: Returns information about the type of the item behind the path.
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/path-info'
+    parameters: []
+  /api/v3/GetFileInfo:
+    get:
+      summary: Get Information About File
+      tags: []
+      responses:
+        '200':
+          $ref: '#/components/responses/200-FileItemInfo'
+        '400':
+          $ref: '#/components/responses/400-Bad-Request-Generic'
+        '401':
+          $ref: '#/components/responses/401-Not-Authorized'
+        '403':
+          $ref: '#/components/responses/403-Forbidden'
+        '404':
+          $ref: '#/components/responses/404-Not-Found-Generic'
+        '500':
+          $ref: '#/components/responses/500-Internal-Server-Error-Generic'
+      operationId: cs-item-get-info
+      description: Returns information about the specified file.
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/path-info'
+        - schema:
+            type: boolean
+            default: false
+          in: query
+          name: includeLocks
+          description: 'If specified, requests lock information to be included with the response'
+          allowEmptyValue: true
+    parameters: []
+  /api/v3/GetFolderInfo:
+    get:
+      summary: Get Information About Folder
+      tags: []
+      responses:
+        '200':
+          $ref: '#/components/responses/200-FileItemInfo'
+        '400':
+          $ref: '#/components/responses/400-Bad-Request-Generic'
+        '401':
+          $ref: '#/components/responses/401-Not-Authorized'
+        '403':
+          $ref: '#/components/responses/403-Forbidden'
+        '404':
+          $ref: '#/components/responses/404-Not-Found-Generic'
+        '500':
+          $ref: '#/components/responses/500-Internal-Server-Error-Generic'
+      operationId: cs-item-get-info-folder
+      description: Returns information about the specified folder.
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/path-info'
+        - schema:
+            type: boolean
+            default: false
+          in: query
+          name: includeLocks
+          description: 'If specified, requests lock information to be included with the response'
+          allowEmptyValue: true
+    parameters: []
+  /api/v3/SetFileInfo:
+    post:
+      summary: Set Item Properties
+      operationId: cs-item-set-properties
+      responses:
+        '200':
+          $ref: '#/components/responses/200-FileItemInfo'
+        '304':
+          description: Code 304 is returned when none of the parameters are specified.
+        '400':
+          $ref: '#/components/responses/400-Bad-Request-Generic'
+        '401':
+          $ref: '#/components/responses/401-Not-Authorized'
+        '403':
+          $ref: '#/components/responses/403-Forbidden'
+        '404':
+          $ref: '#/components/responses/404-Not-Found-Generic'
+        '500':
+          $ref: '#/components/responses/500-Internal-Server-Error-Generic'
+      description: Updates the properties of a file or folder.
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - schema:
+            type: string
+          in: query
+          name: path
+          description: 'The path of the file, the properties of which should be updated'
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                attributes:
+                  type: integer
+                size:
+                  type: integer
+                  format: int64
+                  description: 'New file size, if resizing is required'
+                  minimum: 0
+                created:
+                  type: string
+                  format: date-time
+                  description: File creation time
+                modified:
+                  type: string
+                  format: date-time
+                  description: File last update/modification time
+                accessed:
+                  type: string
+                  format: date-time
+                  description: File last access time
+                returnFileInfo:
+                  type: boolean
+                  description: Whether new file information should be returned after update is complete
+        description: An object with the new property values. A missing property indicates that the current value should be kept.
+    parameters: []
+  /api/v3/CopyFile:
+    post:
+      summary: Copy File
+      operationId: cs-item-copy
+      responses:
+        '200':
+          $ref: '#/components/responses/200-FileItemInfo-Overwritten'
+        '201':
+          $ref: '#/components/responses/201-FileItemInfo-Created'
+        '400':
+          $ref: '#/components/responses/400-Bad-Request-Generic'
+        '401':
+          $ref: '#/components/responses/401-Not-Authorized'
+        '403':
+          $ref: '#/components/responses/403-Forbidden'
+        '404':
+          $ref: '#/components/responses/404-Not-Found-Generic'
+        '409':
+          description: A file or folder with a given name already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileItemInfo'
+        '500':
+          $ref: '#/components/responses/500-Internal-Server-Error-Generic'
+      description: 'Copies the specified file '
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                path:
+                  type: string
+                  description: The path of the item that is an object of the operation. The path must include the name of the file or folder.
+                newPath:
+                  type: string
+                  description: The path that the copy file or folder should have upon completion of the operation. The path must include the name of the file or folder even when copying within a folder.
+                conflictBehavior:
+                  $ref: '#/components/schemas/ConflictBehavior'
+              required:
+                - path
+                - newPath
+        description: ''
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+    parameters: []
+  /api/v3/CopyFolder:
+    post:
+      summary: Copy Folder
+      operationId: cs-item-copy-folder
+      responses:
+        '200':
+          $ref: '#/components/responses/200-FileItemInfo-Overwritten'
+        '201':
+          $ref: '#/components/responses/201-FileItemInfo-Created'
+        '400':
+          $ref: '#/components/responses/400-Bad-Request-Generic'
+        '401':
+          $ref: '#/components/responses/401-Not-Authorized'
+        '403':
+          $ref: '#/components/responses/403-Forbidden'
+        '404':
+          $ref: '#/components/responses/404-Not-Found-Generic'
+        '409':
+          description: A file or folder with a given name already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileItemInfo'
+        '500':
+          $ref: '#/components/responses/500-Internal-Server-Error-Generic'
+      description: Copies the specified folder
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                path:
+                  type: string
+                  description: The path of the item that is an object of the operation. The path must include the name of the file or folder.
+                newPath:
+                  type: string
+                  description: The path that the copy file or folder should have upon completion of the operation. The path must include the name of the file or folder even when copying within a folder.
+                conflictBehavior:
+                  $ref: '#/components/schemas/ConflictBehavior'
+              required:
+                - path
+                - newPath
+        description: ''
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+    parameters: []
+  /api/v3/MoveFile:
+    post:
+      summary: Move or Rename File
+      operationId: cs-item-move-rename
+      responses:
+        '200':
+          description: The destination name was occupied and was overwritten
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileItemInfo'
+        '201':
+          $ref: '#/components/responses/201-FileItemInfo-Created'
+        '400':
+          $ref: '#/components/responses/400-Bad-Request-Generic'
+        '401':
+          $ref: '#/components/responses/401-Not-Authorized'
+        '403':
+          $ref: '#/components/responses/403-Forbidden'
+        '404':
+          $ref: '#/components/responses/404-Not-Found-Generic'
+        '409':
+          description: A file or folder with a given name already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileItemInfo'
+        '500':
+          $ref: '#/components/responses/500-Internal-Server-Error-Generic'
+      description: |-
+        Moves or renames the file. 
+
+        If the file is in the recent files list, the entry is updated to reflect the name change. Otherwise, the file is added to the list when `updateRecents` is specified and is empty or `true`.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                path:
+                  type: string
+                  description: The path of the item that is an object of the operation. The path must include the name of the file or folder.
+                newPath:
+                  type: string
+                  description: The new path that the file or folder should have upon completion of the operation. The path must include the name of the file or folder.
+                conflictBehavior:
+                  $ref: '#/components/schemas/ConflictBehavior'
+              required:
+                - path
+                - newPath
+        description: ''
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/updateRecents'
+    parameters: []
+  /api/v3/MoveFolder:
+    post:
+      summary: Move or Rename Folder
+      operationId: cs-item-move-rename-folder
+      responses:
+        '200':
+          description: The destination name was occupied and was overwritten
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileItemInfo'
+        '201':
+          $ref: '#/components/responses/201-FileItemInfo-Created'
+        '400':
+          $ref: '#/components/responses/400-Bad-Request-Generic'
+        '401':
+          $ref: '#/components/responses/401-Not-Authorized'
+        '403':
+          $ref: '#/components/responses/403-Forbidden'
+        '404':
+          $ref: '#/components/responses/404-Not-Found-Generic'
+        '409':
+          description: A file or folder with a given name already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileItemInfo'
+        '500':
+          $ref: '#/components/responses/500-Internal-Server-Error-Generic'
+      description: Moves or renames the folder
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                path:
+                  type: string
+                  description: The path of the item that is an object of the operation. The path must include the name of the file or folder.
+                newPath:
+                  type: string
+                  description: The new path that the file or folder should have upon completion of the operation. The path must include the name of the file or folder.
+                conflictBehavior:
+                  $ref: '#/components/schemas/ConflictBehavior'
+              required:
+                - path
+                - newPath
+        description: ''
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+    parameters: []
+  /api/v3/GetFileLocks:
+    get:
+      summary: Get Lock Information
+      tags: []
+      responses:
+        '200':
+          $ref: '#/components/responses/200-Locks-Infos'
+        '400':
+          $ref: '#/components/responses/400-Bad-Request-Generic'
+        '401':
+          $ref: '#/components/responses/401-Not-Authorized'
+        '403':
+          $ref: '#/components/responses/403-Forbidden'
+        '404':
+          $ref: '#/components/responses/404-Not-Found-Generic'
+        '500':
+          $ref: '#/components/responses/500-Internal-Server-Error-Generic'
+      operationId: cs-item-get-lock
+      description: 'Returns information about the locks of a file, if any exist.'
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/path-info'
+        - $ref: '#/components/parameters/includeLockOwners'
+        - $ref: '#/components/parameters/includeLockDetails'
+    parameters: []
+  /api/v3/LockFile:
+    post:
+      summary: Lock File
+      operationId: cs-item-lock
+      responses:
+        '200':
+          $ref: '#/components/responses/200-Locks-Infos'
+        '201':
+          description: Created
+        '400':
+          $ref: '#/components/responses/400-Bad-Request-Generic'
+        '401':
+          $ref: '#/components/responses/401-Not-Authorized'
+        '403':
+          $ref: '#/components/responses/403-Forbidden'
+        '404':
+          $ref: '#/components/responses/404-Not-Found-Generic'
+        '409':
+          $ref: '#/components/responses/409-Conflict-With-Lock-Info'
+        '500':
+          $ref: '#/components/responses/500-Internal-Server-Error-Generic'
+      description: |-
+        Locks the file. 
+
+        If a lock of the same type already exists, updates its expiration. 
+
+        Upon success, returns status 200 OK when the lock information is included and 201 Created if the lock information is omitted.
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - schema:
+            type: string
+          in: query
+          name: path
+          description: The path of the file to lock
+          required: true
+        - schema:
+            type: boolean
+          in: query
+          name: coedit
+          description: 'Specifies if the lock allows co-editing the file. Such a lock becomes a shared lock. If the flag is not set, an exclusive lock is created.'
+          required: true
+        - schema:
+            type: integer
+            format: int64
+            minimum: 1
+          in: query
+          name: expires
+          description: Period in seconds (!) after which the lock expires
+        - schema:
+            type: boolean
+          in: query
+          name: includeLockInfo
+          description: 'When set, instructs the server to return lock information'
+          allowEmptyValue: true
+        - $ref: '#/components/parameters/includeLockOwners'
+        - $ref: '#/components/parameters/includeLockDetails'
+    parameters: []
+  /api/v3/UnlockFile:
+    post:
+      summary: Unlock Item
+      operationId: cs-item-unlock
+      responses:
+        '204':
+          $ref: '#/components/responses/204-No-Content'
+        '400':
+          $ref: '#/components/responses/400-Bad-Request-Generic'
+        '401':
+          $ref: '#/components/responses/401-Not-Authorized'
+        '403':
+          $ref: '#/components/responses/403-Forbidden'
+        '404':
+          $ref: '#/components/responses/404-Not-Found-Generic'
+        '409':
+          $ref: '#/components/responses/409-Conflict'
+        '500':
+          $ref: '#/components/responses/500-Internal-Server-Error-Generic'
+      description: Unlocks the file
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - schema:
+            type: string
+          in: query
+          name: path
+          description: The path of the file to unlock
+          required: true
+        - schema:
+            type: string
+          in: query
+          name: owner
+          description: The username of the lock owner
+    parameters: []
+  /api/v3/GetTransferLink:
+    get:
+      summary: Get Direct Link to Access Data
+      tags: []
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/path-info'
+        - schema:
+            type: string
+            enum:
+              - upload
+              - download
+          in: query
+          name: operation
+          description: Specifies the intended operation for which the link is requested
+          required: true
+        - $ref: '#/components/parameters/Accept'
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: The requested link
+            application/json:
+              schema:
+                type: object
+                properties:
+                  link:
+                    type: string
+                    description: The requested link
+                    format: uri
+                  expires:
+                    type: string
+                    description: Expiration date
+                    format: date-time
+                required:
+                  - link
+                  - expires
+        '400':
+          $ref: '#/components/responses/400-Bad-Request-Generic'
+        '401':
+          $ref: '#/components/responses/401-Not-Authorized'
+        '403':
+          $ref: '#/components/responses/403-Forbidden'
+        '404':
+          $ref: '#/components/responses/404-Not-Found-Generic'
+        '500':
+          $ref: '#/components/responses/500-Internal-Server-Error-Generic'
+      operationId: cs-item-get-transfer-link
+      description: 'Returns the direct URL suitable for uploading or downloading data (depending on the value of the `operation` parameter). '
+    parameters: []
+  /api/v3/GetOTP:
+    parameters: []
+    get:
+      summary: Get One-Time Password for Files and Folders
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  otp:
+                    type: string
+              examples: {}
+      operationId: integrations-create-item-otp
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+      description: 'Creates and returns a one-time password. This password can be used by a human user in integrations (OnlyOffice, Sharepoint, etc.) to access files for editing. The password is returned as a response and stored in a session information. '
+  /api/v3/ZipFiles:
+    get:
+      summary: Zip Files
+      tags: []
+      responses:
+        '200':
+          $ref: '#/components/responses/200-ZipResponse'
+        '204':
+          description: No Content
+        '302':
+          description: Found
+        '400':
+          $ref: '#/components/responses/400-Bad-Request-Generic'
+        '401':
+          $ref: '#/components/responses/401-Not-Authorized'
+        '403':
+          $ref: '#/components/responses/403-Forbidden'
+        '404':
+          $ref: '#/components/responses/404-Not-Found-Generic'
+        '500':
+          $ref: '#/components/responses/500-Internal-Server-Error-Generic'
+      operationId: cs-item-make-zip-get
+      description: |-
+        Packs one or more files from the specified folder into a ZIP archive and optionally provides the data for downloading.
+
+        If the path is not found, error 404 is returned. If no files are to be packed (nothing matches the mask), 204 No Content is returned and no data is provided.
+
+        Use the `conflictBehavior` parameter to specify what to do if the target identified by `zipName` exists. The `ignore` value means that the files will be added to the existing archive.
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - schema:
+            type: string
+          in: query
+          name: path
+          description: 'The path of the file or folder to download. Either this parameter, the list of files in the `paths` parameter, or the `ref` parameter must be present.'
+        - schema:
+            type: string
+            format: int64
+            minimum: 0
+          in: query
+          name: mask
+          description: An optional mask to use when downloading a folder. It is used unless the list of files is provided.
+        - $ref: '#/components/parameters/zipResponseType'
+        - $ref: '#/components/parameters/zipName'
+        - $ref: '#/components/parameters/zipRef'
+        - $ref: '#/components/parameters/conflictBehavior'
+    parameters: []
+    post:
+      summary: Download Files as Zip
+      operationId: cs-item-make-zip-post
+      description: |-
+        Packs one or more files specified in the list into a ZIP archive and optionally provides the data for downloading.
+
+        If no files are to be packed (nothing was found), 204 No Content is returned and no data is provided. If only some of the files were not found, status 206 Partial Content is used to indicate that not all files are included. 
+
+        Use the `conflictBehavior` parameter to specify what to do if the target identified by `zipName` exists. The `ignore` value means that files will be added to the existing archive.
+      responses:
+        '200':
+          $ref: '#/components/responses/200-ZipResponse'
+        '201':
+          description: Created
+        '204':
+          description: No Content
+        '206':
+          $ref: '#/components/responses/206-ZipResponse'
+        '400':
+          $ref: '#/components/responses/400-Bad-Request-Generic'
+        '401':
+          $ref: '#/components/responses/401-Not-Authorized'
+        '403':
+          $ref: '#/components/responses/403-Forbidden'
+        '404':
+          $ref: '#/components/responses/404-Not-Found-Generic'
+        '500':
+          $ref: '#/components/responses/500-Internal-Server-Error-Generic'
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/zipResponseType'
+        - $ref: '#/components/parameters/zipName'
+        - $ref: '#/components/parameters/conflictBehavior'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                paths:
+                  type: array
+                  items:
+                    type: string
+  /api/v3/StartFileUpload:
+    post:
+      summary: Start File Upload Session
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: The Id of the upload session
+            application/json:
+              schema:
+                type: object
+                properties:
+                  uploadId:
+                    type: string
+        '400':
+          $ref: '#/components/responses/400-Bad-Request-Generic'
+        '401':
+          $ref: '#/components/responses/401-Not-Authorized'
+        '403':
+          $ref: '#/components/responses/403-Forbidden'
+        '404':
+          $ref: '#/components/responses/404-Not-Found-Generic'
+        '409':
+          $ref: '#/components/responses/409-Conflict'
+        '500':
+          $ref: '#/components/responses/500-Internal-Server-Error-Generic'
+      operationId: cs-item-upload-start
+      description: ''
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - schema:
+            type: string
+          in: query
+          name: path
+          required: true
+          description: The path of the file to write to
+        - $ref: '#/components/parameters/Accept'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                size:
+                  type: integer
+                  format: int64
+                  minimum: 0
+                  description: The size of the file after upload. Used to reserve space and control quota.
+                modified:
+                  type: string
+                  format: date-time
+                  description: 'When included, specifies the last write time in UTC to set for the file'
+                conflictBehavior:
+                  $ref: '#/components/schemas/ConflictBehavior'
+        description: ''
+    parameters: []
+  /api/v3/CompleteUpload:
+    post:
+      summary: Complete File Upload Session
+      tags: []
+      responses:
+        '200':
+          $ref: '#/components/responses/200-FileItemInfo'
+        '400':
+          $ref: '#/components/responses/400-Bad-Request-Generic'
+        '401':
+          $ref: '#/components/responses/401-Not-Authorized'
+        '403':
+          $ref: '#/components/responses/403-Forbidden'
+        '404':
+          $ref: '#/components/responses/404-Not-Found-Generic'
+        '409':
+          $ref: '#/components/responses/409-Conflict'
+        '500':
+          $ref: '#/components/responses/500-Internal-Server-Error-Generic'
+      operationId: cs-item-upload-complete
+      description: Finalizes the upload session.
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - schema:
+            type: string
+          name: uploadId
+          in: query
+          description: The Id of the upload as obtained from the Start File Upload Session operation. This is an alternative for the body parameter.
+        - schema:
+            type: string
+          in: query
+          name: checksum
+          description: 'The SHA1 checksum of the complete file. The hash is encoded using BASE16/HEX without separators. The checksum must be present if checksum checking is enabled in the server configuration and the backend is not Sharepoint Online. '
+        - $ref: '#/components/parameters/updateRecents'
+    parameters: []
+  /api/v3/CancelUpload:
+    post:
+      summary: Cancel File Upload Session
+      operationId: cs-item-upload-cancel
+      responses:
+        '204':
+          $ref: '#/components/responses/204-No-Content'
+        '400':
+          $ref: '#/components/responses/400-Bad-Request-Generic'
+        '401':
+          $ref: '#/components/responses/401-Not-Authorized'
+        '403':
+          $ref: '#/components/responses/403-Forbidden'
+        '404':
+          $ref: '#/components/responses/404-Not-Found-Generic'
+        '500':
+          $ref: '#/components/responses/500-Internal-Server-Error-Generic'
+      description: Cancels the upload session and removes uploaded temporary data.
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: uploadId
+          description: The Id of the upload as obtained from the Start File Upload Session operation
+    parameters: []
+  /api/v3/GetUploadStatus:
+    get:
+      summary: Get File Upload Session Status
+      operationId: cs-item-upload-status
+      responses:
+        '200':
+          description: Status provided successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum:
+                      - InProgress
+                      - Complete
+                      - Error
+                  progress:
+                    type: integer
+                    description: 'If `status` is `InProgress` or `Complete`, contains the size of the file in its current state.'
+                  errorCode:
+                    type: integer
+                    description: 'If `status` is `error`, contains an error code.'
+                required:
+                  - status
+        '400':
+          $ref: '#/components/responses/400-Bad-Request-Generic'
+        '401':
+          $ref: '#/components/responses/401-Not-Authorized'
+        '403':
+          $ref: '#/components/responses/403-Forbidden'
+        '404':
+          $ref: '#/components/responses/404-Not-Found-Generic'
+        '500':
+          $ref: '#/components/responses/500-Internal-Server-Error-Generic'
+      description: Returns the status of the upload session.
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - schema:
+            type: string
+          in: query
+          name: uploadId
+          description: The Id of the upload as obtained from the Start File Upload Session operation
+    parameters: []
+  /api/v3/WriteFileBlock:
+    put:
+      summary: Write Block of Data to Upload Session
+      operationId: cs-item-upload-write-block
+      responses: {}
+      description: '  '
+      parameters:
+        - schema:
+            type: integer
+            minimum: 0
+            format: int64
+          in: query
+          name: startPosition
+          description: The starting position to write at
+          required: true
+        - schema:
+            type: string
+          in: query
+          name: uploadId
+          description: The Id of the upload as obtained from the Start File Upload Session operation
+    parameters: []
+  /api/v3/ListFileVersions:
+    get:
+      summary: List File Versions
+      tags: []
+      operationId: cs-item-get-versions
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/path-info'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FileVersionInfo'
+        '400':
+          $ref: '#/components/responses/400-Bad-Request-Generic'
+        '401':
+          $ref: '#/components/responses/401-Not-Authorized'
+        '403':
+          $ref: '#/components/responses/403-Forbidden'
+        '404':
+          $ref: '#/components/responses/404-Not-Found-Generic'
+        '500':
+          $ref: '#/components/responses/500-Internal-Server-Error-Generic'
+      description: 'Returns the list of file versions, available on the server'
+    parameters: []
+  /api/v3/RestoreFileVersion:
+    post:
+      summary: Restore File Version
+      tags: []
+      responses:
+        '200':
+          $ref: '#/components/responses/200-FileItemInfo'
+        '400':
+          $ref: '#/components/responses/400-Bad-Request-Generic'
+        '401':
+          $ref: '#/components/responses/401-Not-Authorized'
+        '403':
+          $ref: '#/components/responses/403-Forbidden'
+        '404':
+          $ref: '#/components/responses/404-Not-Found-Generic'
+        '500':
+          $ref: '#/components/responses/500-Internal-Server-Error-Generic'
+      operationId: cs-item-restore
+      description: Restores a previous version of a file as a copy of this file. The copy is placed next to the file with a name that includes the modification date as a suffix before the extension.
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - schema:
+            type: string
+          in: query
+          name: path
+          description: The path of the file to restore
+          required: true
+        - schema:
+            type: string
+            format: date-time
+          in: query
+          name: modified
+          description: 'The date-time value that identifies the version to restore. Alternatively, may be set to "latest" to restore the latest version of the file.'
+          required: true
+    parameters: []
+  /api/v3/ListShares:
+    get:
+      summary: List Server Shares
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  useMultipleDriveLetters:
+                    type: boolean
+                  shares:
+                    oneOf:
+                      - items:
+                          $ref: '#/components/schemas/DriveShareInfo'
+                      - items:
+                          $ref: '#/components/schemas/ShareInfo'
+                    type: array
+        '401':
+          $ref: '#/components/responses/401-Not-Authorized'
+        '403':
+          $ref: '#/components/responses/403-Forbidden'
+        '404':
+          $ref: '#/components/responses/404-Not-Found-Generic'
+        '500':
+          $ref: '#/components/responses/500-Internal-Server-Error-Generic'
+      operationId: cs-server-list-shares
+      description: Lists the shares avaialble on the server
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+  /api/v3/ListBookmarks:
+    get:
+      summary: List Bookmarks (Favorites Items)
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BookmarkInfo'
+        '400':
+          $ref: '#/components/responses/400-Bad-Request-Generic'
+        '401':
+          $ref: '#/components/responses/401-Not-Authorized'
+        '403':
+          $ref: '#/components/responses/403-Forbidden'
+        '500':
+          $ref: '#/components/responses/500-Internal-Server-Error-Generic'
+      operationId: cs-bookmark-list
+      description: Returns the list of bookmarks owned by the current user.
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/maxResults'
+  /api/v3/AddBookmark:
+    post:
+      summary: Add Bookmark (Favorites Item)
+      operationId: cs-bookmark-add
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - schema:
+            type: string
+          in: query
+          name: path
+          description: The path of the file to add to favorites
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookmarkInfo'
+        '400':
+          $ref: '#/components/responses/400-Bad-Request-Generic'
+        '401':
+          $ref: '#/components/responses/401-Not-Authorized'
+        '403':
+          $ref: '#/components/responses/403-Forbidden'
+        '500':
+          description: Internal Server Error
+      description: Adds a bookmark for the current user as identified by the Authorization header.
+  /api/v3/DeleteBookmark:
+    post:
+      summary: Delete Bookmark (Favorites Item)
+      tags: []
+      responses:
+        '204':
+          $ref: '#/components/responses/204-No-Content'
+        '400':
+          $ref: '#/components/responses/400-Bad-Request-Generic'
+        '401':
+          $ref: '#/components/responses/401-Not-Authorized'
+        '403':
+          $ref: '#/components/responses/403-Forbidden'
+        '404':
+          $ref: '#/components/responses/404-Not-Found-Generic'
+        '500':
+          $ref: '#/components/responses/500-Internal-Server-Error-Generic'
+      operationId: cs-bookmark-delete
+      description: Deletes the specified `path` from the list of the user's bookmarks.
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - schema:
+            type: string
+          in: query
+          name: path
+          description: The path of the bookmark to delete
+  /api/v3/LogMessage:
+    post:
+      summary: Add Log Message
+      operationId: cs-log-addmessage
+      responses:
+        '200':
+          description: OK
+        '400':
+          $ref: '#/components/responses/400-Bad-Request-Generic'
+        '401':
+          $ref: '#/components/responses/401-Not-Authorized'
+        '403':
+          $ref: '#/components/responses/403-Forbidden'
+        '500':
+          description: Internal Server Error
+      description: Adds an entry to the server log
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: message
+          description: A message to add to the log
+          required: true
+        - $ref: '#/components/parameters/Authorization'
+  /api/v3/GetServerConfig:
+    get:
+      summary: Get Server Configuration Information
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/ConfigInfoAuth'
+                  - $ref: '#/components/schemas/ConfigInfoBase'
+                  - $ref: '#/components/schemas/ConfigInfoTFA'
+                  - $ref: '#/components/schemas/ConfigInfoFileTypes'
+                  - $ref: '#/components/schemas/ConfigInfoViewerTypes'
+              examples: {}
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+                description: 'For the `logo` configuration class, contains the data of the logo. For the `speedTest` configuration class, contains the test data.'
+        '400':
+          $ref: '#/components/responses/400-Bad-Request-Generic'
+        '401':
+          $ref: '#/components/responses/401-Not-Authorized'
+        '403':
+          $ref: '#/components/responses/403-Forbidden'
+        '500':
+          description: Internal Server Error
+      operationId: cs-serverconfig-get
+      parameters:
+        - $ref: '#/components/parameters/configClass'
+        - $ref: '#/components/parameters/Authorization'
+      description: ''
+    head:
+      summary: Get Size Of Logo
+      operationId: cs-serverconfig-head
+      responses:
+        '200':
+          description: OK
+          headers:
+            Content-Length:
+              schema:
+                type: string
+              description: The size of the logo
+      description: 'For the `logo` configuration class, this endpoint returns the size of the logo image in bytes in the header.'
+      parameters:
+        - $ref: '#/components/parameters/configClass'
+  /api/v3/SearchFiles:
+    get:
+      summary: Perform Simple Search in Files
+      tags: []
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SearchResults-Or-Recents'
+        '400':
+          $ref: '#/components/responses/400-Bad-Request-Generic'
+        '401':
+          $ref: '#/components/responses/401-Not-Authorized'
+        '403':
+          $ref: '#/components/responses/403-Forbidden'
+        '500':
+          description: Internal Server Error
+        '501':
+          $ref: '#/components/responses/501-Not-Implemented-Generic'
+        '503':
+          description: Service Unavailable
+      operationId: cs-search-files-get
+      description: |-
+        A simpler form of search with just one field being searched. To specify more fields, use the POST form of this endpoint.
+
+        The `fieldName` parameter indicates where to search. The possible values are
+        * `path` : the path of a file or folder with a name and an extension
+        * `name` : just the name of a file or folder (with an extension)
+        * `ext` : just the extension
+        * `date-created` : the creation date of a file or directory
+        * `date-modified` : the last modification date of a file or directory
+        * `type` : `f` or `d` for files and folders respectively
+        * `size` : the size of a file
+        * `content` : file content
+
+        The `query` parameter contains the search pattern or condition to apply to the field depennding on what the value of `fieldName` is:
+        * For `path`, `name`, `ext`, and `content`, the value of `query` is searched with a substring search, case-insensitively. 
+        * For `date-created` and `date-modified`, `query` may contain an ISO8601-formatted string representation of one date that specifies the exact date value (the time component is ignored and the whole day from 0:00 of the date to 0:00 of the next date is counted), or the range of values "from-to" with the lower and upper values included, or just one of the boundaries. For ranges, the time component of the date is taken into account. 
+        * For `type`, set `query` to either `f` for files or `d` for folders. 
+        * For `size`, `query` may contain a string representation of one number that specifies the exact value, or the range of values "from-to" with the lower and upper values included, or just one of the boundaries, e.g., "100-" or "-200". 
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - schema:
+            type: string
+            enum:
+              - path
+              - name
+              - ext
+              - date-created
+              - date-modified
+              - type
+              - size
+              - content
+          in: query
+          name: field
+          description: The name of the field to which the query applies
+          required: true
+        - schema:
+            type: string
+          in: query
+          name: query
+          description: A search term or condition for search (depends on the value of `fieldName`)
+          required: true
+        - $ref: '#/components/parameters/maxResults'
+        - $ref: '#/components/parameters/includeFileInfo'
+      x-internal: true
+    post:
+      summary: Perform Compound Search in Files
+      operationId: cs-search-files-post
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SearchResults-Or-Recents'
+        '400':
+          $ref: '#/components/responses/400-Bad-Request-Generic'
+        '401':
+          $ref: '#/components/responses/401-Not-Authorized'
+        '403':
+          $ref: '#/components/responses/403-Forbidden'
+        '500':
+          description: Internal Server Error
+        '501':
+          $ref: '#/components/responses/501-Not-Implemented-Generic'
+        '503':
+          description: Service Unavailable
+      parameters:
+        - $ref: '#/components/parameters/maxResults'
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/includeFileInfo'
+      description: 'An advanced form of search with multiple fields being searched. If you have just one field to search, you can use the GET form of this endpoint.'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                queries:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      field:
+                        type: string
+                        description: The name of the field to which the query applies (see the GET operation description for details)
+                      query:
+                        type: string
+                        description: A search term or condition for search (see the GET operation description for details)
+                      optional:
+                        type: boolean
+                        description: 'When set, specifies the query as required or optional. If not specified, the query is required. This field is mutually exclusive with `excluded`. '
+                      excluded:
+                        type: boolean
+                        description: 'When set, specifies a negative rule, i.e., if an entry matches this rule, the entry is excluded from results. This field is mutually exclusive with `optional`. '
+                    required:
+                      - field
+                      - query
+        description: ''
+  /api/v3/ListRecentFiles:
+    get:
+      summary: List Recent Files
+      tags: []
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SearchResults-Or-Recents'
+        '400':
+          $ref: '#/components/responses/400-Bad-Request-Generic'
+        '401':
+          $ref: '#/components/responses/401-Not-Authorized'
+        '403':
+          $ref: '#/components/responses/403-Forbidden'
+        '500':
+          $ref: '#/components/responses/500-Internal-Server-Error-Generic'
+      operationId: cs-recents-list
+      description: Returns the list of files recently accessed by the current user.
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/maxResults'
+        - $ref: '#/components/parameters/includeFileInfo'
+      x-internal: true
+  /api/v3/ClearRecentFiles:
+    post:
+      summary: Clear Recent Files list
+      operationId: cs-recents-clear
+      responses:
+        '204':
+          $ref: '#/components/responses/204-No-Content'
+        '400':
+          $ref: '#/components/responses/400-Bad-Request-Generic'
+        '401':
+          $ref: '#/components/responses/401-Not-Authorized'
+        '403':
+          $ref: '#/components/responses/403-Forbidden'
+        '500':
+          $ref: '#/components/responses/500-Internal-Server-Error-Generic'
+      description: Clears the list of recent files for the current user.
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+    parameters: []
+  /api/v3/GetPublicLinkSettings:
+    get:
+      summary: GetPublic Link Settings
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicLinkSettings'
+        '400':
+          $ref: '#/components/responses/400-Bad-Request-Generic'
+        '401':
+          $ref: '#/components/responses/401-Not-Authorized'
+        '403':
+          $ref: '#/components/responses/403-Forbidden'
+        '500':
+          description: Internal Server Error
+      operationId: cs-public-link-settings-get
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - schema:
+            type: string
+          in: query
+          name: path
+          description: 'An optional path to query for co-edit possibility. If provided, the `AllowOneDriveEdit` property is set as applicable to the specified path; otherwise, the global value is returned.'
+      description: Retrieve public link settings for the specified user.
+  /api/v3/GetPublicLinkInfo:
+    get:
+      summary: Get Public Link Information
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicLinkInfoUserComplete'
+        '400':
+          $ref: '#/components/responses/400-Bad-Request-Generic'
+        '401':
+          $ref: '#/components/responses/401-Not-Authorized'
+        '403':
+          $ref: '#/components/responses/403-Forbidden'
+        '500':
+          description: Internal Server Error
+      operationId: cs-public-link-info-get
+      description: Returns information/settings of a specified public link.
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/link-info'
+  /api/v3/ListPublicLinks:
+    get:
+      summary: List User's Public Links
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PublicLinkInfoUserComplete'
+        '400':
+          $ref: '#/components/responses/400-Bad-Request-Generic'
+        '401':
+          $ref: '#/components/responses/401-Not-Authorized'
+        '403':
+          $ref: '#/components/responses/403-Forbidden'
+        '500':
+          description: Internal Server Error
+      operationId: cs-public-link-list
+      description: Returns the list of the user's public links
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/sortBy-Links'
+        - schema:
+            type: string
+          in: query
+          name: query
+          description: 'An optional query string; when specified, it must be present as a substring in the link path or name.'
+  /api/v3/DeletePublicLinks:
+    get:
+      summary: Delete Public Link
+      tags: []
+      responses:
+        '204':
+          $ref: '#/components/responses/204-No-Content'
+        '400':
+          $ref: '#/components/responses/400-Bad-Request-Generic'
+        '401':
+          $ref: '#/components/responses/401-Not-Authorized'
+        '403':
+          $ref: '#/components/responses/403-Forbidden'
+        '500':
+          description: Internal Server Error
+      operationId: cs-public-link-delete-one
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: link
+          description: The link to delete
+          required: true
+        - $ref: '#/components/parameters/Authorization'
+      description: 'This endpoint deletes one public link. To delete links in bulk, use a POST variant of the endpoint.'
+    post:
+      summary: Delete Multiple Public Links
+      operationId: cs-public-link-delete-many
+      responses:
+        '204':
+          $ref: '#/components/responses/204-No-Content'
+        '400':
+          $ref: '#/components/responses/400-Bad-Request-Generic'
+        '401':
+          $ref: '#/components/responses/401-Not-Authorized'
+        '403':
+          $ref: '#/components/responses/403-Forbidden'
+        '500':
+          description: Internal Server Error
+      description: 'This endpoint deletes one or several public links. To delete just one link, it is easier to use the GET variant of the endpoint.'
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                links:
+                  type: array
+                  items:
+                    type: string
+              required:
+                - links
+        description: The object with a list of links to delete in it.
+  /api/v3/CreatePublicLink:
+    post:
+      summary: Create Public Link
+      tags: []
+      responses:
+        '201':
+          description: Created
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: The newly created link
+            application/json:
+              schema:
+                type: object
+                properties:
+                  value:
+                    type: string
+                    description: The newly created link
+                required:
+                  - value
+        '400':
+          $ref: '#/components/responses/400-Bad-Request-Generic'
+        '401':
+          $ref: '#/components/responses/401-Not-Authorized'
+        '403':
+          $ref: '#/components/responses/403-Forbidden'
+        '404':
+          $ref: '#/components/responses/404-Not-Found-Generic'
+        '500':
+          description: Internal Server Error
+      operationId: cs-public-link-create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PublicLinkInfoCreateUpdate'
+        description: The parameters of the link creation request
+      parameters:
+        - $ref: '#/components/parameters/Accept'
+        - $ref: '#/components/parameters/Authorization'
+      description: This endpoint creates a public link to the specified path.
+  /api/v3/UpdatePublicLink:
+    post:
+      summary: Update Public Link
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicLinkInfoUserComplete'
+      operationId: cs-public-link-update
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PublicLinkInfoCreateUpdate'
+        description: ''
+      parameters:
+        - $ref: '#/components/parameters/Accept'
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/includeLinkInfo'
+        - $ref: '#/components/parameters/link-update'
+      description: This endpoints updates the properties of the link specified in the parameters.
+    parameters: []
+components:
+  schemas:
+    ConflictBehavior:
+      type: string
+      title: ConflictBehavior
+      x-stoplight:
+        id: avvwatkbw3im7
+      enum:
+        - fail
+        - ignore
+        - rename
+        - replace
+      description: |-
+        Identifies how the server should handle name conflicts that occur when performing an operation in which an item with the same name or Id already exists.
+
+        Note about `replace`-ment: a directory can replace a file, but a file cannot replace a directory; also, when an existing file is replaced, deletion may fail, in which case, replacing will still fail with status code 409 Conflict. 
+
+        The `ignore` value means that even if the target filename exists, the name check function will return success; in most cases, this will lead to the failure of the subsequent operation or to the effect the same as replace. However, when making a ZIP file, this value will lead to new files being added to the existing archive if one exists.      
+      default: fail
+    ErrorResponse:
+      title: ErrorResponse
+      x-stoplight:
+        id: 03wrfzrm4l969
+      type: object
+      description: Response object sent in the case of an error
+      properties:
+        status:
+          type: string
+        errorCode:
+          type: integer
+          format: int32
+          default: 0
+          minimum: 0
+        message:
+          type: string
+        details:
+          type: object
+          description: A container for additional error properties
+      required:
+        - status
+        - message
+    FileExtendedInfo:
+      title: FileExtendedInfo
+      x-stoplight:
+        id: f8hwqjvv5nytu
+      type: object
+      properties:
+        id:
+          type: string
+    FileItemInfo:
+      title: FileItemInfo
+      x-stoplight:
+        id: krn751j4bt4fl
+      type: object
+      description: 'File item information. LockInfo and ExtendedInfo are returned only by the Get File Information operation when explicitly requested. In all other cases, only the basic information is returned.'
+      examples:
+        - name: string
+          path: string
+          created: '2019-08-24T14:15:22Z'
+          modified: '2019-08-24T14:15:22Z'
+          attributes: 0
+          isFolder: false
+          size: 1492
+          isLocked: true
+          locks:
+            - id: 0
+              owner: string
+              expires: '2019-08-24T14:15:22Z'
+          extendedInfo:
+            id: string
+      properties:
+        name:
+          type: string
+          description: The name of the file or folder without a path.
+        path:
+          type: string
+          description: 'The full path (including the name) of the item, suitable for passing to other endpoints.'
+        created:
+          type: string
+          format: date-time
+        modified:
+          type: string
+          format: date-time
+        attributes:
+          type: integer
+          minimum: 0
+        isFolder:
+          type: boolean
+        size:
+          type: integer
+          format: int64
+          description: 'If `isFolder` is `false`, this property is present and contains the file size. For folders, this property is omitted.'
+        isLocked:
+          type: boolean
+          description: Indicates if any locks exist on the item. This property is useful when the list of locks is not requested or not provided.
+        locks:
+          type: array
+          items:
+            $ref: '#/components/schemas/FileLockInfo'
+        extendedInfo:
+          $ref: '#/components/schemas/FileExtendedInfo'
+      required:
+        - name
+        - path
+        - isFolder
+        - isLocked
+    FileLockInfo:
+      title: FileLockInfo
+      x-stoplight:
+        id: u2hau5vempz6j
+      type: object
+      description: 'Contains basic '
+      properties:
+        id:
+          type: integer
+        owner:
+          type: string
+          description: 'The ***username*** of the owner of the lock. '
+        expires:
+          type: string
+          format: date-time
+          description: Date/time in UTC when the lock expires
+    FileLockInfoExtended:
+      title: FileLockInfoExtended
+      x-stoplight:
+        id: u2hau5vempz6j
+      type: object
+      description: TBD.
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        expires:
+          type: string
+          format: date-time
+          description: Date/time in UTC when the lock expires
+        coedit:
+          type: boolean
+        owner:
+          type: string
+        isDeep:
+          type: boolean
+        level:
+          type: string
+          enum:
+            - Shared
+            - Exclusive
+      examples: []
+    FileLockInfoSummary:
+      title: FileLockInfoSummary
+      x-stoplight:
+        id: iiqlroy0jqenp
+      type: object
+      description: 'Contains the summary information, the list of lock holders, and the list of lock information objects'
+      properties:
+        lockCount:
+          type: integer
+          minimum: 0
+        lockedByMultipleEditors:
+          type: boolean
+          description: Indicates that two or more locks have been set for CoEdit. Not set at the moment.
+        lockedByCurrentSession:
+          type: integer
+          minimum: 0
+          maximum: 2
+          description: 'Indicates that the lock was placed by the current session (if it was). 0 - no lock made by current session, 1 - current session has locked the file exclusively, 2 - current session has locked the file for co-editing'
+        lockedByOtherSessions:
+          type: boolean
+          description: Indicates that some locks have been set by sessions other than current.
+        openedDirectly:
+          type: boolean
+        lockOwners:
+          type: array
+          description: An array of **usernames** of accounts that have locked the item. Is included when there exists at least one lock.
+          items:
+            type: string
+        locks:
+          type: array
+          items:
+            $ref: '#/components/schemas/FileLockInfo'
+      required:
+        - lockCount
+        - lockedByCurrentSession
+        - lockedByOtherSessions
+    FileVersionInfo:
+      title: FileVersionInfo
+      x-stoplight:
+        id: e5daliae7oeon
+      type: object
+      properties:
+        name:
+          type: string
+        modified:
+          type: string
+          format: date-time
+          description: Date/time in UTC when the version was last modified
+        size:
+          type: integer
+          format: float
+        serverName:
+          type: string
+          description: The domain name or the IP address of the server which serves previous versions of files.
+        shadowPath:
+          type: string
+          description: The path of the shadow copy (can be used to restore a version)
+    SharepointLockInfo:
+      title: SharepointLockInfo
+      x-stoplight:
+        id: 1mladtuuo2e3m
+      type: object
+      properties:
+        id:
+          type: string
+    ShareInfo:
+      title: ShareInfo
+      x-stoplight:
+        id: u3hh3gmtgh9ww
+      type: object
+      description: ''
+      properties:
+        shareName:
+          type: string
+        driveLetter:
+          type: string
+        downloadEnabled:
+          type: boolean
+        desktopClientEnabled:
+          type: boolean
+          description: is this share available to desktop clients
+        webClientEnabled:
+          type: boolean
+          description: is this share available to the web client
+      required:
+        - shareName
+        - downloadEnabled
+        - desktopClientEnabled
+        - webClientEnabled
+    DriveShareInfo:
+      title: DriveShareInfo
+      x-stoplight:
+        id: ypgfwar12tr4p
+      type: object
+      properties:
+        sharePath:
+          type: string
+        driveLetter:
+          type: string
+        rootId:
+          type: string
+        allowedPaths:
+          type: array
+          items:
+            type: string
+        downloadEnabled:
+          type: boolean
+        desktopClientEnabled:
+          type: boolean
+          description: is this share available to desktop clients
+        webClientEnabled:
+          type: boolean
+          description: is this share available to the web client
+        isStorageAPI:
+          type: boolean
+      required:
+        - sharePath
+        - driveLetter
+        - rootId
+        - downloadEnabled
+        - desktopClientEnabled
+        - webClientEnabled
+    BookmarkInfo:
+      title: BookmarkInfo
+      x-stoplight:
+        id: ajx4b4b2x0odk
+      type: object
+      properties:
+        id:
+          type: integer
+          description: The Id of the bookmark
+        username:
+          type: string
+          description: The username of the user who created the bookmark
+        path:
+          type: string
+          description: The path of the file which the bookmark is related
+    ConfigInfoFileTypes:
+      title: ConfigInfoFileTypes
+      x-stoplight:
+        id: e1p1ghyfc308v
+      type: object
+      properties:
+        allowSpecificTypes:
+          type: boolean
+        blockSpecificTypes:
+          type: boolean
+        fileTypesMessageOption:
+          type: string
+        fileTypesCustomMessage:
+          type: string
+        allowedFileTypes:
+          type: array
+          description: The list of allowed file types. May be omitted when `allowSpecificTypes` is `false`.
+          items:
+            type: string
+        blockedFileTypes:
+          type: array
+          description: The list of blocked file types. May be omitted when `blockSpecificTypes` is `false`.
+          items:
+            type: string
+      required:
+        - allowSpecificTypes
+        - blockSpecificTypes
+    ConfigInfoBase:
+      title: ConfigInfoBase
+      x-stoplight:
+        id: wbmd39z4o50lb
+      type: object
+      description: Base configuration information
+      properties:
+        desktopClientEnabled:
+          type: boolean
+        mobileClientEnabled:
+          type: boolean
+        webClientEnabled:
+          type: boolean
+        serverVersion:
+          type: string
+        desktopClientMinVersion:
+          type: string
+        mobileClientMinVersion:
+          type: string
+        allowPasswordSaving:
+          type: boolean
+        checksumFailRetries:
+          type: integer
+          minimum: 0
+        dlpEnabled:
+          type: boolean
+        displayShortcuts:
+          type: boolean
+        emailUsernameRequired:
+          type: boolean
+        maxFileSizeLimit:
+          type: integer
+          format: int64
+          description: The value in bytes
+          minimum: 0
+        maxDesktopFileSizeLimit:
+          type: integer
+          format: int64
+          description: The value in bytes
+          minimum: 0
+        maxFileSizeReminderDisabled:
+          type: boolean
+        allRemindersOnLoginDisabled:
+          type: boolean
+        officeOnlineEnabled:
+          type: boolean
+        oneDriveLetterCustomName:
+          type: string
+        replaceExistingNetworkDrives:
+          type: boolean
+        saveFilesToMemoryBeforeDisk:
+          type: boolean
+        sloEnabled:
+          type: boolean
+        ssoEnabled:
+          type: boolean
+        validateChecksumsOnSave:
+          type: boolean
+        customWopiEnabled:
+          type: boolean
+        wopiDomain:
+          type: string
+        wopiEnabled:
+          type: boolean
+      required:
+        - desktopClientEnabled
+        - mobileClientEnabled
+        - webClientEnabled
+        - serverVersion
+        - desktopClientMinVersion
+        - mobileClientMinVersion
+        - allowPasswordSaving
+        - checksumFailRetries
+        - dlpEnabled
+        - displayShortcuts
+        - emailUsernameRequired
+        - maxFileSizeLimit
+        - maxDesktopFileSizeLimit
+        - maxFileSizeReminderDisabled
+        - allRemindersOnLoginDisabled
+        - officeOnlineEnabled
+        - oneDriveLetterCustomName
+        - replaceExistingNetworkDrives
+        - saveFilesToMemoryBeforeDisk
+        - sloEnabled
+        - ssoEnabled
+        - validateChecksumsOnSave
+        - customWopiEnabled
+        - wopiDomain
+        - wopiEnabled
+    ConfigInfoAuth:
+      title: ConfigInfoAuth
+      x-stoplight:
+        id: wbmd39z4o50lb
+      type: object
+      description: Authentication-related configuration information
+      properties:
+        adfsEnabled:
+          type: boolean
+        adfsRequired:
+          type: boolean
+        samlEnabled:
+          type: boolean
+        samlRequired:
+          type: boolean
+        useCustomLoginProvider:
+          type: boolean
+      required:
+        - adfsEnabled
+        - adfsRequired
+        - samlEnabled
+        - samlRequired
+        - useCustomLoginProvider
+    ConfigInfoSSL:
+      title: ConfigInfoSSL
+      x-stoplight:
+        id: wbmd39z4o50lb
+      type: object
+      description: SSL/TLS configuration information
+      properties:
+        tlsRequired:
+          type: boolean
+      required:
+        - tlsRequired
+    ConfigInfoTFA:
+      title: ConfigInfoTFA
+      x-stoplight:
+        id: hjtv672wkkz5t
+      type: object
+      properties:
+        enabled:
+          type: bool
+        host:
+          type: string
+        aKey:
+          type: string
+        iKey:
+          type: string
+        sKey:
+          type: string
+    ConfigInfoViewerTypes:
+      title: ConfigInfoViewerTypes
+      x-stoplight:
+        id: 6vc1li0m7wdq7
+      type: object
+      properties:
+        viewerSupportedFileTypes:
+          type: array
+          items:
+            type: string
+        viewerParseAsTxtFileTypes:
+          type: array
+          items:
+            type: string
+    PublicLinkSettings:
+      title: PublicLinkSettings
+      x-stoplight:
+        id: hqyt3teytvdq1
+      type: object
+      description: ''
+      properties:
+        passwordIsMandatory:
+          type: boolean
+        allowDownloading:
+          type: boolean
+        allowUploading:
+          type: boolean
+        allowEditing:
+          type: boolean
+        allowFolderSharing:
+          type: boolean
+        allowOneDriveEditing:
+          type: boolean
+          description: 'If a `path` is provided in a request, this property is set as applicable to the specified path; otherwise, the global value is returned.'
+        linkExpirationDays:
+          type: integer
+          minimum: 0
+          description: 'If present, contains the number of days until the link expires. If absent, no restriction is set.'
+        maxNumberOfDownloads:
+          type: integer
+          minimum: 0
+          description: 'If present, contains the maximum number of downloads permitted for the link. If absent, no restriction is set.'
+      required:
+        - passwordIsMandatory
+        - allowUploading
+        - allowEditing
+        - allowFolderSharing
+    PublicLinkInfo:
+      title: PublicLinkInfo
+      x-stoplight:
+        id: hyau6wq0qp9oo
+      type: object
+      properties:
+        allowDownloading:
+          type: boolean
+        allowUploading:
+          type: boolean
+        allowEditing:
+          type: boolean
+        viewerSupportedFileTypes:
+          type: array
+          items:
+            type: string
+    PublicLinkInfoUserComplete:
+      title: PublicLinkInfoUserComplete
+      x-stoplight:
+        id: mk3wpl8kaz9dh
+      type: object
+      properties:
+        id:
+          type: string
+        path:
+          type: string
+        username:
+          type: string
+        isValid:
+          type: boolean
+        isFolder:
+          type: boolean
+        created:
+          type: string
+          format: date-time
+        expires:
+          type: string
+          format: date-time
+        hasPassword:
+          type: boolean
+        allowDownloading:
+          type: boolean
+        allowUploading:
+          type: boolean
+        allowEditing:
+          type: boolean
+        maxNumberOfDownloads:
+          type: integer
+        currentDownloads:
+          type: integer
+        shareLink:
+          type: string
+        hasExternalLink:
+          type: boolean
+        lastAccessed:
+          type: string
+          format: date-time
+      required:
+        - id
+        - path
+        - isValid
+        - isFolder
+        - created
+        - expires
+        - hasPassword
+        - allowDownloading
+        - allowUploading
+        - allowEditing
+        - currentDownloads
+        - shareLink
+        - hasExternalLink
+        - lastAccessed
+      description: ''
+    PublicLinkInfoCreateUpdate:
+      title: PublicLinkInfoCreateUpdate
+      x-stoplight:
+        id: tsljq66yq7mtr
+      type: object
+      properties:
+        path:
+          type: string
+        allowDownloading:
+          type: boolean
+        allowUploading:
+          type: boolean
+        allowEditing:
+          type: boolean
+        password:
+          type: string
+        expires:
+          type: string
+          description: date and time when the link expires
+        maxNumberOfDownloads:
+          type: integer
+      required:
+        - path
+        - allowDownloading
+        - allowUploading
+        - allowEditing
+        - password
+  responses:
+    200-FileItemInfo:
+      description: A common response with file or directory details
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/FileItemInfo'
+    200-FileItemInfo-Overwritten:
+      description: 'A response with file or directory details, when the destination name was occupied and has been overwritten'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/FileItemInfo'
+    200-Locks-Infos:
+      description: Lock Information
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/FileLockInfoSummary'
+    200-ZipResponse:
+      description: Response to DownloadAsZip request
+      content:
+        application/octet-stream:
+          schema:
+            type: string
+            format: binary
+        text/plain:
+          schema:
+            type: string
+            description: Either a path of the ZIP file or a link or a reference to it depending on the value of the `respondWith` parameter
+    200-SearchResults-Or-Recents:
+      description: The list of search results or recently accessed files
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - items:
+                  type: string
+              - items:
+                  $ref: '#/components/schemas/FileItemInfo'
+            type: array
+    201-FileItemInfo-Created:
+      description: 'A response with file or directory details, when the destination name was available, and an item was created/copied/moved without overwriting anything'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/FileItemInfo'
+    204-No-Content:
+      description: The deletion was successful.
+    206-ZipResponse:
+      description: Response to DownloadAsZip request used when not all specified files were returned
+      content:
+        application/octet-stream:
+          schema:
+            type: string
+            format: binary
+        text/plain:
+          schema:
+            type: string
+            description: A link to the ZIP file
+    400-Bad-Request-Generic:
+      description: Generic error response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    401-Not-Authorized:
+      description: 'The request was made by an unauthorized user, and authorization is mandatory for this request.'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    403-Forbidden:
+      description: The request was made by the user who is not authorized to access the requested resource or service.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    404-Not-Found-Generic:
+      description: Generic error response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    409-Conflict:
+      description: An item exists or updating has failed due to an existing lock.
+    409-Conflict-With-Lock-Info:
+      description: Locking has failed due to an existing lock.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/FileLockInfoSummary'
+    417-Directory-Not-Empty:
+      description: Folder is not empty.
+    500-Internal-Server-Error-Generic:
+      description: Generic error response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    501-Not-Implemented-Generic:
+      description: Generic error response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+  parameters:
+    Accept:
+      name: Accept
+      in: header
+      required: false
+      schema:
+        type: string
+      description: Specifies the expected format of the response. The supported values are text/plain and application/json.
+    conflictBehavior:
+      name: conflictBehavior
+      in: query
+      required: false
+      schema:
+        type: string
+        enum:
+          - fail
+          - ignore
+          - rename
+          - replace
+      description: 'Identifies how the server should handle conflicts when performing an operation in which an item with the same name or ID already exists. This value is ignored in file upload operations with a specified range (i.e., in partial uploads).'
+    session:
+      name: session
+      in: query
+      required: true
+      schema:
+        type: string
+      description: The Id of the session
+    session-path:
+      name: session
+      in: path
+      required: true
+      schema:
+        type: string
+      description: The Id of the session
+    path-info:
+      name: path
+      in: query
+      schema:
+        type: string
+      description: 'The path of the item, whose information or status is requested'
+      required: true
+    Content-Length:
+      name: Content-Length
+      in: header
+      required: false
+      schema:
+        type: integer
+        format: int64
+      description: The length of the data being transferred
+    path-update:
+      name: path
+      in: query
+      schema:
+        type: string
+      description: The path of the item that is updated
+    Authorization:
+      name: Authorization
+      in: header
+      required: true
+      schema:
+        type: string
+      description: 'The carrier for authorization information. To transfer session IDs, the value must have the form "SessionId <session id here>"'
+    includeLockOwners:
+      name: includeLockOwners
+      in: query
+      required: false
+      schema:
+        type: boolean
+        default: false
+      description: Specifies whether the returned lock information should include the list of owners
+      allowEmptyValue: true
+    includeLockDetails:
+      name: includeLockDetails
+      in: query
+      required: false
+      schema:
+        type: boolean
+        default: false
+      description: Specifies whether the returned lock information should include detailed information about every lock
+      allowEmptyValue: true
+    zipResponseType:
+      name: respondWith
+      in: query
+      required: false
+      schema:
+        type: string
+        enum:
+          - data
+          - link
+          - path
+          - redirect
+          - ref
+      description: 'Specifies whether the server should send the data as binary, a link (URL) as a text, a path as a text, a reference as a text, or send a 302 response with the link as a target of redirection. If a reference is requested, it should be passed to this endpoint in the `ref` parameter of a GET request in order to obtain the downloadable ZIP file data. If the `respondWith` parameter is omitted, a reference is sent as a text.'
+    zipName:
+      name: zipName
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'The path with the name of a ZIP file to create, when respondWith is set to `path`. If it is not specified, the name will be created automatically. If the path is already occupied, a similar filename will be generated. In all cases, the full path to the resulting archive is returned in the response. '
+    zipRef:
+      name: ref
+      in: query
+      required: false
+      schema:
+        type: string
+      description: A reference to the already created ZIP file that the client wants to download.
+    configClass:
+      name: configClass
+      in: query
+      required: true
+      schema:
+        type: string
+        enum:
+          - all
+          - auth
+          - base
+          - tfa
+          - fileTypes
+          - viewerTypes
+          - tls
+          - logo
+          - speedTest
+      description: 'The class of information that the server should return. '
+    maxResults:
+      name: maxResults
+      in: query
+      required: false
+      schema:
+        type: integer
+        format: int64
+        minimum: 0
+      description: 'The maximum number of entries to return in response to the query. If not set, all results are returned, which may be time- and resource-consuming.'
+    includeFileInfo:
+      name: includeFileInfo
+      in: query
+      required: false
+      schema:
+        type: boolean
+      description: 'Specifies that full file information objects must be included in response. If the parameter is not included or is set to `false`, an array of paths of found files is returned.'
+      allowEmptyValue: true
+    link-info:
+      name: link
+      in: query
+      required: true
+      schema:
+        type: string
+      description: 'The public link, information or status of which is requested'
+    link-update:
+      name: link
+      in: query
+      required: true
+      schema:
+        type: string
+      description: The public link that is updated
+    updateRecents:
+      name: updateRecents
+      in: query
+      required: false
+      schema:
+        type: boolean
+      description: 'When set to `true` or to an empty value, indicates that the list of recent files should be updated according to the operation. Depending on the operation, updating of the recent files list is done by default and can be suppressed by setting this parameter to `false`'
+      allowEmptyValue: true
+    sortBy-Links:
+      name: sortBy
+      in: query
+      required: false
+      schema:
+        type: string
+        enum:
+          - pathAsc
+          - pathDesc
+          - userAsc
+          - userDesc
+          - idAsc
+          - idDesc
+      description: Specifies how to sort the list of links
+    includeLinkInfo:
+      name: includeLinkInfo
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'Specifies that full link information object must be included in response. If the parameter is not included or is set to `false`, no body is returned.'
+      allowEmptyValue: true

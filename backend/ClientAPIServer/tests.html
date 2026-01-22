@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MWD Mock Server - Test Suite Summary</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #34495e;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            padding-left: 10px;
+            border-left: 4px solid #3498db;
+        }
+        h3 {
+            color: #2c3e50;
+            margin-top: 25px;
+            margin-bottom: 10px;
+        }
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+        .test-class {
+            background: #f8f9fa;
+            margin: 15px 0;
+            padding: 20px;
+            border-radius: 6px;
+            border-left: 4px solid #28a745;
+        }
+        .test-class h4 {
+            margin: 0 0 15px 0;
+            color: #2c3e50;
+            font-size: 1.2em;
+        }
+        .test-list {
+            list-style: none;
+            padding: 0;
+        }
+        .test-list li {
+            background: white;
+            margin: 8px 0;
+            padding: 12px 15px;
+            border-radius: 4px;
+            border-left: 3px solid #17a2b8;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .test-list li strong {
+            color: #2c3e50;
+        }
+        .test-description {
+            color: #6c757d;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .feature-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 6px;
+            border-top: 4px solid #28a745;
+        }
+        .feature-card h4 {
+            margin: 0 0 10px 0;
+            color: #2c3e50;
+        }
+        .feature-card ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        .feature-card li {
+            margin: 5px 0;
+            color: #6c757d;
+        }
+        .overview-section {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .overview-section h2 {
+            border: none;
+            padding: 0;
+            margin: 0 0 15px 0;
+            color: white;
+        }
+        .built-in-tests {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+            border-left: 4px solid #6c757d;
+        }
+        .built-in-tests h4 {
+            margin: 0 0 10px 0;
+            color: #495057;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+        th {
+            background-color: #e9ecef;
+            font-weight: 600;
+            color: #495057;
+        }
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+        .tag {
+            display: inline-block;
+            background: #6c757d;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            margin: 2px;
+        }
+        .tag.core { background: #007bff; }
+        .tag.upload { background: #28a745; }
+        .tag.auth { background: #dc3545; }
+        .tag.zip { background: #fd7e14; }
+        .tag.locking { background: #6610f2; }
+        .tag.links { background: #e83e8c; }
+        .tag.api { background: #20c997; }
+        .tag.debug { background: #6c757d; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 MWD Mock Server - Test Suite Summary</h1>
+
+        <div class="overview-section">
+            <h2>📋 Project Overview</h2>
+            <p><strong>MyWorkDrive Mock Server</strong> is a comprehensive C# .NET 9.0 ASP.NET Core test harness that implements a complete mock/test server for the MyWorkDrive (MWD) client-server API. It provides a robust testing environment for validating the uniform client-server REST API defined in the OpenAPI specification.</p>
+            <p><strong>Architecture:</strong> Layered design with core API handlers, file system operations, and extensive test coverage across multiple functional areas including authentication, file operations, uploads, public links, and advanced features.</p>
+        </div>
+
+        <div class="summary-stats">
+            <div class="stat-card">
+                <div class="stat-number">117</div>
+                <div class="stat-label">Total Tests</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">9</div>
+                <div class="stat-label">Test Classes</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">30+</div>
+                <div class="stat-label">API Endpoints</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">2</div>
+                <div class="stat-label">Built-in Tests</div>
+            </div>
+        </div>
+
+        <h2>🗂️ Test Categories & Coverage</h2>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <h4><span class="tag core">CORE</span> Authentication & Session Management</h4>
+                <ul>
+                    <li>SessionID-based authentication testing</li>
+                    <li>Authorization header validation</li>
+                    <li>Multiple session format support</li>
+                    <li>Unauthorized access handling</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <h4><span class="tag core">CORE</span> Core File Operations</h4>
+                <ul>
+                    <li>File & folder creation with conflict resolution</li>
+                    <li>Read/Write operations with position control</li>
+                    <li>Copy/Move operations with various behaviors</li>
+                    <li>Delete operations with safety checks</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <h4><span class="tag upload">UPLOAD</span> Upload & Download Management</h4>
+                <ul>
+                    <li>Chunked upload sessions</li>
+                    <li>Multi-block file uploads</li>
+                    <li>Upload status tracking</li>
+                    <li>Transfer link generation</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <h4><span class="tag zip">ZIP</span> Archive Operations</h4>
+                <ul>
+                    <li>Folder compression with various response formats</li>
+                    <li>File list compression with scheme-based paths</li>
+                    <li>Conflict behavior handling</li>
+                    <li>Mask filtering and selective archiving</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <h4><span class="tag locking">LOCKING</span> File Locking & Versioning</h4>
+                <ul>
+                    <li>Exclusive and shared locking mechanisms</li>
+                    <li>File version management</li>
+                    <li>Metadata updates and file resizing</li>
+                    <li>Lock status tracking</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <h4><span class="tag links">LINKS</span> Public Link Management</h4>
+                <ul>
+                    <li>Public link creation and configuration</li>
+                    <li>Permission-based access control</li>
+                    <li>Bulk link operations</li>
+                    <li>Query filtering and management</li>
+                </ul>
+            </div>
+        </div>
+
+        <h2>📁 Detailed Test Breakdown</h2>
+
+        <div class="test-class">
+            <h4><span class="tag auth">AUTH</span> AuthorizationTests (7 tests)</h4>
+            <ul class="test-list">
+                <li><strong>CheckSession_WithValidSessionID_ReturnsSuccess</strong>
+                    <div class="test-description">Validates successful session authentication with valid GUID session ID</div>
+                </li>
+                <li><strong>CheckSession_WithRandomString_ReturnsSuccess</strong>
+                    <div class="test-description">Tests authentication with non-GUID session identifiers</div>
+                </li>
+                <li><strong>CheckSession_WithoutAuthorization_ReturnsUnauthorized</strong>
+                    <div class="test-description">Ensures proper 401 response when authorization header is missing</div>
+                </li>
+                <li><strong>CheckSession_WithWrongScheme_ReturnsUnauthorized</strong>
+                    <div class="test-description">Validates rejection of incorrect authentication schemes (e.g., Bearer instead of SessionID)</div>
+                </li>
+                <li><strong>CheckSession_WithEmptySessionID_ReturnsUnauthorized</strong>
+                    <div class="test-description">Tests behavior with empty session ID values</div>
+                </li>
+                <li><strong>Authorization_FormatTest_CorrectFormat</strong>
+                    <div class="test-description">Verifies exact "SessionID &lt;value&gt;" authorization header format compliance</div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="test-class">
+            <h4><span class="tag core">CORE</span> CoreFileOperationsTests (39 tests)</h4>
+            <ul class="test-list">
+                <li><strong>CheckSession_ReturnsSuccess</strong>
+                    <div class="test-description">Basic session validation test</div>
+                </li>
+                <li><strong>QueryQuotas_ReturnsQuotaInformation</strong>
+                    <div class="test-description">Tests quota information retrieval with share-based paths</div>
+                </li>
+                <li><strong>CreateFile_CreatesNewFile & CreateFile_CreatesNewFolder</strong>
+                    <div class="test-description">File and folder creation with conflict behavior testing</div>
+                </li>
+                <li><strong>GetItemType_ReturnsCorrectTypeForFile & GetItemType_ReturnsCorrectTypeForFolder</strong>
+                    <div class="test-description">Item type detection and classification</div>
+                </li>
+                <li><strong>ListFolder_ReturnsContents</strong>
+                    <div class="test-description">Directory listing functionality with mixed file types</div>
+                </li>
+                <li><strong>GetFileInfo_ReturnsFileInformation & GetFolderInfo_ReturnsFolderInformation</strong>
+                    <div class="test-description">Metadata retrieval for files and folders</div>
+                </li>
+                <li><strong>WriteFile_And_ReadFile_WorkCorrectly</strong>
+                    <div class="test-description">File content write/read operations with position control</div>
+                </li>
+                <li><strong>CopyFile_CreatesExactCopy & MoveFile_MovesFileCorrectly</strong>
+                    <div class="test-description">File duplication and relocation operations</div>
+                </li>
+                <li><strong>DeleteFile_RemovesFile & DeleteFolder_RemovesFolder</strong>
+                    <div class="test-description">File and folder deletion with existence verification</div>
+                </li>
+                <li><strong>DeleteFolder_NonEmptyFolder_Returns417</strong>
+                    <div class="test-description">Safety check for non-empty folder deletion (returns 417 Directory Not Empty)</div>
+                </li>
+                <li><strong>Multiple Conflict Behavior Tests</strong>
+                    <div class="test-description">Comprehensive testing of 'fail', 'rename', and 'replace' conflict behaviors for create, copy, and move operations</div>
+                </li>
+                <li><strong>Path Format Tests</strong>
+                    <div class="test-description">Testing both share-based (/Documents/) and scheme-based (:sh:Documents:/) path formats</div>
+                </li>
+                <li><strong>Public Link Path Scheme Testing</strong>
+                    <div class="test-description">Link-based path access (:lnk:linkId:/) with public link integration</div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="test-class">
+            <h4><span class="tag upload">UPLOAD</span> UploadDownloadTests (13 tests)</h4>
+            <ul class="test-list">
+                <li><strong>StartFileUpload_And_CompleteUpload_WorksCorrectly</strong>
+                    <div class="test-description">End-to-end upload session lifecycle management</div>
+                </li>
+                <li><strong>WriteFileBlock_UploadProcess_WorksCorrectly</strong>
+                    <div class="test-description">Multi-block chunked upload with data integrity verification</div>
+                </li>
+                <li><strong>GetUploadStatus_ReturnsCorrectStatus</strong>
+                    <div class="test-description">Upload progress and status tracking</div>
+                </li>
+                <li><strong>CancelUpload_CancelsUploadSession</strong>
+                    <div class="test-description">Upload session cancellation and cleanup</div>
+                </li>
+                <li><strong>GetTransferLink_ReturnsValidLink</strong>
+                    <div class="test-description">Transfer link generation for download and upload operations</div>
+                </li>
+                <li><strong>Multiple Upload Conflict Tests</strong>
+                    <div class="test-description">Conflict behavior testing for upload sessions with 'fail' and 'rename' strategies</div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="test-class">
+            <h4><span class="tag zip">ZIP</span> ZipFilesTests (20 tests)</h4>
+            <ul class="test-list">
+                <li><strong>ZipFiles_GET_WithValidFolder_ReturnsZipReference</strong>
+                    <div class="test-description">Folder compression with reference generation</div>
+                </li>
+                <li><strong>ZipFiles_POST_WithValidFiles_ReturnsZipReference</strong>
+                    <div class="test-description">File list compression with reference-based workflow</div>
+                </li>
+                <li><strong>ZipFiles_GET_WithDataResponse_ReturnsBinaryZip</strong>
+                    <div class="test-description">Direct binary ZIP file generation and content verification</div>
+                </li>
+                <li><strong>ZipFiles Error Handling Tests</strong>
+                    <div class="test-description">404 for non-existent paths, 204 for empty folders, 206 for partial content</div>
+                </li>
+                <li><strong>ZipFiles_WithConflictBehavior Tests</strong>
+                    <div class="test-description">Conflict resolution for ZIP file creation with 'fail' and 'rename' behaviors</div>
+                </li>
+                <li><strong>ZipFiles_GET_WithMaskFilter_FiltersCorrectly</strong>
+                    <div class="test-description">Selective file inclusion using mask patterns (*.txt, etc.)</div>
+                </li>
+                <li><strong>Scheme-Based Path Tests</strong>
+                    <div class="test-description">ZIP operations with :sh:Documents:/ path format</div>
+                </li>
+                <li><strong>Reference Workflow Tests</strong>
+                    <div class="test-description">Complete workflow from ZIP reference creation to data retrieval</div>
+                </li>
+                <li><strong>ZipFiles_POST_WithFolderPath_IncludesFolderContentsInZip</strong>
+                    <div class="test-description">Recursive folder compression with subdirectory support</div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="test-class">
+            <h4><span class="tag locking">LOCKING</span> FileLockingAndVersioningTests (8 tests)</h4>
+            <ul class="test-list">
+                <li><strong>LockFile_And_UnlockFile_WorkCorrectly</strong>
+                    <div class="test-description">Exclusive file locking and unlocking operations</div>
+                </li>
+                <li><strong>LockFile_Coedit_AllowsSharedLock</strong>
+                    <div class="test-description">Shared/collaborative locking for simultaneous editing</div>
+                </li>
+                <li><strong>GetFileLocks_ReturnsLockInformation</strong>
+                    <div class="test-description">Lock status and ownership information retrieval</div>
+                </li>
+                <li><strong>ListFileVersions_ReturnsVersionHistory</strong>
+                    <div class="test-description">File version history tracking and listing</div>
+                </li>
+                <li><strong>RestoreFileVersion_RestoresSpecificVersion</strong>
+                    <div class="test-description">Version rollback and restoration functionality</div>
+                </li>
+                <li><strong>SetFileInfo_UpdatesFileMetadata & SetFileInfo_ResizesFile</strong>
+                    <div class="test-description">File metadata modification and size management</div>
+                </li>
+                <li><strong>FileInfo_IncludeLocks_ShowsLockStatus</strong>
+                    <div class="test-description">Lock information integration in file metadata</div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="test-class">
+            <h4><span class="tag links">LINKS</span> PublicLinkManagementTests (8 tests)</h4>
+            <ul class="test-list">
+                <li><strong>GetPublicLinkSettings_ReturnsSettings</strong>
+                    <div class="test-description">Public link configuration and policy retrieval</div>
+                </li>
+                <li><strong>CreatePublicLink_And_GetPublicLinkInfo_WorkCorrectly</strong>
+                    <div class="test-description">Public link creation with permission settings and information retrieval</div>
+                </li>
+                <li><strong>UpdatePublicLink_ModifiesExistingLink</strong>
+                    <div class="test-description">Public link permission and setting modifications</div>
+                </li>
+                <li><strong>ListPublicLinks_ShowsUserLinks</strong>
+                    <div class="test-description">User-specific public link enumeration</div>
+                </li>
+                <li><strong>ListPublicLinks_WithQueryFilter_FiltersResults</strong>
+                    <div class="test-description">Public link search and filtering by criteria</div>
+                </li>
+                <li><strong>DeletePublicLinks_POST_DeletesMultipleLinks</strong>
+                    <div class="test-description">Bulk public link deletion operations</div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="test-class">
+            <h4><span class="tag api">API</span> NewAPIFeaturesTests (12 tests)</h4>
+            <ul class="test-list">
+                <li><strong>ListShares_ReturnsAvailableShares</strong>
+                    <div class="test-description">Share enumeration and multi-drive support testing</div>
+                </li>
+                <li><strong>AddBookmark_And_ListBookmarks_WorkCorrectly</strong>
+                    <div class="test-description">Bookmark management for frequently accessed items</div>
+                </li>
+                <li><strong>LogMessage_AcceptsLogEntries</strong>
+                    <div class="test-description">Client-side logging and message submission</div>
+                </li>
+                <li><strong>GetServerConfig_ReturnsConfigurationData</strong>
+                    <div class="test-description">Server configuration retrieval across different config classes</div>
+                </li>
+                <li><strong>SearchFiles_PerformsSimpleSearch & SearchFiles_PerformsCompoundSearch</strong>
+                    <div class="test-description">File search functionality with single and multiple criteria</div>
+                </li>
+                <li><strong>ListRecentFiles_And_ClearRecentFiles_WorkCorrectly</strong>
+                    <div class="test-description">Recent file tracking and history management</div>
+                </li>
+                <li><strong>ZipFiles ZIP Creation Tests</strong>
+                    <div class="test-description">Archive creation from folders and file lists</div>
+                </li>
+                <li><strong>GetFileCapabilities_ChecksPermissions</strong>
+                    <div class="test-description">File and folder permission validation</div>
+                </li>
+                <li><strong>GetOTP_GeneratesOneTimePassword</strong>
+                    <div class="test-description">One-time password generation for security</div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="test-class">
+            <h4><span class="tag api">API</span> AdaptedClientAPITests (9 tests)</h4>
+            <ul class="test-list">
+                <li><strong>Mirror API Tests</strong>
+                    <div class="test-description">JSON, URL params, form data, and multipart form request testing</div>
+                </li>
+                <li><strong>TestJsonRequestWithDateAsync</strong>
+                    <div class="test-description">ISO8601 date handling and serialization validation</div>
+                </li>
+                <li><strong>TestFailingRequestAsync</strong>
+                    <div class="test-description">Error response format and status code validation</div>
+                </li>
+                <li><strong>TestCreateFilesAsync & TestCreateFolderAsync</strong>
+                    <div class="test-description">Adapted original API tests for file and folder creation</div>
+                </li>
+                <li><strong>TestListFolderAsync</strong>
+                    <div class="test-description">Directory listing with backend item verification</div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="test-class">
+            <h4><span class="tag debug">DEBUG</span> DebugTest (3 tests)</h4>
+            <ul class="test-list">
+                <li><strong>TestSimpleCreateFile</strong>
+                    <div class="test-description">Basic file creation debugging and response validation</div>
+                </li>
+                <li><strong>TestPathRecognition</strong>
+                    <div class="test-description">Middleware path recognition and routing verification</div>
+                </li>
+                <li><strong>TestGetItemType</strong>
+                    <div class="test-description">End-to-end item type detection workflow testing</div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="built-in-tests">
+            <h4>🔧 Built-in Integration Tests (In Program.cs)</h4>
+            <table>
+                <tr>
+                    <th>Test Name</th>
+                    <th>Description</th>
+                    <th>Operations Tested</th>
+                </tr>
+                <tr>
+                    <td><strong>RunSimpleFileTest</strong></td>
+                    <td>Basic file lifecycle validation</td>
+                    <td>CreateFile → GetFileInfo → DeleteFile with existence verification</td>
+                </tr>
+                <tr>
+                    <td><strong>RunSimpleFolderTest</strong></td>
+                    <td>Basic folder lifecycle validation</td>
+                    <td>CreateFile (folder) → GetFolderInfo → DeleteFolder with existence verification</td>
+                </tr>
+            </table>
+            <p><em>Note: These tests are currently commented out in Program.cs but can be enabled for integration testing during development.</em></p>
+        </div>
+
+        <h2>🛠️ Test Infrastructure</h2>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <h4>Test Framework</h4>
+                <ul>
+                    <li><strong>MSTest Framework:</strong> Visual Studio integrated testing</li>
+                    <li><strong>WebApplicationFactory:</strong> In-memory test server</li>
+                    <li><strong>HttpClient:</strong> API endpoint testing</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <h4>Base Classes</h4>
+                <ul>
+                    <li><strong>MockApiTestsBase:</strong> Common test infrastructure</li>
+                    <li><strong>AdaptedRealTestsBase:</strong> Adapted real server tests</li>
+                    <li><strong>Cross-platform support:</strong> Windows/Linux/macOS</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <h4>Test Configuration</h4>
+                <ul>
+                    <li><strong>Platform-specific paths:</strong> C:\tmp\mwd (Windows), /tmp/mwd (Unix)</li>
+                    <li><strong>Share management:</strong> Documents, Pictures, Projects</li>
+                    <li><strong>Session management:</strong> GUID-based test sessions</li>
+                </ul>
+            </div>
+        </div>
+
+        <h2>🔍 Key Testing Features</h2>
+
+        <table>
+            <tr>
+                <th>Feature</th>
+                <th>Test Coverage</th>
+                <th>Key Aspects</th>
+            </tr>
+            <tr>
+                <td><strong>Path Formats</strong></td>
+                <td>Multiple test classes</td>
+                <td>Share-based (/Documents/), scheme-based (:sh:Documents:/), link-based (:lnk:id:/)</td>
+            </tr>
+            <tr>
+                <td><strong>Conflict Resolution</strong></td>
+                <td>Core & Upload tests</td>
+                <td>'fail' (409 Conflict), 'rename' (auto-rename), 'replace' (overwrite)</td>
+            </tr>
+            <tr>
+                <td><strong>Authentication</strong></td>
+                <td>Dedicated test class</td>
+                <td>SessionID scheme, header validation, unauthorized access handling</td>
+            </tr>
+            <tr>
+                <td><strong>File Operations</strong></td>
+                <td>Core operations tests</td>
+                <td>CRUD operations, metadata, permissions, content verification</td>
+            </tr>
+            <tr>
+                <td><strong>Upload Management</strong></td>
+                <td>Upload/Download tests</td>
+                <td>Chunked uploads, session tracking, cancellation, transfer links</td>
+            </tr>
+            <tr>
+                <td><strong>Archive Operations</strong></td>
+                <td>ZIP tests</td>
+                <td>Multiple response formats, filtering, recursive compression</td>
+            </tr>
+            <tr>
+                <td><strong>Advanced Features</strong></td>
+                <td>New API features</td>
+                <td>Search, bookmarks, recent files, server config, OTP</td>
+            </tr>
+        </table>
+
+        <h2>📊 Test Execution</h2>
+
+        <div class="overview-section">
+            <h2>Running the Tests</h2>
+            <p><strong>Command Line:</strong> <code>dotnet test</code> from the project root</p>
+            <p><strong>Visual Studio:</strong> Test Explorer with full debugging support</p>
+            <p><strong>Environment:</strong> Tests use WebApplicationFactory for in-memory testing with real HTTP client interactions</p>
+            <p><strong>Clean-up:</strong> Automatic test directory cleanup before and after test execution</p>
+        </div>
+
+        <div style="margin-top: 40px; padding: 20px; background: #f8f9fa; border-radius: 6px; text-align: center; color: #6c757d;">
+            <p><strong>Generated:</strong> <?php echo date('Y-m-d H:i:s'); ?> | <strong>Framework:</strong> .NET 9.0 | <strong>Test Framework:</strong> MSTest</p>
+            <p><em>This comprehensive test suite ensures the MWD Mock Server correctly implements the MyWorkDrive client-server API specification.</em></p>
+        </div>
+    </div>
+</body>
+</html>

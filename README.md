@@ -12,43 +12,67 @@ Before setting up the project, ensure you have the following installed:
 - **.NET 9.0 SDK** - [Download from dotnet.microsoft.com](https://dotnet.microsoft.com/download/dotnet/9.0)
 - **Git** - [Download from git-scm.com](https://git-scm.com/)
 
+
 ### Getting Started
 
 1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/anyplacecontrol/myWorkDrive-Client
-   cd myworkdrive-ui
-   ```
 
 2. **Install frontend dependencies:**
    ```bash
    npm install
    ```
 
-3. **Extract the backend server:**
-   
-   Extract the contents of `backend/mock-server-net9.0.zip` into the `backend/net9.0/` directory:
-   
-   **Windows (PowerShell):**
-   ```powershell
-   Expand-Archive -Path backend\mock-server-net9.0.zip -DestinationPath backend\net9.0
-   ```
-   
-   **macOS/Linux:**
+3. **Restore backend dependencies:**
    ```bash
-   unzip backend/mock-server-net9.0.zip -d backend/net9.0
+   cd backend/ClientAPIServer
+   dotnet restore
+   cd ../..
    ```
-   
-   **Or manually:** Extract the zip file using your preferred tool and place the contents in `backend/net9.0/`
 
-### Backend Server
+### Server Configuration
 
-The backend server is a pre-built .NET 9.0 executable (`MWDMockServer.exe`) that runs on:
-- **Port:** 8357
-- **Base Path:** `C:\temp\mock` (Windows)
-- **API URL:** `http://localhost:8357/api/v3/`
+The backend API server can be configured through platform-specific `appsettings.json` files located in the `backend/ClientAPIServer` directory. The server automatically selects the appropriate configuration based on the runtime platform.
 
-The server starts automatically when you run `npm run start:backend` or `npm run start:dev`.
+#### Configuration Files
+- `appsettings.json` - Base configuration (no BasePath set)
+- `appsettings.Linux.json` - Linux-specific settings (BasePath: `/tmp/mwd`)
+- `appsettings.macOS.json` - macOS-specific settings (BasePath: `~/mwd`)
+- `appsettings.Windows.json` - Windows-specific settings (BasePath: `C:\tmp\mwd`)
+
+#### Server Configuration Parameters
+
+**ServerConfiguration Section:**
+- **ApiPort** (default: `5001`): The port number on which the API server listens
+- **BasePath**: The root directory path for file operations and storage
+  - Linux: `/tmp/mwd`
+  - macOS: `~/mwd` (user's home directory)
+  - Windows: `C:\tmp\mwd`
+  - Base config: Empty string (uses current directory)
+- **UseHttps** (default: `false`): Whether to enable HTTPS for the API server
+- **DefaultShare** (default: `"Documents"`): The default share name for file operations
+- **PathFormat** (default: `"scheme"`): The path format scheme used for file paths
+
+**Logging Configuration:**
+- **Default** log level: `Information`
+- **Microsoft** framework logs: `Warning` level
+- **Microsoft.Hosting.Lifetime**: `Information` level
+
+#### Customizing Configuration
+
+To modify server settings:
+1. Navigate to `backend/ClientAPIServer/`
+2. Edit the appropriate platform-specific appsettings file
+3. Restart the backend server to apply changes
+
+**Example - Changing the API port:**
+```json
+{
+  "ServerConfiguration": {
+    "ApiPort": 8080,
+    // ... other settings
+  }
+}
+```
 
 ### Running the Application
 
@@ -56,7 +80,7 @@ The server starts automatically when you run `npm run start:backend` or `npm run
 ```bash
 npm run start:dev
 ```
-This command starts both the backend API server and the frontend development server. The backend will wait until it's ready before starting the frontend.
+This command starts both the frontend development server and the backend API server concurrently.
 
 #### Option 2: Run Components Separately
 
@@ -64,21 +88,16 @@ This command starts both the backend API server and the frontend development ser
 ```bash
 npm run start:backend
 ```
-
-The backend runs in detached mode (background). To see console output:
+or
 ```bash
-npm run start:backend -- --attach
+cd backend/ClientAPIServer
+dotnet run
 ```
 
 **Start the frontend (in a new terminal):**
 ```bash
 npm start
 ```
-
-**View backend logs:**
-- Logs are saved to `backend/net9.0/backend.log`
-- **Windows (PowerShell):** `Get-Content backend\net9.0\backend.log -Wait -Tail 100`
-- **macOS/Linux:** `tail -f backend/net9.0/backend.log`
 
 ### Building for Production
 
@@ -97,21 +116,6 @@ npm run build-prod
 npm run release-prod
 ```
 
-**Preview the built application:**
-```bash
-npm run preview
-```
-
-### Available Scripts
-
-- **`npm run start:dev`** - Start backend and frontend together (recommended)
-- **`npm run start:backend`** - Start backend server only
-- **`npm start`** - Start frontend only (requires backend running separately)
-- **`npm run build`** - Build frontend for production
-- **`npm run build-prod`** - Build with mocking enabled
-- **`npm run preview`** - Preview production build locally
-- **`npm run release-ci`** - Build and create distribution zip (CI)
-- **`npm run release-prod`** - Build production release and create zip
  
 ## Additional resources
 
@@ -121,3 +125,11 @@ npm run preview
 
 - **API specification for the mock server:** The repository includes `uniform-client-server-api.yaml` which documents the mock server API used by the frontend. Use this file as the source of truth for available endpoints and request/response shapes.
 
+- **Figma prototype for design:** available here:
+
+   https://www.figma.com/design/J8YIyDa2y2rM01WsDe6FQI/Browser-client--Old-version-?node-id=388-13551&p=f&t=mWLCgF4TpMYLOM27-0
+
+
+- **Old prototype of web-client:** available here:
+
+   https://github.com/xmlui-org/myworkdrive-ui

@@ -4,7 +4,8 @@
   "version": "0.8.0",
   "scripts": {
     "start": "xmlui start --withMock=false",
-    "start:backend": "node scripts/start-backend.js",
+    "start:backend": "cd backend/ClientAPIServer && dotnet run",
+    "start:backend-new": "node scripts/start-backend.js",
     "start:dev": "npm run start:backend && npm run start",
     "build": "xmlui build",
     "preview": "xmlui preview",
