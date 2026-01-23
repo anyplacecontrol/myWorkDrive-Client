@@ -1,4 +1,4 @@
- <!--
+<!--
   This component provides the file browsing and file managing functionality.
 
   Properties:
@@ -24,51 +24,57 @@
         id: (item.drive || '') + (item.path || '') + (item.file || ''),
         type: item.isFolder ? '' : getFileExtension(item.path)
       })
-    )}" />
+    )}"
+  />
   <!-- Let's keep the sorting and view state here -->
   <AppState
     id="appState"
     bucket="fileCatalogView"
-    initialValue="{{ view: 'table', sortBy: 'name', sortDirection: 'ascending' }}" />
+    initialValue="{{ view: 'table', sortBy: 'name', sortDirection: 'ascending' }}"
+  />
   <!-- Selection state management using AppState -->
   <AppState
     id="selectionState"
     bucket="fileCatalogSelection"
-    initialValue="{{ selectedItems: [] }}" />
-    <!-- The entire screen is a drop zone for file uploads -->
-    <FileUploadDropZone
-      id="fileUploadDialog"
-      height="100%"
-      onUpload="onUploadFiles">
-      <FileCatalogHeader
-        drive="{$props.drive}"
-        folder="{$props.folder}"
-        name="{$props.name}"
-        breadcrumbRootName="{$props.breadcrumbRootName}"
-        onCreateFolderTriggered="createFolderModal.open()"
-        onUploadTriggered="fileUploadDialog.open()"
-        onRefreshTriggered="fileCatalogData.refetch(); toast.success('File list refreshed')"
-        onDeleteTriggered="deleteFileEntries"
-        onDownloadTriggered="downloadFiles"
-        onRenameTriggered="renameModal.open()"
-        onMoveTriggered="moveModal.open()"
-        onCopyTriggered="copyModal.open()" />
-      <!--
+    initialValue="{{ selectedItems: [] }}"
+  />
+  <!-- The entire screen is a drop zone for file uploads -->
+  <FileUploadDropZone
+    id="fileUploadDialog"
+    height="100%"
+    onUpload="onUploadFiles"
+  >
+    <FileCatalogHeader
+      drive="{$props.drive}"
+      folder="{$props.folder}"
+      name="{$props.name}"
+      breadcrumbRootName="{$props.breadcrumbRootName}"
+      onCreateFolderTriggered="createFolderModal.open()"
+      onUploadTriggered="fileUploadDialog.open()"
+      onRefreshTriggered="fileCatalogData.refetch(); toast.success('File list refreshed')"
+      onDeleteTriggered="deleteFileEntries"
+      onDownloadTriggered="downloadFiles"
+      onRenameTriggered="renameModal.open()"
+      onMoveTriggered="moveModal.open()"
+      onCopyTriggered="copyModal.open()"
+    />
+    <!--
         Display the files and allow navigating in the folder structure. Also, provide
         context menu actions for each file and folder -->
 
-      <Files
-        id="fileCatalogContent"
-        data="{fileCatalogData}"
-        loading="{fileCatalogData.loading}"
-        folderPath="{$props.folder}"
-        height="*"
-        onDownloadFiles="downloadFiles"
-        onDeleteTriggered="deleteFileEntries"
-        onRenameTriggered="renameModal.open()" />
+    <Files
+      id="fileCatalogContent"
+      data="{fileCatalogData}"
+      loading="{fileCatalogData.loading}"
+      folderPath="{$props.folder}"
+      height="*"
+      onDownloadFiles="downloadFiles"
+      onDeleteTriggered="deleteFileEntries"
+      onRenameTriggered="renameModal.open()"
+    />
 
-    </FileUploadDropZone>
-  <!-- Modal for file copy operation to select the copy target folder
+  </FileUploadDropZone>
+  <!-- Modal for file copy operation to select the copy target folder-->
   <TargetSelectorModal
     id="copyModal"
     drive="{$props.drive}"
@@ -76,9 +82,10 @@
     saveButtonLabel="Copy here"
     sortBy="{sorting.sortBy}"
     sortingDirection="{sorting.sortingDirection}"
-    onRequestSave="doCopyItems" />
--->
-  <!-- Modal for file move operation to select the move target folder
+    onRequestSave="doCopyItems"
+  />
+
+  <!-- Modal for file move operation to select the move target folder  -->
   <TargetSelectorModal
     id="moveModal"
     drive="{$props.drive}"
@@ -86,63 +93,76 @@
     saveButtonLabel="Move here"
     sortBy="{sorting.sortBy}"
     sortingDirection="{sorting.sortingDirection}"
-    onRequestSave="doMoveItems" />
-    -->
+    onRequestSave="doMoveItems"
+  />
+
   <!-- Modal for renaming a single selected item -->
   <RenameItemModal
     id="renameModal"
     initialValue="{suggestName(getCatalogItemById(selectionState.value.selectedIds[0]).name)}"
     originalName="{getCatalogItemById(selectionState.value.selectedIds[0]).name}"
-    onRequestSave="onSaveRenamedItem" />
+    onRequestSave="onSaveRenamedItem"
+  />
   <!-- Modal for creating a new folder -->
   <CreateFolderModal
     id="createFolderModal"
     parentFolder="{$props.folder}"
-    drive="{$props.drive}" />
+    drive="{$props.drive}"
+  />
   <!--
     As operations are async and can take some time, we use queues to manage them.
-  --> <!-- Queue for delete operations -->
+  -->
+  <!-- Queue for delete operations -->
   <Queue
     id="deleteQueue"
     onProcess="onDeleteQueuedItem"
-    onProcessError="onDeleteQueuedItemError">
+    onProcessError="onDeleteQueuedItemError"
+  >
     <property name="progressFeedback">
       <Text
-        value="Deleting {pluralize(deleteQueue.getQueuedItems().length, 'file', 'files')}" />
+        value="Deleting {pluralize(deleteQueue.getQueuedItems().length, 'file', 'files')}"
+      />
     </property>
     <property name="resultFeedback">
       <Text
-        value="Deleted {pluralize($completedItems.length, 'file', 'files')}" />
+        value="Deleted {pluralize($completedItems.length, 'file', 'files')}"
+      />
     </property>
   </Queue>
   <!-- Queue for move operations -->
   <Queue
     id="moveItemsQueue"
     onProcess="onMoveQueuedItem"
-    onProcessError="onMoveQueuedItemError">
+    onProcessError="onMoveQueuedItemError"
+  >
     <property name="progressFeedback">
       <Text
-        value="Moving {pluralize(moveItemsQueue.getQueuedItems().length, 'file', 'files')}" />
+        value="Moving {pluralize(moveItemsQueue.getQueuedItems().length, 'file', 'files')}"
+      />
     </property>
     <property name="resultFeedback">
       <Text
         testId="move-result-toast"
-        value="Moved {pluralize($completedItems.length, 'file', 'files')}" />
+        value="Moved {pluralize($completedItems.length, 'file', 'files')}"
+      />
     </property>
   </Queue>
   <!-- Queue for copy operations -->
   <Queue
     id="copyItemsQueue"
     onProcess="onCopyQueuedItem"
-    onProcessError="onCopyQueuedItemError">
+    onProcessError="onCopyQueuedItemError"
+  >
     <property name="progressFeedback">
       <Text
-        value="Copying {pluralize(copyItemsQueue.getQueuedItems().length, 'file', 'files')}" />
+        value="Copying {pluralize(copyItemsQueue.getQueuedItems().length, 'file', 'files')}"
+      />
     </property>
     <property name="resultFeedback">
       <Text
         value="Copied {pluralize($completedItems.length, 'file', 'files')}"
-        testId="copy-result-toast" />
+        testId="copy-result-toast"
+      />
     </property>
   </Queue>
   <!-- Queue for upload operations -->
@@ -150,13 +170,15 @@
     id="uploadItemsQueue"
     clearAfterFinish
     onProcess="onUploadQueuedItem"
-    onProcessError="onUploadQueuedItemError">
+    onProcessError="onUploadQueuedItemError"
+  >
     <property name="progressFeedback">
       <FileUploadProgressIndicator items="{uploadItemsQueue.getQueuedItems()}" />
     </property>
     <property name="resultFeedback">
       <Text
-        value="Uploaded {pluralize($completedItems.length, 'file', 'files')}" />
+        value="Uploaded {pluralize($completedItems.length, 'file', 'files')}"
+      />
     </property>
   </Queue>
 </Component>

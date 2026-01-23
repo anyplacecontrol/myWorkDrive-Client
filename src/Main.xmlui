@@ -38,14 +38,13 @@
       />
       </HSplitter>
     </Page>
-    <!-- We overlay a modal when a file is to be viewed -->
-    <!--
+    <!-- We overlay a modal when a file is to be viewed-->
     <FileContentModal
       drive="{defaultTo($queryParams.drive, currentDrive)}"
       folder="{defaultTo($queryParams.folder, '/')}"
       file="{$queryParams.file}"
     />
-    -->
+
   </Pages>
   <Footer height="46px">
     <MwdFooter />

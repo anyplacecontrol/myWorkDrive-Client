@@ -1,4 +1,4 @@
- <!--
+<!--
   This component is a modal dialog that allows the user to select a target folder when
   moving or copying files.
 
@@ -10,31 +10,38 @@
 -->
 <Component
   name="TargetSelectorModal"
-  method.open="selectModal.open()"
-  method.close="selectModal.close()">
+  var.isOpen="{false}"
+  method.open="isOpen = true"
+  method.close="isOpen = false"
+>
   <script>
     var folder = $props.drive + "/";
   </script>
   <AppState
     id="appState"
     bucket="targetSelector"
-    initialValue="{{ view: 'table', sortBy: 'name', sortDirection: 'ascending' }}" />
-  <!-- Get the content of the folder (ignore the file property) -->
-  <DataSource
-    id="fileCatalogData"
-    url="/ListFolder"
-    queryParams="{{ path: folder }}"
-    transformResult="{(result) => result.map(item => ({
+    initialValue="{{ view: 'table', sortBy: 'name', sortDirection: 'ascending' }}"
+  />
+
+  <ModalDialog
+    when="{isOpen}"
+    id="selectModal"
+    height="{appGlobals.targetSelectorModal.height}"
+    maxWidth="{appGlobals.targetSelectorModal.maxWidth}"
+    title="{$props.title}"
+    onClose="isOpen = false"
+    >
+    <!-- Get the content of the folder (ignore the file property) -->
+    <DataSource
+      id="fileCatalogData"
+      url="/ListFolder?path={folder}"
+      transformResult="{(result) => result.map(item => ({
         ...item,
         id: (item.drive || '') + (item.path || '') + (item.file || ''),
         type: item.isFolder ? 'folder' : getFileExtension(item.path)
       })
-    )}" />
-  <ModalDialog
-    id="selectModal"
-    height="{appGlobals.targetSelectorModal.height}"
-    maxWidth="{appGlobals.targetSelectorModal.maxWidth}"
-    title="{$props.title}">
+    )}"
+    />
     <VStack testId="select-target-folder-content" height="100%">
       <!-- Breadcrumb navigation to show the current folder path -->
       <FolderBreadcrumbs
@@ -42,7 +49,8 @@
         folder="{folder}"
         shouldHideLinkUrl
         breadcrumbRootName="Root"
-        onRequestNavigateToFolder="(target) => {console.log(target);folder = $props.drive + (target || '/')}" />
+        onRequestNavigateToFolder="(target) => {console.log(target);folder = $props.drive + (target || '/')}"
+      />
       <!-- Use the table or tiles view according to the current app state -->
       <TableView
         fileEntries="{fileCatalogData.value}"
@@ -57,19 +65,22 @@
         onSelectItem="itemId => emitEvent('selectItem', itemId)"
         onDownloadFiles="emitEvent('downloadFiles')"
         onDeleteTriggered="emitEvent('deleteTriggered')"
-        onRenameTriggered="emitEvent('renameTriggered')" />
+        onRenameTriggered="emitEvent('renameTriggered')"
+      />
       <HStack horizontalAlignment="end">
         <Button
           type="button"
           label="Cancel"
           variant="ghost"
           themeColor="secondary"
-          onClick="$self.close()" />
+          onClick="isOpen = false"
+        />
         <Button
           label="{$props.saveButtonLabel}"
           enabled="{!$props.inProgress}"
           testId="select-target-folder-submit-button"
-          onClick="emitEvent('requestSave', folder)" />
+          onClick="emitEvent('requestSave', folder)"
+        />
       </HStack>
     </VStack>
   </ModalDialog>

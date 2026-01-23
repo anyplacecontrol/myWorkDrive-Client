@@ -26,7 +26,6 @@ function navigateToNode(node) {
   }
   const queryString = parts.join("&");
   const targetUrl = queryString ? `/my-files?${queryString}` : "/my-files";
-  console.log("Navigating to:", targetUrl);
   Actions.navigate(targetUrl);
 }
 
