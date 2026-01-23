@@ -43,6 +43,7 @@
     id="fileUploadDialog"
     height="100%"
     onUpload="onUploadFiles"
+    overflowX="hidden"
   >
     <FileCatalogHeader
       drive="{$props.drive}"
