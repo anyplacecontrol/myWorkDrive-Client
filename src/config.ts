@@ -29,13 +29,10 @@ const appDef: StandaloneAppDescription = {
     }
   },
   resources: {
-    logo: "resources/mwd-logo.svg",
-    "logo-dark": "resources/mwd-logo-dark.svg",
     favicon: "resources/favicon.ico",
-    "icon.empty-folder": "resources/empty-folder.svg",
+  //  "icon.empty-folder": "resources/folder.svg",
   },
-  defaultTheme: "windowsExplorer",
-  // defaultTone: "dark",
+  defaultTheme: "myWorkDrive",
   apiInterceptor: undefined
 };
 

@@ -1,0 +1,74 @@
+<!--
+  This component provides the file browsing and file managing functionality.
+
+  Properties:
+  - `drive`: The ID of the drive containing the files/folders
+  - `folder`: The path of the folder to display
+
+  The `fileCatalogData` DataSource fetches the list of files and folders in the
+  folder specified by `drive` and `folder`.
+-->
+<Component name="FilesContainer">
+  <script>
+    var sortedFiles = MwdHelpers.sortFiles(
+      fileCatalogData.value,
+      appState.value.sortBy,
+      appState.value.sortDirection);
+  </script>
+  <!-- Get the content of the folder (ignore the file property) -->
+  <DataSource
+    id="fileCatalogData"
+    url="/ListFolder?path={$props.drive}{defaultTo($props.folder, '/')}"
+    transformResult="{(result) => result.map(item => ({
+        ...item,
+        id: (item.drive || '') + (item.path || '') + (item.file || ''),
+        type: item.isFolder ? '' : getFileExtension(item.path)
+      })
+    )}"
+  />
+  <!-- Let's keep the sorting and view state here -->
+  <AppState
+    id="appState"
+    bucket="fileCatalogView"
+    initialValue="{{ view: 'table', sortBy: 'name', sortDirection: 'ascending' }}"
+  />
+  <!-- Selection state management using AppState -->
+  <AppState
+    id="selectionState"
+    bucket="fileCatalogSelection"
+    initialValue="{{ selectedItems: [] }}"
+  />
+  <!-- The entire screen is a drop zone for file uploads -->
+  <FileUploadDropZone
+    id="fileUploadDialog"
+    height="100%"
+    onUpload="()=>{}"
+    overflowX="hidden"
+  >
+    <FilesContainerHeader
+      drive="{$props.drive}"
+      folder="{$props.folder}"
+    />
+    <!-- Display the files  -->
+
+    <!-- Use the table or tiles view according to the current app state -->
+    <FilesTableView
+      when="{appState.value.view === 'table'}"
+      fileEntries="{sortedFiles}"
+      loading="{fileCatalogData.loading}"
+      height="*"
+    />
+    <!--
+    <TilesView
+      when="{appState.value.view === 'tiles'}"
+      fileEntries="{sortedFiles}"
+      drive="{$props.drive}"
+      folder="{$props.folder}"
+      loading="{fileCatalogData.loading}"
+      height="*"
+    />
+   -->
+
+  </FileUploadDropZone>
+
+</Component>

@@ -1,0 +1,50 @@
+ <!--
+  This component displays the header of the file catalog, including search box and Bedcrumbs.
+
+  Properties:
+  - `drive`: The current drive
+  - `folder`: The ID of the current folder
+
+-->
+<Component name="FilesContainerHeader">
+  <!-- We obtain the view mode and sorting state from the AppState -->
+  <AppState id="appState" bucket="fileCatalogView" />
+  <!-- Selection state management using AppState -->
+  <AppState id="selectionState" bucket="fileCatalogSelection" />
+  <VStack
+    paddingTop="{0}"
+    gap="$space-4"
+    canShrink="false"
+    paddingVertical="$space-4">
+    <!-- Actions available when no items are selected -->
+    <HStack
+      height="46px"
+      verticalAlignment="center"
+      borderBottom="1px solid $borderColor"
+      gap="{mediaSize.largeScreen ? '$space-2' : 0}">
+    <HStack
+      height="46px"
+      verticalAlignment="center"
+      paddingHorizontal="$space-4"
+      gap="0"
+      borderBottom="1px solid $borderColor"
+    >
+      <TextBox
+        height="36px"
+        canShrink="true"
+        width="100%"
+        testId="tree-search"
+        placeholder="Search"
+        startIcon="search"
+      />
+      <SpaceFiller />
+    </HStack>
+
+    <FilesContainerBreadcrumbs
+      drive="{$props.drive}"
+      folder="{$props.folder}"
+    />
+    </HStack>
+
+  </VStack>
+</Component>

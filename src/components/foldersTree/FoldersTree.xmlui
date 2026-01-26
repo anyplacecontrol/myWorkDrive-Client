@@ -4,23 +4,7 @@
 
   <!-- Panel with fixed toolbar (46px) and scrollable tree area below -->
   <VStack height="100%" overflow="hidden">
-    <HStack
-      height="46px"
-      verticalAlignment="center"
-      paddingHorizontal="$space-4"
-      gap="0"
-      borderBottom="1px solid $borderColor"
-    >
-      <TextBox
-        height="36px"
-        canShrink="true"
-        width="100%"
-        testId="tree-search"
-        placeholder="Search"
-        startIcon="search"
-      />
-      <SpaceFiller />
-    </HStack>
+
 
     <!-- Tree container: fills remaining space and scrolls independently -->
 

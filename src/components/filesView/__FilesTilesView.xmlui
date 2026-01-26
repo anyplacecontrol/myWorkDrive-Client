@@ -9,7 +9,7 @@
   - `height`: The height of the tiles
   - `folderId`: The id of the folder
 -->
-<Component name="TilesView">
+<Component name="FilesTilesView">
   <!-- We obtain the view mode and sorting state from the AppState -->
   <AppState id="appState" bucket="fileCatalogView" />
   <AppState id="selectionState" bucket="fileCatalogSelection" />

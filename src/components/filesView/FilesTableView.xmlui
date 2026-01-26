@@ -2,28 +2,16 @@
   Table view for displaying files and folders in a tabular format.
 
   Properties:
-  - `appState`: The application state containing view and sorting information
   - `fileEntries`: The list of file entries to display
-  - `itemDisabledPredicate`: A function that takes an item and returns whether it is disabled
   - `loading`: Whether the data is currently loading
   - `height`: The height of the component
-  - `shouldHideLinkUrl`: Whether to hide the link URL
-  - `actionsAvailable`: Whether action buttons are available for each item
-  - `sortBy`: The field to sort by
-  - `sortDirection`: The direction to sort by
-  - `itemsSelectable`: Whether items are selectable
-
-  Events:
-  - `requestNavigateToFolder`: Emitted when navigation to a folder is requested
-  - `downloadFiles`: Emitted when download of selected files is requested
-  - `deleteFileEntries`: Emitted when deletion of selected files is requested
-  - `startRenamingSelected`: Emitted when renaming of the selected item is requested
 
   Note: We pass an AppState bucket through the `appState` property to keep the
-  sorting state in sync with the parent component. When we display files in a modal,
-  we keep the sorting state local to that modal.
+  sorting state in sync with the parent component.
+    - `sortBy`: The field to sort by
+    - `sortDirection`: The direction to sort by
 -->
-<Component name="TableView">
+<Component name="FilesTableView">
   <!-- We obtain the view mode and sorting state from the AppState -->
   <AppState id="appState" bucket="fileCatalogView" />
   <AppState id="selectionState" bucket="fileCatalogSelection" />
@@ -33,9 +21,7 @@
     headerHeight="32px"
     sortBy="{appState.value.sortBy}"
     sortDirection="{appState.value.sortDirection}"
-    rowsSelectable="{$props.itemsSelectable !== false}"
-    syncWithAppState="{($props.shouldSyncWithAppState ?? true) ? selectionState : null}"
-    rowDisabledPredicate="{$props.itemDisabledPredicate}"
+    syncWithAppState="{ selectionState }"
     autoFocus="true"
     items="{$props.fileEntries}"
     loading="{$props.loading}"
@@ -65,7 +51,6 @@
             queryParams: MwdHelpers.fileItemQueryParams($item)
           }}"
         testId="link-{$item.name}"
-        onClick="emitEvent('requestNavigateToFolder', $item.path)"
       >
       <Icon
         name="{ $item.isFolder ? 'folder' : getFileExtension($item.name) }"
@@ -124,38 +109,6 @@
         <Text value="{ formatDate($item.created) }" />
       </Link>
     </Column>
-    <Column
-      id="actions"
-      header=" "
-      width="{appGlobals.filesTableColumns.actions}"
-      when="{$props.actionsAvailable !== false}"
-      canResize="false"
-      pinTo="right"
-    >
-      <Stack horizontalAlignment="center">
-        <DropdownMenu
-          onWillOpen="selectionState.update({ selectedIds: [$item.id] })"
-        >
-          <property name="triggerTemplate">
-            <Button icon="dotmenuhorizontal" variant="ghost" />
-          </property>
-          <MenuItem onClick="emitEvent('downloadFiles')">
-            <Icon name="download" />
-            Download
-          </MenuItem>
-          <MenuItem onClick="emitEvent('deleteTriggered')">
-            <Icon name="trash" />
-            Delete
-          </MenuItem>
-          <MenuItem
-            when="{selectionState.value.selectedIds.length === 1}"
-            onClick="emitEvent('renameTriggered')"
-          >
-            <Icon name="rename" />
-            Rename
-          </MenuItem>
-        </DropdownMenu>
-      </Stack>
-    </Column>
+
   </Table>
 </Component>

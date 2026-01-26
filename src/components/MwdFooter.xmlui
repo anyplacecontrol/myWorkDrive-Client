@@ -1,9 +1,0 @@
-<Component name="MwdFooter">
-   <HStack width="100%" verticalAlignment="center" >
-      <SpaceFiller />
-      <Text width="auto">
-         Copyright (c) {getDate().getFullYear()} Callback Technologies, Inc.
-      </Text>
-      <ToneSwitch />
-   </HStack>
-</Component>
