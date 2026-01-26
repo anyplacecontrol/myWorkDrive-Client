@@ -3,22 +3,30 @@
 
 
   <!-- Panel with fixed toolbar (46px) and scrollable tree area below -->
-  <VStack height="100%" overflow="hidden">
+  <VStack height="100%" overflow="hidden" paddingTop="$space-5" paddingLeft="$space-4" gap="{0}">
 
-
+      <Text color="$textColor--disabled">My Folders</Text>
     <!-- Tree container: fills remaining space and scrolls independently -->
-
       <Tree
         id="tree"
         testId="tree"
         dataFormat="hierarchy"
         itemClickExpands
         overflowX="hidden"
+        iconSize="$space-6"
         data="{treeData}"
         onLoadChildren="loadChildren"
         onNodeDidCollapse="onNodeCollapse"
         onSelectionDidChange="onTreeSelectionDidChange">
+        <template name="itemTemplate">
+          <HStack verticalAlignment="center" gap="$space-2" height="$space-10">
+            <Icon when="{$item.icon}" name="{$item.icon}" height="$space-5" />
+            <Text value="{$item.name}" />
+          </HStack>
+
+        </template>
       </Tree>
+
 
   </VStack>
 </Component>

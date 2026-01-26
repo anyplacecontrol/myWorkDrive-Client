@@ -36,6 +36,9 @@ export const MyWorkDriveTheme: ThemeDefinition = {
     "backgroundColor-selected-Table": "$backgroundColor--selected", // row selected
     "textColor-heading-Table": "$textColor-secondary", // table header text color
     "textColor-row-Table": "$textColor-primary", // table row text color
+
+    //Toolbar
+    "toolbar-fg-color": "$textColor-primary",
   },
   resources: {
     //button icons

@@ -12,8 +12,8 @@
         fontSize-Button="1rem"
         size-Icon="1rem"
         paddingHorizontal-Button-sm="$space-3"
-        themeColor-Button="secondary"
         space-4="1rem"
+        textColor-Button="$toolbar-fg-color"
       >
         <Button
           label="{mediaSize.largeScreen ? 'Folders' : undefined}"
@@ -48,7 +48,7 @@
           marginHorizontal="$space-3"
         />
         <DropdownMenu>
-          <property name="triggerTemplate">
+          <template name="triggerTemplate">
             <Button
               testId="dropdown-button-new"
               variant="ghost"
@@ -63,7 +63,7 @@
                 size="sm"
               />
             </Button>
-          </property>
+          </template>
           <MenuItem
             label="Upload"
             onClick="()=>{}"
@@ -71,7 +71,7 @@
         </DropdownMenu>
 
         <DropdownMenu>
-          <property name="triggerTemplate">
+          <template name="triggerTemplate">
             <Button
               testId="dropdown-button-new"
               variant="ghost"
@@ -86,7 +86,7 @@
                 size="sm"
               />
             </Button>
-          </property>
+          </template>
           <MenuItem
             label="New"
             onClick="()=>{}"
@@ -95,7 +95,7 @@
         <SpaceFiller />
 
        <DropdownMenu>
-          <property name="triggerTemplate">
+          <template name="triggerTemplate">
             <Button
               testId="dropdown-button-new"
               variant="ghost"
@@ -110,7 +110,7 @@
                 size="sm"
               />
             </Button>
-          </property>
+          </template>
           <MenuItem
             label="View"
             onClick="()=>{}"

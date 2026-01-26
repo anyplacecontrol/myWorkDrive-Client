@@ -11,16 +11,16 @@
     <AppHeader padding="0" height="$space-11">
       <Toolbar />
 
-      <property name="profileMenuTemplate">
+      <template name="profileMenuTemplate">
         <Stack padding="1rem" >
           <DropdownMenu>
-            <property name="triggerTemplate">
+            <template name="triggerTemplate">
               <Avatar size="xs" name="{loggedInUser.displayName}" />
-            </property>
+            </template>
             <MenuItem label="Log out" />
           </DropdownMenu>
         </Stack>
-      </property>
+      </template>
 
     </AppHeader>
   </Theme>
