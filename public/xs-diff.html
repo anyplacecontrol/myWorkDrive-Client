@@ -477,7 +477,6 @@
         <option value="html">Download HTML</option>
         <option value="md">Download Markdown</option>
       </select>
-[judell/inspector 31d063d]
     </div>
     <div id="diff"></div>
 
@@ -547,13 +546,34 @@
         }
       }
 
+      // Strip functions from objects (jsondiffpatch can't handle them)
+      function stripFunctions(obj, seen = new WeakSet()) {
+        if (obj === null || typeof obj !== "object") return obj;
+        if (typeof obj === "function") return "[function]";
+        if (seen.has(obj)) return "[circular]";
+        seen.add(obj);
+        if (Array.isArray(obj)) {
+          return obj.map(item => stripFunctions(item, seen));
+        }
+        const result = {};
+        for (const key of Object.keys(obj)) {
+          const val = obj[key];
+          if (typeof val === "function") {
+            result[key] = "[function]";
+          } else {
+            result[key] = stripFunctions(val, seen);
+          }
+        }
+        return result;
+      }
+
       function buildSnapshotsFromDiff(diffArray) {
         const left = {};
         const right = {};
         diffArray.forEach((d) => {
           if (!d || !d.path) return;
-          const beforeVal = d.before === undefined ? null : d.before;
-          const afterVal = d.after === undefined ? null : d.after;
+          const beforeVal = d.before === undefined ? null : stripFunctions(d.before);
+          const afterVal = d.after === undefined ? null : stripFunctions(d.after);
           setByPath(left, d.path, beforeVal);
           setByPath(right, d.path, afterVal);
         });
@@ -1395,6 +1415,10 @@
           }
         }
 
+        // Get file info from first handler:start
+        const sourceFile = start ? resolveFileLabel(start.ownerFileId) : null;
+        const handlerCode = start?.handlerCode || null;
+
         return {
           componentText: componentText || "Unknown trace",
           changeCount,
@@ -1408,6 +1432,8 @@
           totalDuration,
           expensiveParts: topExpensive,
           timelineBreakdown,
+          sourceFile,
+          handlerCode,
         };
       }
 
@@ -2045,13 +2071,17 @@
               }
             }
 
-            const snapshots = buildSnapshotsFromDiff(e.diffJson);
-            const delta = jsondiffpatch.diff(snapshots.left, snapshots.right);
-            if (delta) {
-              const diffHtml = htmlFormatter.format(delta, snapshots.left);
-              const summary = usedArraySummary ? "Show full diff" : "Diff";
-              // Force collapsed when we already have a good summary
-              bodyHtml += wrapDiffInExpander(diffHtml, summary, usedArraySummary);
+            try {
+              const snapshots = buildSnapshotsFromDiff(e.diffJson);
+              const delta = jsondiffpatch.diff(snapshots.left, snapshots.right);
+              if (delta) {
+                const diffHtml = htmlFormatter.format(delta, snapshots.left);
+                const summary = usedArraySummary ? "Show full diff" : "Diff";
+                // Force collapsed when we already have a good summary
+                bodyHtml += wrapDiffInExpander(diffHtml, summary, usedArraySummary);
+              }
+            } catch (diffErr) {
+              bodyHtml += `<div class="text-warning">Could not render diff: ${diffErr.message}</div>`;
             }
           }
 
@@ -2062,13 +2092,18 @@
           bodyHtml += `<div class="trace-event text-warning">Deduped ${dedupedCount} repeated state change${dedupedCount > 1 ? "s" : ""}.</div>`;
         }
 
+        // Build file link for header if available
+        const fileLink = summary.sourceFile
+          ? ` <span class="file-link" data-file="${summary.sourceFile}"${summary.handlerCode ? ` data-highlight="${summary.handlerCode.replace(/"/g, '&quot;')}"` : ""}>${summary.sourceFile}</span>`
+          : "";
+
         return `
           <div class="trace-group" data-trace-id="${traceId}">
             <div class="trace-header" onclick="this.parentElement.classList.toggle('expanded'); this.classList.toggle('expanded');">
               <span class="arrow">▶</span>
               <div class="trace-summary">
                 <span class="component">${summary.componentText}</span>
-                ${changesHtml}${durationHtml}
+                ${changesHtml}${durationHtml}${fileLink}
               </div>
               <span class="trace-age">${age}</span>
             </div>
