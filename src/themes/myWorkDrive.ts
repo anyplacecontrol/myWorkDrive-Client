@@ -63,6 +63,7 @@ export const MyWorkDriveTheme: ThemeDefinition = {
     "icon.btn_upload": "resources/btn-upload.svg",
     "icon.btn_new": "resources/btn-new.svg",
     "icon.btn_view": "resources/btn-view.svg",
+    "icon.btn-mediumIcons": "resources/btn-mediumIcons.svg",
     //file type icons
     "icon.folder": "resources/folder.svg",
     "icon.emptyfolder": "resources/folder.svg",

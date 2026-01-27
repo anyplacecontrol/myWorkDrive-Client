@@ -164,7 +164,13 @@
             </Button>
           </template>
           <MenuItem
-            label="View"
+            label="Details"
+            icon="btn_view"
+            onClick="toast.error('Not implemented yet')"
+          />
+          <MenuItem
+            label="Medium Icons"
+            icon="btn-mediumIcons"
             onClick="toast.error('Not implemented yet')"
           />
         </DropdownMenu>

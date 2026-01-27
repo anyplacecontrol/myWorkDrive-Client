@@ -15,8 +15,22 @@
   <!-- We obtain the view mode and sorting state from the AppState -->
   <AppState id="appState" bucket="fileCatalogView" />
   <AppState id="selectionState" bucket="fileCatalogSelection" />
-  <Table
+  <script>
+    function navigateToItem(item) {
+      try {
+        // Only navigate when the target is a folder. Ignore files.
+        if (!item || !item.isFolder) return;
 
+        if (window.MwdHelpers && window.MwdHelpers.buildNavigationUrl) {
+          const target = window.MwdHelpers.buildNavigationUrl(item.path || '');
+          Actions.navigate(target);
+          return;
+        }
+      } catch (e) {
+      }
+    }
+  </script>
+  <Table
     height="100%"
     id="filesTable"
     headerHeight="$space-10"
@@ -35,6 +49,7 @@
       appState.update({ sortBy, sortDirection: direction });
       return true;
     }"
+    onRowDoubleClick="(item)=>navigateToItem(item)"
   >
     <property name="noDataTemplate">
       <EmptyDataView />
@@ -46,13 +61,12 @@
       bindTo="name"
       canSort="true"
     >
-      <SafeLink
-        shouldHideLinkUrl="{$props.shouldHideLinkUrl}"
-        to="{{
-            pathname: '.',
-            queryParams: MwdHelpers.fileItemQueryParams($item)
-          }}"
+    <Link>
+      <HStack
         testId="link-{$item.name}"
+        gap="0"
+        verticalAlignment="center"
+        onDoubleClick="() => navigateToItem($item)"
       >
         <Icon
           name="{ $item.isFolder ? 'folder' : getFileExtension($item.name) }"
@@ -64,7 +78,8 @@
           value="{$item.name}"
           maxLines="1"
         />
-      </SafeLink>
+      </HStack>
+    </Link>
     </Column>
 
     <Column
@@ -86,9 +101,11 @@
       width="*"
       canSort="true"
     >
-    <Link>
-     <Badge variant="badge">{ $item.type}</Badge>
-     </Link>
+      <Link>
+        <Badge variant="badge">
+          { $item.type}
+        </Badge>
+      </Link>
 
     </Column>
     <Column
@@ -101,7 +118,6 @@
         <Text value="{ formatDateTime($item.modified, 'M/d/yyyy h:mm a') }" />
       </Link>
     </Column>
-
 
   </Table>
 </Component>
