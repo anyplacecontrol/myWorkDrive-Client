@@ -10,7 +10,6 @@ var treeData = [
 
 function navigateToNode(node) {
   if (!node.id) return;
-
   // Build URL and navigate to folder
   const targetUrl = MwdHelpers.buildNavigationUrl(node.id);
   Actions.navigate(targetUrl);

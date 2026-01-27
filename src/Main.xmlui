@@ -11,7 +11,13 @@
   <AppState
     id="appState"
     bucket="fileCatalogView"
-    initialValue="{{ view: 'table', sortBy: 'name', sortDirection: 'ascending', isFoldersVisible: true }}"
+    initialValue="{{
+          view: 'table', //controls representation of files
+          sortBy: 'name', //controls sorting of files
+          sortDirection: 'ascending', //controls sorting direction
+          isFoldersVisible: true,  //controls visibility of folders Tree
+          fileCatalogDataRef: null  // reference to the fileCatalogData DataSource (used for refresh)
+          }}"
   />
 
   <Theme space-4="0px">
@@ -33,8 +39,6 @@
       </template>
     </AppHeader>
   </Theme>
-
-
 
   <Pages fallbackPath="/my-files">
 
@@ -65,3 +69,4 @@
   </Pages>
 
 </App>
+

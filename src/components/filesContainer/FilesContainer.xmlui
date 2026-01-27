@@ -15,6 +15,7 @@
       appState.value.sortBy,
       appState.value.sortDirection);
   </script>
+
   <!-- Get the content of the folder (ignore the file property) -->
   <DataSource
     id="fileCatalogData"
@@ -26,6 +27,11 @@
       })
     )}"
   />
+
+  <ChangeListener
+    listenTo="{fileCatalogData}"
+    onDidChange="{ appState.update({ fileCatalogDataRef: fileCatalogData })}" />
+
   <!--  sorting and view state here -->
   <AppState
     id="appState"

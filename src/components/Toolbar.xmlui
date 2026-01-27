@@ -69,6 +69,7 @@
           label="{mediaSize.largeScreen ? 'Favorites' : undefined}"
           icon="btn_favorites"
           variant="ghost"
+          onClick="toast.error('Not implemented yet')"
         />
         <ContentSeparator
           orientation="vertical"
@@ -86,6 +87,11 @@
           label="{mediaSize.largeScreen ? 'Refresh' : undefined}"
           icon="btn_refresh"
           variant="ghost"
+          onClick="() => {
+            if (appState.value.fileCatalogDataRef !== null) {
+              appState.value.fileCatalogDataRef.refetch();
+            }
+          }"
         />
         <ContentSeparator
           orientation="vertical"
@@ -112,7 +118,7 @@
           </template>
           <MenuItem
             label="Upload"
-            onClick="()=>{}"
+            onClick="toast.error('Not implemented yet')"
           />
         </DropdownMenu>
 
@@ -135,7 +141,7 @@
           </template>
           <MenuItem
             label="New"
-            onClick="()=>{}"
+            onClick="toast.error('Not implemented yet')"
           />
         </DropdownMenu>
         <SpaceFiller />
@@ -159,7 +165,7 @@
           </template>
           <MenuItem
             label="View"
-            onClick="()=>{}"
+            onClick="toast.error('Not implemented yet')"
           />
         </DropdownMenu>
       </Theme>
