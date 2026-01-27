@@ -1416,6 +1416,10 @@
           }
         }
 
+        // Get file info from first handler:start
+        const sourceFile = start ? resolveFileLabel(start.ownerFileId) : null;
+        const handlerCode = start?.handlerCode || null;
+
         return {
           componentText: componentText || "Unknown trace",
           changeCount,
@@ -1429,6 +1433,8 @@
           totalDuration,
           expensiveParts: topExpensive,
           timelineBreakdown,
+          sourceFile,
+          handlerCode,
         };
       }
 
@@ -2087,13 +2093,18 @@
           bodyHtml += `<div class="trace-event text-warning">Deduped ${dedupedCount} repeated state change${dedupedCount > 1 ? "s" : ""}.</div>`;
         }
 
+        // Build file link for header if available
+        const fileLink = summary.sourceFile
+          ? ` <span class="file-link" data-file="${summary.sourceFile}"${summary.handlerCode ? ` data-highlight="${summary.handlerCode.replace(/"/g, '&quot;')}"` : ""}>${summary.sourceFile}</span>`
+          : "";
+
         return `
           <div class="trace-group" data-trace-id="${traceId}">
             <div class="trace-header" onclick="this.parentElement.classList.toggle('expanded'); this.classList.toggle('expanded');">
               <span class="arrow">▶</span>
               <div class="trace-summary">
                 <span class="component">${summary.componentText}</span>
-                ${changesHtml}${durationHtml}
+                ${changesHtml}${durationHtml}${fileLink}
               </div>
               <span class="trace-age">${age}</span>
             </div>
