@@ -29,6 +29,13 @@
     bucket="fileCatalogView"
   />
 
+ <ModalDialog
+    id="xsLogDialog"
+    testId="InspectorDialog"
+    title="XMLUI Inspector">
+    <IFrame src="/xs-diff.html" testId="InspectorFrame" width="70vw" height="90vh" />
+  </ModalDialog>
+
   <Theme>
     <HStack
       width="100%"
@@ -45,6 +52,7 @@
         space-4="1rem"
         textColor-Button="$fgColor-Toolbar"
       >
+      <Button label="Inspector" width="100px" testId="Inspector" variant="outlined" onClick="xsLogDialog.open()" />
         <Theme
           textColor-Button="{ appState.value.isFoldersVisible ? '$fgColor-Toolbar--selected' : '$fgColor-Toolbar' }"
         >

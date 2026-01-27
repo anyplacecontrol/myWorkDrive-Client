@@ -1,0 +1,2795 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>XMLUI Inspector</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/jsondiffpatch@0.7.3/lib/formatters/styles/html.css"
+    />
+    <style>
+      /* =============================================================================
+         CSS VARIABLES - Edit these to change the look
+         ============================================================================= */
+      :root {
+        /* Colors */
+        --color-text: #111;
+        --color-text-muted: #4b5563;
+        --color-text-faint: #6b7280;
+        --color-text-subtle: #9ca3af;
+        --color-error: #dc2626;
+        --color-success: #059669;
+        --color-warning: #d97706;
+        --color-info: #4f46e5;
+        --color-border: #e5e7eb;
+        --color-bg: #fff;
+        --color-bg-subtle: #f9fafb;
+        --color-bg-muted: #fafafa;
+        --color-bg-hover: #f3f4f6;
+        --color-interaction-border: #a5b4fc;
+        --color-interaction-bg: #eef2ff;
+
+        /* Font sizes */
+        --font-xs: 8px;
+        --font-sm: 10px;
+        --font-md: 11px;
+        --font-base: 12px;
+        --font-lg: 13px;
+
+        /* Spacing */
+        --space-1: 4px;
+        --space-2: 6px;
+        --space-3: 8px;
+        --space-4: 12px;
+        --space-5: 16px;
+
+        /* Border radius */
+        --radius-sm: 4px;
+        --radius-md: 6px;
+        --radius-lg: 8px;
+      }
+
+      /* =============================================================================
+         BASE STYLES
+         ============================================================================= */
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+        background: var(--color-bg);
+        color: var(--color-text);
+        font-size: var(--font-base);
+      }
+
+      pre, code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      }
+
+      /* =============================================================================
+         TOOLBAR
+         ============================================================================= */
+      .toolbar {
+        display: flex;
+        gap: var(--space-3);
+        align-items: center;
+        padding: var(--space-3) var(--space-4);
+        border-bottom: 1px solid var(--color-border);
+        background: var(--color-bg-subtle);
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        flex-wrap: wrap;
+      }
+
+      .spacer { flex: 1 1 auto; }
+
+      label { font-size: var(--font-base); color: var(--color-text); }
+
+      input[type="text"], select {
+        border: 1px solid #d1d5db;
+        border-radius: var(--radius-md);
+        padding: var(--space-1) var(--space-3);
+        font-size: var(--font-base);
+      }
+
+      button {
+        border: 1px solid var(--color-text-faint);
+        background: var(--color-bg);
+        padding: var(--space-1) var(--space-3);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        font-size: var(--font-base);
+      }
+      button:hover { background: var(--color-bg-subtle); }
+
+      /* =============================================================================
+         CONTENT AREA
+         ============================================================================= */
+      #diff { padding: var(--space-4); }
+
+      /* =============================================================================
+         TRACE GROUPS (main cards)
+         ============================================================================= */
+      .trace-group {
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-lg);
+        margin: var(--space-4) 0;
+        overflow: hidden;
+      }
+      .trace-group--interaction {
+        border-color: var(--color-interaction-border);
+      }
+
+      .trace-header {
+        background: var(--color-bg-subtle);
+        padding: var(--space-3) var(--space-4);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        font-size: var(--font-lg);
+      }
+      .trace-header:hover { background: var(--color-bg-hover); }
+      .trace-header--interaction { background: var(--color-interaction-bg); }
+
+      .trace-header .arrow {
+        transition: transform 0.2s;
+        color: var(--color-text-muted);
+      }
+      .trace-header.expanded .arrow { transform: rotate(90deg); }
+
+      .trace-summary { flex: 1; }
+      .trace-summary .component { font-weight: 500; color: var(--color-text); }
+
+      .trace-body {
+        display: none;
+        padding: var(--space-4);
+        border-top: 1px solid var(--color-border);
+      }
+      .trace-group.expanded .trace-body { display: block; }
+
+      /* =============================================================================
+         TRACE EVENTS (items within a trace)
+         ============================================================================= */
+      .trace-event {
+        margin: var(--space-3) 0;
+        padding: var(--space-3);
+        background: var(--color-bg-muted);
+        border-radius: var(--radius-sm);
+        font-size: var(--font-base);
+      }
+
+      .trace-event-header {
+        color: var(--color-text-muted);
+        margin-bottom: var(--space-1);
+      }
+      .trace-event-header strong { font-weight: 500; }
+
+      /* =============================================================================
+         STATUS INDICATORS
+         ============================================================================= */
+      .badge-success { color: var(--color-success); font-size: var(--font-base); }
+      .badge-error { color: var(--color-error); font-size: var(--font-base); }
+      .badge-warning { color: var(--color-warning); font-size: var(--font-base); }
+      .badge-info { color: var(--color-info); font-weight: 500; }
+      .badge-muted { color: var(--color-text-muted); font-size: var(--font-base); }
+
+      .text-error { color: var(--color-error); }
+      .text-success { color: var(--color-success); }
+      .text-warning { color: var(--color-warning); }
+      .text-muted { color: var(--color-text-muted); }
+      .text-faint { color: var(--color-text-faint); }
+
+      /* =============================================================================
+         METADATA (timestamps, trace IDs, etc)
+         ============================================================================= */
+      .trace-age {
+        font-size: var(--font-sm);
+        color: var(--color-text-faint);
+      }
+
+      .trace-meta {
+        font-size: var(--font-sm);
+        color: var(--color-text-subtle);
+      }
+
+      .timeline-table {
+        font-size: var(--font-sm);
+        color: var(--color-text);
+        border-collapse: collapse;
+        margin-bottom: var(--space-4);
+      }
+      .timeline-table th, .timeline-table td {
+        padding: var(--space-1) var(--space-3);
+        text-align: left;
+      }
+      .timeline-table th {
+        font-weight: 500;
+        border-bottom: 1px solid var(--color-border);
+      }
+      .timeline-table .text-right {
+        text-align: right;
+      }
+      .timeline-table .timeline-total {
+        border-top: 1px solid var(--color-border);
+      }
+
+      .meta-inline {
+        font-size: var(--font-sm);
+        color: var(--color-text-subtle);
+        margin-left: var(--space-3);
+      }
+
+      /* =============================================================================
+         DIFF DISPLAY
+         ============================================================================= */
+      .diff-added { color: var(--color-success); font-weight: 500; }
+      .diff-removed { color: var(--color-error); font-weight: 500; }
+      .diff-modified { color: var(--color-warning); font-weight: 500; }
+      .diff-item { margin-left: var(--space-5); }
+      .diff-count { color: var(--color-text-muted); margin-bottom: var(--space-1); }
+
+      /* =============================================================================
+         DETAILS/EXPANDERS
+         ============================================================================= */
+      details { margin: var(--space-3) 0; }
+      details > summary {
+        cursor: pointer;
+        font-size: var(--font-md);
+        color: var(--color-text-faint);
+      }
+      details > summary:hover { color: var(--color-text-muted); }
+
+      details pre {
+        margin: var(--space-2) 0 0;
+        padding: var(--space-3);
+        background: var(--color-bg-subtle);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-md);
+        white-space: pre-wrap;
+        font-size: var(--font-sm);
+        color: var(--color-text-muted);
+        overflow-x: auto;
+      }
+
+      .stack-trace {
+        font-size: var(--font-sm);
+        color: var(--color-text-muted);
+        overflow-x: auto;
+      }
+
+      /* =============================================================================
+         SOURCE CODE DISPLAY
+         ============================================================================= */
+      .source-code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: var(--font-sm);
+        background: var(--color-bg-subtle);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-sm);
+        padding: var(--space-3);
+        margin: var(--space-2) 0;
+        overflow-x: auto;
+        white-space: pre-wrap;
+        color: var(--color-text);
+      }
+
+      .api-body {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: var(--font-sm);
+        background: var(--color-bg-subtle);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-sm);
+        padding: var(--space-3);
+        margin: var(--space-2) 0;
+        overflow-x: auto;
+        white-space: pre-wrap;
+        color: var(--color-text);
+      }
+
+      .highlight-line {
+        display: block;
+        background: rgba(255, 200, 0, 0.2);
+        border-left: 3px solid #f0a000;
+        margin-left: -8px;
+        padding-left: 5px;
+        font-weight: 500;
+      }
+
+      .event-metadata {
+        margin: var(--space-2) 0;
+      }
+      .event-metadata details {
+        margin: var(--space-1) 0;
+      }
+      .event-metadata summary {
+        font-size: var(--font-sm);
+        color: var(--color-text-muted);
+        cursor: pointer;
+      }
+      .event-metadata summary:hover {
+        color: var(--color-text);
+      }
+      .metadata-grid {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: var(--space-1) var(--space-3);
+        font-size: var(--font-sm);
+        padding: var(--space-2);
+        background: var(--color-bg-subtle);
+        border-radius: var(--radius-sm);
+        margin-top: var(--space-1);
+      }
+      .metadata-grid dt {
+        color: var(--color-text-muted);
+        font-weight: 500;
+      }
+      .metadata-grid dd {
+        margin: 0;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        color: var(--color-text);
+      }
+
+      /* =============================================================================
+         COLLAPSIBLE SECTIONS (Notes, Files)
+         ============================================================================= */
+      .collapsible-section {
+        margin-top: var(--space-4);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-md);
+        background: var(--color-bg-subtle);
+      }
+      .collapsible-section summary {
+        padding: var(--space-2) var(--space-3);
+        font-size: var(--font-lg);
+        font-weight: 500;
+        color: var(--color-text-muted);
+        cursor: pointer;
+        user-select: none;
+      }
+      .collapsible-section summary:hover {
+        background: var(--color-bg-hover);
+      }
+      .collapsible-section[open] summary {
+        border-bottom: 1px solid var(--color-border);
+      }
+      .collapsible-content {
+        padding: var(--space-3);
+        font-size: var(--font-md);
+        color: var(--color-text-muted);
+      }
+
+      /* Notes section specifics */
+      .notes-list {
+        margin: 0;
+        padding-left: 18px;
+      }
+      .notes-list li { margin: var(--space-2) 0; }
+      .note-title { font-weight: 500; margin-bottom: var(--space-1); }
+      .note-description { font-size: var(--font-md); margin-bottom: var(--space-2); }
+    .note-items { font-size: var(--font-md); }
+      .note-item { margin: 2px 0; }
+      .note-key { font-weight: 500; margin: var(--space-1) 0; }
+
+      /* Source files specifics */
+      .source-file {
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        margin: var(--space-1) 0;
+      }
+
+      /* =============================================================================
+         SECTION HEADERS
+         ============================================================================= */
+      .section-header {
+        margin: var(--space-5) 0 var(--space-3);
+        font-size: var(--font-base);
+        color: var(--color-text-muted);
+        font-weight: 500;
+      }
+
+      /* =============================================================================
+         FILE PREVIEW MODAL
+         ============================================================================= */
+      .file-link {
+        color: var(--color-info);
+        cursor: pointer;
+        text-decoration: underline;
+        text-decoration-style: dotted;
+      }
+      .file-link:hover {
+        text-decoration-style: solid;
+        color: #3730a3;
+      }
+      .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+      }
+      .modal-overlay.open {
+        display: flex;
+      }
+      .modal-content {
+        background: var(--color-bg);
+        border-radius: var(--radius-lg);
+        max-width: 90vw;
+        max-height: 90vh;
+        width: 900px;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      }
+      .modal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: var(--space-3) var(--space-4);
+        border-bottom: 1px solid var(--color-border);
+        font-weight: 500;
+      }
+      .modal-header .file-path {
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: var(--font-sm);
+        color: var(--color-text-muted);
+      }
+      .modal-close {
+        background: none;
+        border: none;
+        font-size: 20px;
+        cursor: pointer;
+        padding: 4px 8px;
+        color: var(--color-text-muted);
+      }
+      .modal-close:hover {
+        color: var(--color-text);
+      }
+      .modal-body {
+        flex: 1;
+        overflow: auto;
+        padding: 0;
+      }
+      .modal-body pre {
+        margin: 0;
+        padding: var(--space-4);
+        font-size: var(--font-sm);
+        line-height: 1.5;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="toolbar">
+      <label>View:</label>
+      <label><input type="radio" name="viewMode" id="viewPretty" checked /> pretty</label>
+      <label><input type="radio" name="viewMode" id="viewRaw" /> raw</label>
+      <span class="spacer"></span>
+      <button id="clear">Clear</button>
+      <span class="spacer"></span>
+      <select id="exportFormat">
+        <option value="">Export...</option>
+        <option value="html">Download HTML</option>
+        <option value="md">Download Markdown</option>
+      </select>
+[judell/inspector 31d063d]
+    </div>
+    <div id="diff"></div>
+
+    <!-- File Preview Modal -->
+    <div id="fileModal" class="modal-overlay">
+      <div class="modal-content">
+        <div class="modal-header">
+          <span class="file-path" id="modalFilePath"></span>
+          <button class="modal-close" id="modalClose">&times;</button>
+        </div>
+        <div class="modal-body">
+          <pre id="modalFileContent">Loading...</pre>
+        </div>
+      </div>
+    </div>
+
+    <script type="module">
+      import * as jsondiffpatch from "https://unpkg.com/jsondiffpatch@0.7.3/lib/index.js";
+      import * as htmlFormatter from "https://unpkg.com/jsondiffpatch@0.7.3/lib/formatters/html.js";
+
+      // =============================================================================
+      // UTILITY FUNCTIONS
+      // =============================================================================
+
+      function isIndexSegment(seg) {
+        return String(seg).match(/^\d+$/);
+      }
+
+      function setByPath(root, path, value) {
+        const parts = String(path || "").split(".");
+        let cur = root;
+        let parent = null;
+        let parentKey = null;
+        for (let i = 0; i < parts.length; i++) {
+          const key = parts[i];
+          const isLast = i === parts.length - 1;
+          const idx = isIndexSegment(key) ? Number(key) : null;
+          if (isLast) {
+            if (idx !== null) {
+              if (!Array.isArray(cur)) {
+                const newArr = [];
+                if (parent) parent[parentKey] = newArr;
+                cur = newArr;
+              }
+              cur[idx] = value;
+            } else {
+              cur[key] = value;
+            }
+          } else {
+            if (idx !== null) {
+              if (!Array.isArray(cur)) {
+                const newArr = [];
+                if (parent) parent[parentKey] = newArr;
+                cur = newArr;
+              }
+              if (!cur[idx]) cur[idx] = {};
+              parent = cur;
+              parentKey = idx;
+              cur = cur[idx];
+            } else {
+              if (!cur[key]) cur[key] = {};
+              parent = cur;
+              parentKey = key;
+              cur = cur[key];
+            }
+          }
+        }
+      }
+
+      function buildSnapshotsFromDiff(diffArray) {
+        const left = {};
+        const right = {};
+        diffArray.forEach((d) => {
+          if (!d || !d.path) return;
+          const beforeVal = d.before === undefined ? null : d.before;
+          const afterVal = d.after === undefined ? null : d.after;
+          setByPath(left, d.path, beforeVal);
+          setByPath(right, d.path, afterVal);
+        });
+        return { left, right };
+      }
+
+      function getItemKey(item) {
+        if (!item || typeof item !== "object") return null;
+        return item.id || item.path || item.name || null;
+      }
+
+      function getItemLabel(item) {
+        if (!item || typeof item !== "object") return String(item);
+        const name = item.name || item.title || item.label || item.id || item.path;
+        if (!name) return JSON.stringify(item).slice(0, 60);
+        if (item.size !== undefined) {
+          const sizeStr = formatFileSize(item.size);
+          return `${name} (${sizeStr})`;
+        }
+        return name;
+      }
+
+      function formatFileSize(bytes) {
+        if (bytes === 0) return "0 B";
+        const k = 1024;
+        const sizes = ["B", "KB", "MB", "GB"];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
+      }
+
+      function isKeyedArray(arr) {
+        if (!Array.isArray(arr) || arr.length === 0) return false;
+        const keyedCount = arr.filter((item) => getItemKey(item) !== null).length;
+        return keyedCount / arr.length > 0.5;
+      }
+
+      function analyzeArrayDiff(before, after) {
+        const beforeArr = Array.isArray(before) ? before : [];
+        const afterArr = Array.isArray(after) ? after : [];
+        const beforeMap = new Map();
+        const afterMap = new Map();
+
+        beforeArr.forEach((item, idx) => {
+          const key = getItemKey(item) || `#${idx}`;
+          beforeMap.set(key, item);
+        });
+        afterArr.forEach((item, idx) => {
+          const key = getItemKey(item) || `#${idx}`;
+          afterMap.set(key, item);
+        });
+
+        const added = [];
+        const removed = [];
+        const changed = [];
+
+        for (const [key, beforeItem] of beforeMap.entries()) {
+          if (!afterMap.has(key)) {
+            removed.push({ key, item: beforeItem, label: getItemLabel(beforeItem) });
+          } else {
+            const afterItem = afterMap.get(key);
+            try {
+              const b = JSON.stringify(beforeItem);
+              const a = JSON.stringify(afterItem);
+              if (b !== a) {
+                changed.push({ key, before: beforeItem, after: afterItem, label: getItemLabel(afterItem) });
+              }
+            } catch {
+              changed.push({ key, before: beforeItem, after: afterItem, label: getItemLabel(afterItem) });
+            }
+          }
+        }
+        for (const [key, afterItem] of afterMap.entries()) {
+          if (!beforeMap.has(key)) {
+            added.push({ key, item: afterItem, label: getItemLabel(afterItem) });
+          }
+        }
+
+        return {
+          added, removed, changed,
+          beforeCount: beforeArr.length,
+          afterCount: afterArr.length,
+          isSignificant: added.length > 0 || removed.length > 0 || changed.length > 0,
+        };
+      }
+
+      function renderArrayDiffSummary(analysis) {
+        const { added, removed, changed, beforeCount, afterCount } = analysis;
+        const lines = [];
+
+        if (beforeCount !== afterCount) {
+          lines.push(`<div class="diff-count">${beforeCount} → ${afterCount} items</div>`);
+        }
+
+        const renderItems = (items, icon, cssClass) => {
+          if (items.length === 0) return "";
+          const limit = 5;
+          const shown = items.slice(0, limit);
+          const remaining = items.length - limit;
+          let html = shown.map((i) => `<div class="diff-item ${cssClass}">${icon} ${i.label}</div>`).join("");
+          if (remaining > 0) {
+            html += `<div class="diff-item text-faint">… and ${remaining} more</div>`;
+          }
+          return html;
+        };
+
+        if (added.length > 0) {
+          lines.push(`<div class="diff-added">+${added.length} added</div>`);
+          lines.push(renderItems(added, "+", "text-success"));
+        }
+        if (removed.length > 0) {
+          lines.push(`<div class="diff-removed">−${removed.length} removed</div>`);
+          lines.push(renderItems(removed, "−", "text-error"));
+        }
+        if (changed.length > 0) {
+          lines.push(`<div class="diff-modified">~${changed.length} modified</div>`);
+          lines.push(renderItems(changed, "~", "text-warning"));
+        }
+
+        return lines.join("");
+      }
+
+      function summarizeArrayDiff(before, after) {
+        const analysis = analyzeArrayDiff(before, after);
+        const lines = [];
+        if (analysis.beforeCount !== analysis.afterCount) {
+          lines.push(`${analysis.beforeCount} → ${analysis.afterCount} items`);
+        }
+        if (analysis.added.length > 0) {
+          lines.push(`+${analysis.added.length} added: ${analysis.added.map((i) => i.label).join(", ")}`);
+        }
+        if (analysis.removed.length > 0) {
+          lines.push(`−${analysis.removed.length} removed: ${analysis.removed.map((i) => i.label).join(", ")}`);
+        }
+        if (analysis.changed.length > 0) {
+          lines.push(`~${analysis.changed.length} modified: ${analysis.changed.map((i) => i.label).join(", ")}`);
+        }
+        return lines.join("\n");
+      }
+
+      function formatAge(ts) {
+        if (!ts) return "";
+        const deltaMs = Date.now() - ts;
+        if (deltaMs < 10000) return `${deltaMs}ms ago`;
+        const sec = Math.max(0, Math.floor(deltaMs / 1000));
+        if (sec < 60) return `${sec}s ago`;
+        const min = Math.floor(sec / 60);
+        const remSec = sec % 60;
+        return `${min}m ${remSec}s ago`;
+      }
+
+      // Fetch and cache source file contents
+      const sourceCache = new Map();
+      async function fetchSourceRange(filePath, startChar, endChar) {
+        if (!filePath) return null;
+        try {
+          let content = sourceCache.get(filePath);
+          if (!content) {
+            const resp = await fetch(filePath);
+            if (!resp.ok) return null;
+            content = await resp.text();
+            sourceCache.set(filePath, content);
+          }
+          return content.slice(startChar, endChar);
+        } catch (e) {
+          console.warn("Failed to fetch source:", filePath, e);
+          return null;
+        }
+      }
+
+      // Load source into a details element when expanded
+      function setupSourceLoader(detailsEl, filePath, startChar, endChar) {
+        let loaded = false;
+        detailsEl.addEventListener("toggle", async () => {
+          if (detailsEl.open && !loaded) {
+            loaded = true;
+            const codeEl = detailsEl.querySelector(".source-code");
+            if (codeEl) {
+              codeEl.textContent = "Loading...";
+              const source = await fetchSourceRange(filePath, startChar, endChar);
+              codeEl.textContent = source || "Could not load source";
+            }
+          }
+        });
+      }
+
+      // Load file and search for handler attribute in .xmlui, and function in .xs
+      function setupHandlerSourceLoader(detailsEl, filePath, handlerName, componentLabel) {
+        let loaded = false;
+        detailsEl.addEventListener("toggle", async () => {
+          if (detailsEl.open && !loaded) {
+            loaded = true;
+            const codeEl = detailsEl.querySelector(".source-code");
+            if (codeEl) {
+              codeEl.textContent = "Loading...";
+              try {
+                const outputSections = [];
+                let handlerValue = null; // The function name from the handler attribute
+
+                // Helper to find specific handler attribute in .xmlui
+                function findHandlerInXmlui(source, eventName, compLabel) {
+                  const lines = source.split("\n");
+                  const matches = [];
+
+                  // If we have a component label, find lines that have both the id and handler nearby
+                  if (compLabel) {
+                    // First find the component by id
+                    for (let i = 0; i < lines.length; i++) {
+                      const line = lines[i];
+                      const idPattern = new RegExp(`id\\s*=\\s*["']${compLabel}["']`);
+                      if (idPattern.test(line)) {
+                        // Found the component - look for handler on this line or nearby lines
+                        const searchStart = Math.max(0, i - 2);
+                        const searchEnd = Math.min(lines.length - 1, i + 5);
+                        for (let j = searchStart; j <= searchEnd; j++) {
+                          const attrPattern = new RegExp(`on${eventName}\\s*=\\s*"([^"]*)"`, "i");
+                          const attrMatch = lines[j].match(attrPattern);
+                          if (attrMatch) {
+                            matches.push({ lineNum: j, pattern: "handler-attr" });
+                            if (!handlerValue) handlerValue = attrMatch[1];
+                            break;
+                          }
+                        }
+                        break; // Found the component, stop searching
+                      }
+                    }
+                  } else {
+                    // No component label - find all matching handlers
+                    for (let i = 0; i < lines.length; i++) {
+                      const line = lines[i];
+
+                      // Look for on{EventName}= attribute
+                      const attrPattern = new RegExp(`on${eventName}\\s*=\\s*"([^"]*)"`, "i");
+                      const attrMatch = line.match(attrPattern);
+                      if (attrMatch) {
+                        matches.push({ lineNum: i, pattern: "handler-attr" });
+                        if (!handlerValue) handlerValue = attrMatch[1];
+                      }
+
+                      // Also look for emitEvent('{eventName}') calls
+                      const emitPattern = new RegExp(`emitEvent\\s*\\(\\s*['"]${eventName}['"]`, "i");
+                      if (emitPattern.test(line)) {
+                        matches.push({ lineNum: i, pattern: "handler-attr" });
+                      }
+                    }
+                  }
+                  return { lines, matches };
+                }
+
+                // Helper to format matches with context
+                function formatMatches(lines, matches) {
+                  const contextLines = 2;
+                  const outputLines = [];
+                  const shownRanges = new Set();
+
+                  for (const match of matches) {
+                    const start = Math.max(0, match.lineNum - contextLines);
+                    const end = Math.min(lines.length - 1, match.lineNum + contextLines);
+
+                    const rangeKey = `${start}-${end}`;
+                    if (shownRanges.has(rangeKey)) continue;
+                    shownRanges.add(rangeKey);
+
+                    if (outputLines.length > 0) outputLines.push("");
+
+                    for (let i = start; i <= end; i++) {
+                      const prefix = i === match.lineNum ? "→ " : "  ";
+                      const lineNum = String(i + 1).padStart(4);
+                      outputLines.push(`${prefix}${lineNum}: ${lines[i]}`);
+                    }
+                  }
+                  return outputLines;
+                }
+
+                // 1. Search .xmlui file for the specific handler
+                const xmluiSource = await fetchSourceRange(filePath, 0, 999999);
+                if (xmluiSource) {
+                  const result = findHandlerInXmlui(xmluiSource, handlerName, componentLabel);
+                  if (result.matches.length > 0) {
+                    outputSections.push(`// ${filePath.split("/").pop()} - handler attribute`);
+                    outputSections.push(...formatMatches(result.lines, result.matches));
+                  }
+                }
+
+                // 2. Search for handler in .xs files
+                // First try the direct .xs file, then search sibling .xs files in same directory
+                const xsFilePath = filePath + ".xs";
+                let foundXsFile = null;
+                let foundXsSource = null;
+                let handlerFunctionMatch = null;
+
+                // Helper to check if source is valid JS (not HTML error page)
+                const isValidJs = (src) => src && !src.trim().startsWith("<!") && !src.trim().startsWith("<html");
+
+                // Helper to find specific handler function in .xs source
+                const findHandlerFunction = (src, funcName) => {
+                  const lines = src.split("\n");
+                  const matches = [];
+                  // If we have a specific function name, look for it
+                  if (funcName) {
+                    // Extract just the function name (strip parens, etc)
+                    const cleanName = funcName.replace(/\(.*$/, "").trim();
+                    const funcPattern = new RegExp(`\\bfunction\\s+${cleanName}\\b`);
+                    for (let i = 0; i < lines.length; i++) {
+                      if (funcPattern.test(lines[i])) {
+                        matches.push({ lineNum: i, type: "function" });
+                      }
+                    }
+                  }
+                  return matches;
+                };
+
+                // Try direct .xs file first
+                const directXsSource = await fetchSourceRange(xsFilePath, 0, 999999);
+                if (isValidJs(directXsSource)) {
+                  foundXsFile = xsFilePath;
+                  foundXsSource = directXsSource;
+                } else {
+                  // Try to find sibling .xs files by checking common parent files
+                  // Extract directory and try FileCatalog.xmlui.xs, Main.xmlui.xs, etc.
+                  const pathParts = filePath.split("/");
+                  const fileName = pathParts.pop();
+                  const dirPath = pathParts.join("/");
+
+                  // Common parent component names to try
+                  const siblingNames = ["FileCatalog.xmlui.xs", "Main.xmlui.xs", "App.xmlui.xs"];
+                  // Also try the component name without "Header", "Footer", etc.
+                  const baseName = fileName.replace(/Header|Footer|Item|Row|Cell/g, "");
+                  if (baseName !== fileName) {
+                    siblingNames.unshift(baseName + ".xs");
+                  }
+
+                  for (const sibling of siblingNames) {
+                    const siblingPath = dirPath + "/" + sibling;
+                    const siblingSource = await fetchSourceRange(siblingPath, 0, 999999);
+                    if (isValidJs(siblingSource)) {
+                      foundXsFile = siblingPath;
+                      foundXsSource = siblingSource;
+                      break;
+                    }
+                  }
+                }
+
+                // Only show .xs section if we found a specific function to display
+                if (foundXsSource && handlerValue) {
+                  const lines = foundXsSource.split("\n");
+                  // Use the handler value (function name) from the xmlui attribute
+                  const funcMatches = findHandlerFunction(foundXsSource, handlerValue);
+
+                  if (funcMatches.length > 0) {
+                    if (outputSections.length > 0) outputSections.push("");
+                    outputSections.push(`// ${foundXsFile.split("/").pop()} - code-behind`);
+
+                    // Show just the matched function with context
+                    for (const match of funcMatches) {
+                      const start = Math.max(0, match.lineNum - 1);
+                      // Find end of function (simple heuristic: next function or 30 lines)
+                      let end = match.lineNum + 30;
+                      for (let i = match.lineNum + 1; i < lines.length && i < match.lineNum + 50; i++) {
+                        if (/^\s*function\s+\w+/.test(lines[i]) || /^}$/.test(lines[i].trim())) {
+                          end = i;
+                          break;
+                        }
+                      }
+                      end = Math.min(end, lines.length - 1);
+
+                      for (let i = start; i <= end; i++) {
+                        const prefix = i === match.lineNum ? "→ " : "  ";
+                        const lineNum = String(i + 1).padStart(4);
+                        outputSections.push(`${prefix}${lineNum}: ${lines[i]}`);
+                      }
+                    }
+                  }
+                  // If no function match found, don't show the .xs section at all
+                }
+
+                if (outputSections.length === 0) {
+                  // No useful content found
+                  codeEl.textContent = "// Source not found";
+                } else {
+                  codeEl.innerHTML = outputSections.join("\n")
+                    .replace(/</g, "&lt;")
+                    .replace(/^→ (.*)$/gm, '<span class="highlight-line">→ $1</span>');
+                }
+              } catch (err) {
+                codeEl.textContent = "Error loading source: " + err.message;
+              }
+            }
+          }
+        });
+      }
+
+      // Load file and search for variable declaration, showing context with highlighting
+      function setupVarSourceLoader(detailsEl, filePath, varName) {
+        let loaded = false;
+        detailsEl.addEventListener("toggle", async () => {
+          if (detailsEl.open && !loaded) {
+            loaded = true;
+            const codeEl = detailsEl.querySelector(".source-code");
+            if (codeEl) {
+              codeEl.textContent = "Loading...";
+              try {
+                const varNames = varName.split(",").map(v => v.trim());
+
+                // Helper to search for var declarations in source
+                function findVarMatches(source, sourceFile) {
+                  const lines = source.split("\n");
+                  const matches = [];
+                  for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i];
+                    for (const vn of varNames) {
+                      // Check for inline var declaration (in .xmlui files)
+                      if (line.includes(`var.${vn}=`) || line.includes(`var.${vn} =`)) {
+                        matches.push({ lineNum: i, pattern: "inline", file: sourceFile });
+                      }
+                      // Check for script var declaration
+                      const scriptPatterns = [
+                        new RegExp(`\\bvar\\s+${vn}\\b`),
+                        new RegExp(`\\blet\\s+${vn}\\b`),
+                        new RegExp(`\\bconst\\s+${vn}\\b`),
+                      ];
+                      for (const pat of scriptPatterns) {
+                        if (pat.test(line)) {
+                          matches.push({ lineNum: i, pattern: "script", file: sourceFile });
+                          break;
+                        }
+                      }
+                    }
+                  }
+                  return { lines, matches };
+                }
+
+                // Helper to format matches with context
+                function formatMatches(lines, matches, fileLabel) {
+                  const contextLines = 2;
+                  const outputLines = [];
+                  const shownRanges = new Set();
+
+                  if (fileLabel) {
+                    outputLines.push(`// ${fileLabel}`);
+                  }
+
+                  for (const match of matches) {
+                    const start = Math.max(0, match.lineNum - contextLines);
+                    const end = Math.min(lines.length - 1, match.lineNum + contextLines);
+
+                    const rangeKey = `${start}-${end}`;
+                    if (shownRanges.has(rangeKey)) continue;
+                    shownRanges.add(rangeKey);
+
+                    if (outputLines.length > (fileLabel ? 1 : 0)) outputLines.push("");
+
+                    for (let i = start; i <= end; i++) {
+                      const prefix = i === match.lineNum ? "→ " : "  ";
+                      const lineNum = String(i + 1).padStart(4);
+                      outputLines.push(`${prefix}${lineNum}: ${lines[i]}`);
+                    }
+                  }
+                  return outputLines;
+                }
+
+                // First try the .xmlui file
+                const xmluiSource = await fetchSourceRange(filePath, 0, 999999);
+                let result = xmluiSource ? findVarMatches(xmluiSource, filePath) : { lines: [], matches: [] };
+
+                // If no matches in .xmlui, try the .xs code-behind file
+                if (result.matches.length === 0) {
+                  const xsFilePath = filePath + ".xs";
+                  const xsSource = await fetchSourceRange(xsFilePath, 0, 999999);
+                  if (xsSource) {
+                    result = findVarMatches(xsSource, xsFilePath);
+                    if (result.matches.length > 0) {
+                      const outputLines = formatMatches(result.lines, result.matches, xsFilePath.split("/").pop());
+                      codeEl.innerHTML = outputLines.join("\n")
+                        .replace(/</g, "&lt;")
+                        .replace(/^→ (.*)$/gm, '<span class="highlight-line">→ $1</span>');
+                      return;
+                    }
+                  }
+                }
+
+                if (result.matches.length === 0) {
+                  // No match found in either file - show first 20 lines of xmlui as fallback
+                  const lines = xmluiSource ? xmluiSource.split("\n") : [];
+                  codeEl.textContent = lines.slice(0, 20).join("\n") + (lines.length > 20 ? "\n..." : "");
+                  return;
+                }
+
+                // Format matches from .xmlui file
+                const outputLines = formatMatches(result.lines, result.matches, null);
+                codeEl.innerHTML = outputLines.join("\n")
+                  .replace(/</g, "&lt;")
+                  .replace(/^→ (.*)$/gm, '<span class="highlight-line">→ $1</span>');
+              } catch (err) {
+                codeEl.textContent = "Error loading source: " + err.message;
+              }
+            }
+          }
+        });
+      }
+
+      // Wrap diff HTML in expander - open if small, closed if large (or force closed)
+      function wrapDiffInExpander(diffHtml, summaryText = "Diff", forceCollapsed = false) {
+        if (forceCollapsed) {
+          return `<details><summary>${summaryText}</summary><div>${diffHtml}</div></details>`;
+        }
+        const lineCount = (diffHtml.match(/\n/g) || []).length + 1;
+        const isLarge = lineCount > 20;
+        const openAttr = isLarge ? "" : " open";
+        return `<details${openAttr}><summary>${summaryText}</summary><div>${diffHtml}</div></details>`;
+      }
+
+      function sortKey(entry) {
+        if (!entry) return 0;
+        if (entry.perfTs !== undefined) return entry.perfTs;
+        return entry.ts || 0;
+      }
+
+      function resolveFileLabel(fileId) {
+        if (fileId === undefined || fileId === null) return undefined;
+        const root = window.parent && window.parent !== window ? window.parent : window;
+        const sources = root._xsSourceFiles || root._xsSources;
+        if (!sources) return String(fileId);
+        if (Array.isArray(sources)) {
+          const idx = typeof fileId === "number" ? fileId : Number(fileId);
+          if (Number.isFinite(idx) && sources[idx]) return sources[idx];
+        }
+        if (sources[fileId]) return String(fileId);
+        const asNumber = typeof fileId === "number" ? fileId : Number(fileId);
+        if (Number.isFinite(asNumber)) {
+          const keys = Object.keys(sources);
+          if (keys[asNumber]) return keys[asNumber];
+        }
+        return String(fileId);
+      }
+
+      function getSourceFileList() {
+        const root = window.parent && window.parent !== window ? window.parent : window;
+        const sources = root._xsSourceFiles || root._xsSources;
+        if (!sources) return [];
+        if (Array.isArray(sources)) return sources;
+        return Object.keys(sources);
+      }
+
+      // =============================================================================
+      // ENTRY NORMALIZATION & FILTERING
+      // =============================================================================
+
+      function normalizeEntry(entry) {
+        if (!entry) return null;
+        if (typeof entry === "string") {
+          return { ts: Date.now(), kind: "log", text: entry };
+        }
+        if (typeof entry === "object") {
+          const findInstanceId = (value, depth = 2) => {
+            if (!value || typeof value !== "object" || depth < 0) return undefined;
+            if (value.instanceId !== undefined) return value.instanceId;
+            if (value.dataSourceInstanceId !== undefined) return value.dataSourceInstanceId;
+            const values = Object.values(value);
+            for (const v of values) {
+              if (v && typeof v === "object") {
+                const found = findInstanceId(v, depth - 1);
+                if (found !== undefined) return found;
+              }
+            }
+            return undefined;
+          };
+
+          const instanceId =
+            entry.instanceId ?? findInstanceId(entry.detail) ?? findInstanceId(entry.data) ?? findInstanceId(entry.meta);
+          if (instanceId !== undefined) {
+            return { ...entry, instanceId };
+          }
+          return entry;
+        }
+        return null;
+      }
+
+      function getAllEntries() {
+        const logs = (window.parent && window.parent._xsLogs) || [];
+        return logs.map(normalizeEntry).filter((entry) => entry && (entry.kind || entry.text));
+      }
+
+      function entryMatches(entry, textFilter) {
+        if (entry.componentLabel === "Inspector" || entry.uid === "Inspector") return false;
+        if (entry.detail?.text === "Inspector" || entry.detail?.componentId === "Inspector") return false;
+        if (entry.componentType === "vite-error-overlay" || entry.uid === "vite-error-overlay") return false;
+        if (entry.componentLabel?.startsWith("vite-") || entry.uid?.startsWith("vite-")) return false;
+        if (!textFilter) return true;
+        const haystack = `${entry.kind || ""} ${entry.eventName || ""} ${entry.uid || ""} ${entry.text || ""}`.toLowerCase();
+        return haystack.includes(textFilter.toLowerCase());
+      }
+
+      // =============================================================================
+      // DEDUPLICATION HELPERS
+      // =============================================================================
+
+      function fingerprintDiff(entry) {
+        if (!entry || !Array.isArray(entry.diffJson)) return "";
+        const d = entry.diffJson;
+        if (d.length === 1) {
+          const only = d[0];
+          try {
+            return JSON.stringify({ path: only.path, before: only.before, after: only.after });
+          } catch {
+            return `${only.path}`;
+          }
+        }
+        try {
+          return JSON.stringify(d);
+        } catch {
+          return String(d.length);
+        }
+      }
+
+      function fingerprintStateChange(entry) {
+        if (!entry) return "";
+        if (entry.diffPretty) return entry.diffPretty;
+        if (entry.diffText) return entry.diffText;
+        const fp = fingerprintDiff(entry);
+        if (fp) return entry.instanceId ? `${entry.instanceId}|${fp}` : fp;
+        if (entry.text) return entry.text;
+        try {
+          const base = JSON.stringify(entry);
+          return entry.instanceId ? `${entry.instanceId}|${base}` : base;
+        } catch {
+          return String(entry.kind || "state:changes");
+        }
+      }
+
+      function isNoopStateChange(entry) {
+        if (!entry || !Array.isArray(entry.diffJson) || entry.diffJson.length !== 1) return false;
+        const only = entry.diffJson[0];
+        try {
+          return JSON.stringify(only.before) === JSON.stringify(only.after);
+        } catch {
+          return false;
+        }
+      }
+
+      // =============================================================================
+      // COMMON DATA PROCESSING
+      // =============================================================================
+
+      function buildEntryMeta(e) {
+        const resolvedFile = resolveFileLabel(e.ownerFileId);
+        const parts = [];
+        if (e.perfTs !== undefined) parts.push(`perfTs ${e.perfTs.toFixed(1)}`);
+        if (e.instanceId) parts.push(`instance ${e.instanceId}`);
+        if (e.dataSourceUrl) parts.push(`url ${e.dataSourceUrl}`);
+        if (e.ownerUid) parts.push(`uid ${e.ownerUid}`);
+        if (resolvedFile) {
+          // Include handler code for highlighting in modal if available
+          const highlight = e.handlerCode ? ` data-highlight="${e.handlerCode.replace(/"/g, '&quot;')}"` : "";
+          parts.push(`file <span class="file-link" data-file="${resolvedFile}"${highlight}>${resolvedFile}</span>`);
+        }
+        return {
+          resolvedFile, parts,
+          hasSource: e.ownerSource?.start !== undefined && e.ownerSource?.end !== undefined,
+          sourceRange: e.ownerSource ? `${e.ownerSource.start}-${e.ownerSource.end}` : null,
+        };
+      }
+
+      function buildTraceSummary(traceEntries) {
+        const starts = traceEntries.filter((e) => e.kind === "handler:start");
+        const start = starts[0];
+        const error = traceEntries.find((e) => e.kind === "handler:error");
+        const stateChanges = traceEntries.filter((e) => e.kind === "state:changes");
+
+        let componentText = "";
+        if (start) {
+          const type = start.componentType || "";
+          const label = start.componentLabel || "";
+          const uid = start.uid || "";
+          const event = start.eventName || "";
+          const parts = [];
+          if (type) parts.push(type);
+          if (label) parts.push(`"${label}"`);
+          else if (uid && uid !== event) parts.push(uid);
+          if (event) parts.push(event);
+          componentText = parts.join(" ");
+        } else {
+          const interaction = traceEntries.find((e) => e.kind === "interaction");
+          if (interaction) {
+            const label = interaction.componentLabel || interaction.uid || "Unknown";
+            const action = interaction.interaction || interaction.eventName || "";
+            const detailTextContent = interaction.detail?.text;
+            const hasOnlyTag = /^[a-z]+$/.test(label);
+            const contextText = hasOnlyTag && detailTextContent && detailTextContent.length < 40 ? ` "${detailTextContent}"` : "";
+            componentText = action ? `${label}${contextText} ${action}` : label + contextText;
+          }
+        }
+
+        const traceId = traceEntries[0]?.traceId || "";
+
+        // If still no componentText, try to derive from state changes (e.g. DataSource updates)
+        if (!componentText && stateChanges.length > 0) {
+          const dsChange = stateChanges.find((e) => e.componentType === "DataSource" || (e.eventName && e.eventName.startsWith("DataSource:")));
+          if (dsChange) {
+            const dsName = dsChange.eventName || `DataSource:${dsChange.uid || "unknown"}`;
+            componentText = dsName;
+          } else {
+            // Use first state change's eventName if available
+            const first = stateChanges[0];
+            componentText = first.eventName || first.componentType || "";
+          }
+        }
+
+        // Check for navigate events
+        if (!componentText) {
+          const nav = traceEntries.find((e) => e.kind === "navigate");
+          if (nav) componentText = "Navigation";
+        }
+
+        const changeCount = stateChanges.reduce((acc, e) => acc + (e.diffJson ? e.diffJson.length : 0), 0);
+        const handlerNames = starts.map((s) => s.eventName || "unknown");
+
+        // Calculate trace duration from perfTs
+        const entriesWithPerfTs = traceEntries.filter((e) => typeof e.perfTs === "number");
+        let totalDuration = null;
+        if (entriesWithPerfTs.length >= 2) {
+          const sorted = entriesWithPerfTs.slice().sort((a, b) => a.perfTs - b.perfTs);
+          totalDuration = sorted[sorted.length - 1].perfTs - sorted[0].perfTs;
+        }
+
+        // Collect all handler:complete with durations for header display
+        const handlerDurations = [];
+        traceEntries.forEach((e) => {
+          if (e.kind === "handler:complete") {
+            const name = e.eventName || "handler";
+            const label = e.componentLabel || null;
+            const duration = typeof e.duration === "number" ? e.duration : null;
+            handlerDurations.push({ name, label, duration });
+          }
+        });
+
+        // Find expensive parts (handlers and API calls with duration > 10ms) for body breakdown
+        const expensiveParts = [];
+        traceEntries.forEach((e) => {
+          if (e.kind === "handler:complete" && typeof e.duration === "number" && e.duration > 10) {
+            const label = e.componentLabel || e.uid || e.eventName || "handler";
+            expensiveParts.push({ name: `${label}.${e.eventName || "handler"}`, duration: e.duration, kind: "handler" });
+          }
+          if (e.kind === "api:complete" && typeof e.duration === "number" && e.duration > 10) {
+            const method = e.method || "GET";
+            const urlPath = e.url ? new URL(e.url, "http://x").pathname : "";
+            expensiveParts.push({ name: `${method} ${urlPath}`, duration: e.duration, kind: "api" });
+          }
+        });
+        // Sort by duration descending, take top 3
+        expensiveParts.sort((a, b) => b.duration - a.duration);
+        const topExpensive = expensiveParts.slice(0, 3);
+
+        // Timeline breakdown: analyze where time is spent
+        const timelineBreakdown = [];
+        let timelineOrder = 0;
+        if (entriesWithPerfTs.length >= 2) {
+          const sorted = entriesWithPerfTs.slice().sort((a, b) => a.perfTs - b.perfTs);
+          const traceStart = sorted[0].perfTs;
+          const traceEnd = sorted[sorted.length - 1].perfTs;
+
+          // Build map of api:start events to calculate duration for api:complete
+          const apiStarts = new Map();
+          sorted.forEach(e => {
+            if (e.kind === "api:start" && e.url) {
+              const key = `${e.method || "GET"}:${e.url}`;
+              apiStarts.set(key, e.perfTs);
+            }
+          });
+
+          // Find first handler:start
+          const firstHandlerStart = sorted.find(e => e.kind === "handler:start");
+          const firstHandlerTs = firstHandlerStart ? firstHandlerStart.perfTs : traceEnd;
+
+          // Track DataSource completions before first handler (these explain "before handlers" time)
+          let lastEventTs = traceStart;
+          sorted.forEach(e => {
+            // DataSource state:changes before first handler - show where time is going
+            if (e.kind === "state:changes" && e.componentType === "DataSource" && e.perfTs < firstHandlerTs) {
+              const dsName = e.uid || e.dataSourceId || "DataSource";
+              const duration = e.perfTs - lastEventTs;
+              if (duration > 100) { // Only show gaps > 100ms
+                timelineBreakdown.push({ phase: `DataSource:${dsName}`, duration, perfTs: e.perfTs, order: timelineOrder++ });
+              }
+              lastEventTs = e.perfTs;
+            }
+          });
+
+          // Collect all timed activities and detect gaps between handlers
+          let lastHandlerEndTime = null;
+          let lastHandlerLabel = null;
+          sorted.forEach(e => {
+            // Detect gaps: time between last handler:complete and this handler:start
+            if (e.kind === "handler:start" && lastHandlerEndTime !== null) {
+              const gap = e.perfTs - lastHandlerEndTime;
+              if (gap > 100) { // Only report gaps > 100ms
+                timelineBreakdown.push({
+                  phase: "gap",
+                  duration: gap,
+                  order: timelineOrder++
+                });
+              }
+            }
+
+            if (e.kind === "handler:complete") {
+              lastHandlerEndTime = e.perfTs;
+              lastHandlerLabel = e.componentLabel || e.eventName || "handler";
+              if (typeof e.duration === "number" && e.duration > 10) {
+                timelineBreakdown.push({ phase: `handler:${lastHandlerLabel}`, duration: e.duration, perfTs: e.perfTs, order: timelineOrder++ });
+              }
+            }
+            if (e.kind === "api:complete") {
+              const method = e.method || "GET";
+              const key = `${method}:${e.url}`;
+              // Calculate duration from api:start if not already present
+              let duration = e.duration;
+              if (typeof duration !== "number" && apiStarts.has(key)) {
+                duration = e.perfTs - apiStarts.get(key);
+                apiStarts.delete(key); // Remove so we don't match again
+              }
+              if (typeof duration === "number" && duration > 10) {
+                const urlPath = e.url ? new URL(e.url, "http://x").pathname.split("/").pop() : "";
+                timelineBreakdown.push({ phase: `api:${method} ${urlPath}`, duration, perfTs: e.perfTs, order: timelineOrder++ });
+              }
+            }
+          });
+
+          // Time after last handler:complete
+          const lastHandlerComplete = [...sorted].reverse().find(e => e.kind === "handler:complete");
+          if (lastHandlerComplete && traceEnd - lastHandlerComplete.perfTs > 10) {
+            timelineBreakdown.push({ phase: "after handlers", duration: traceEnd - lastHandlerComplete.perfTs, order: timelineOrder++ });
+          }
+
+          // Calculate unaccounted time
+          const accountedTime = timelineBreakdown.reduce((sum, item) => sum + item.duration, 0);
+          const totalTime = traceEnd - traceStart;
+          const unaccounted = totalTime - accountedTime;
+          if (unaccounted > 10) {
+            timelineBreakdown.push({ phase: "other", duration: unaccounted, order: timelineOrder++ });
+          }
+        }
+
+        return {
+          componentText: componentText || "Unknown trace",
+          changeCount,
+          hasError: !!error,
+          multipleStarts: handlerNames.length > 1,
+          handlerNames,
+          handlerDurations,
+          startCount: starts.length,
+          timestamp: start?.ts || traceEntries[0]?.ts,
+          traceId,
+          totalDuration,
+          expensiveParts: topExpensive,
+          timelineBreakdown,
+        };
+      }
+
+      function processTraceEvents(traceEntries) {
+        const events = [];
+        let dedupedCount = 0;
+        const lastFingerprintByEvent = new Map();
+        const orderedEntries = traceEntries.slice().sort((a, b) => sortKey(a) - sortKey(b));
+
+        // Build queue of api:start events to calculate duration for api:complete (FIFO for same URLs)
+        const apiStartQueues = new Map(); // key -> array of perfTs values
+        orderedEntries.forEach(e => {
+          if (e.kind === "api:start" && e.url && typeof e.perfTs === "number") {
+            const key = `${e.method || "GET"}:${e.url}`;
+            if (!apiStartQueues.has(key)) apiStartQueues.set(key, []);
+            apiStartQueues.get(key).push(e.perfTs);
+          }
+        });
+
+        // Track component:vars deduplication separately with counts
+        const componentVarsCounts = new Map(); // key -> { entry, count, meta }
+
+        orderedEntries.forEach((e) => {
+          // Calculate API duration for api:complete (match with earliest unmatched api:start)
+          if (e.kind === "api:complete" && e.url && typeof e.perfTs === "number") {
+            const key = `${e.method || "GET"}:${e.url}`;
+            const queue = apiStartQueues.get(key);
+            if (queue && queue.length > 0) {
+              const startTs = queue.shift(); // FIFO - take earliest
+              e._apiDuration = e.perfTs - startTs;
+            }
+          }
+
+          if (e.kind === "state:changes") {
+            if (isNoopStateChange(e)) { dedupedCount += 1; return; }
+            const fp = fingerprintStateChange(e);
+            const key = (e.eventName || e.uid || "state:changes") + "|" + (e.componentType || "");
+            if (fp && lastFingerprintByEvent.get(key) === fp) { dedupedCount += 1; return; }
+            lastFingerprintByEvent.set(key, fp);
+          }
+
+          // Deduplicate component:vars events with identical values
+          if (e.kind === "component:vars:init" || e.kind === "component:vars:change") {
+            const varName = e.eventName || "unknown";
+            // Fingerprint based on var name and the diff content
+            const fp = e.diffPretty || JSON.stringify(e.changes);
+            const key = `${e.kind}|${varName}|${fp}`;
+
+            if (componentVarsCounts.has(key)) {
+              componentVarsCounts.get(key).count += 1;
+              return; // Skip adding duplicate
+            }
+            componentVarsCounts.set(key, { entry: e, count: 1, meta: buildEntryMeta(e) });
+            return; // Will add after loop
+          }
+
+          const meta = buildEntryMeta(e);
+          // Add duration to handler:complete eventTitle
+          let eventTitle = e.kind + (e.eventName ? ` ${e.eventName}` : "");
+          if (e.kind === "handler:complete" && e.duration !== undefined) {
+            eventTitle += ` (${e.duration.toFixed(1)}ms)`;
+          }
+          events.push({
+            entry: e, meta,
+            eventTitle,
+            label: e.componentLabel ? `"${e.componentLabel}"` : "",
+          });
+        });
+
+        // Add deduplicated component:vars events with counts
+        for (const [, data] of componentVarsCounts) {
+          const { entry, count, meta } = data;
+          events.push({
+            entry: { ...entry, _dedupCount: count },
+            meta,
+            eventTitle: entry.kind + (entry.eventName ? ` ${entry.eventName}` : ""),
+            label: entry.componentLabel ? `"${entry.componentLabel}"` : "",
+          });
+          if (count > 1) dedupedCount += count - 1;
+        }
+
+        // Re-sort events by timestamp after adding component:vars
+        events.sort((a, b) => sortKey(a.entry) - sortKey(b.entry));
+
+        return { events, dedupedCount };
+      }
+
+      function buildInteractionText(entry) {
+        const type = entry.componentType || "";
+        const label = entry.componentLabel || entry.uid || "";
+        const detailTextContent = entry.detail?.text;
+        const hasOnlyTag = !type && label && /^[a-z]+$/.test(label);
+        const contextText = hasOnlyTag && detailTextContent && detailTextContent.length < 40 ? ` "${detailTextContent}"` : "";
+        return type ? (label && label !== type ? `${type} "${label}"` : type) : (label || "Unknown") + contextText;
+      }
+
+      function findDataSourceCollisions(entries) {
+        const groups = new Map();
+        entries.forEach((e) => {
+          const isDataSource = e.componentType === "DataSource" || (e.eventName && e.eventName.startsWith("DataSource:"));
+          if (!isDataSource) return;
+          const key = e.dataSourceId || e.uid;
+          if (!key) return;
+          if (!groups.has(key)) groups.set(key, []);
+          groups.get(key).push(e);
+        });
+        const collisions = [];
+        for (const [key, list] of groups.entries()) {
+          const uniqueInstances = new Set(list.map((e) => e.instanceId).filter(Boolean));
+          if (uniqueInstances.size > 1 || list.length > 1) {
+            collisions.push({ key, entries: list.map((e) => ({ entry: e, meta: buildEntryMeta(e) })) });
+          }
+        }
+        return collisions;
+      }
+
+      function groupDataSourceUpdates(entries) {
+        const groups = new Map();
+        entries.forEach((entry) => {
+          const name = entry.uid || (entry.eventName && entry.eventName.replace("DataSource:", "")) || "unknown";
+          const key = entry.instanceId ? `${name}::${entry.instanceId}` : name;
+          if (!groups.has(key)) groups.set(key, { name, instanceId: entry.instanceId, entries: [] });
+          groups.get(key).entries.push(entry);
+        });
+
+        const result = [];
+        for (const [, group] of groups.entries()) {
+          const { name, instanceId, entries } = group;
+          entries.sort((a, b) => (a.ts || 0) - (b.ts || 0));
+          const firstTs = entries[0]?.ts;
+          const lastTs = entries[entries.length - 1]?.ts;
+          const timeline = entries.map((e, i) => i === 0 ? "0ms" : `+${(e.ts || 0) - (firstTs || 0)}ms`);
+
+          let isRedundant = false;
+          if (entries.length > 1) {
+            const firstData = entries[0]?.diffJson?.[0]?.after;
+            isRedundant = entries.every((e) => {
+              try { return JSON.stringify(e?.diffJson?.[0]?.after) === JSON.stringify(firstData); }
+              catch { return false; }
+            });
+          }
+
+          result.push({
+            name, instanceId, timeline, isRedundant,
+            entries: entries.map((e, i) => ({ entry: e, relTime: i === 0 ? "0ms" : `+${(e.ts || 0) - (firstTs || 0)}ms`, meta: buildEntryMeta(e) })),
+            updateCount: entries.length, firstTs, lastTs,
+            meta: buildEntryMeta(entries[0]),
+          });
+        }
+        return result;
+      }
+
+      function processAllEntries(entries) {
+        const interactions = entries.filter((e) => e.kind === "interaction" && !e.traceId);
+        const nonInteractions = entries.filter((e) => e.kind !== "interaction" || e.traceId);
+
+        const tracesMap = new Map();
+        const orphans = [];
+        nonInteractions.forEach((entry) => {
+          if (entry.traceId) {
+            if (!tracesMap.has(entry.traceId)) tracesMap.set(entry.traceId, []);
+            tracesMap.get(entry.traceId).push(entry);
+          } else {
+            orphans.push(entry);
+          }
+        });
+
+        const processedTraces = [];
+        for (const [traceId, traceEntries] of tracesMap.entries()) {
+          const summary = buildTraceSummary(traceEntries);
+          const { events, dedupedCount } = processTraceEvents(traceEntries);
+          // Use minimum timestamp from all entries (first event in trace)
+          const minTs = Math.min(...traceEntries.map(e => sortKey(e) || Infinity));
+          processedTraces.push({ traceId, summary, events, dedupedCount, ts: minTs === Infinity ? 0 : minTs });
+        }
+        processedTraces.sort((a, b) => b.ts - a.ts);
+
+        const processedInteractions = interactions.map((entry) => ({
+          entry, componentText: buildInteractionText(entry), ts: sortKey(entry) || 0,
+        }));
+
+        const timelineItems = [];
+        processedTraces.forEach((trace) => timelineItems.push({ type: "trace", ...trace }));
+        processedInteractions.forEach((interaction) => timelineItems.push({ type: "interaction", ...interaction }));
+        timelineItems.sort((a, b) => b.ts - a.ts);
+
+        const dataSourceOrphans = orphans.filter((e) => e.componentType === "DataSource" || (e.eventName && e.eventName.startsWith("DataSource:")));
+        const otherOrphans = orphans.filter((e) => e.componentType !== "DataSource" && !(e.eventName && e.eventName.startsWith("DataSource:")));
+
+        return {
+          timelineItems,
+          groupedDataSources: groupDataSourceUpdates(dataSourceOrphans),
+          otherOrphans: otherOrphans.map((e) => ({ entry: e, meta: buildEntryMeta(e), title: e.eventName ? `${e.kind} ${e.eventName}` : e.kind })),
+          collisions: findDataSourceCollisions(entries),
+          sourceFiles: getSourceFileList(),
+          totalEvents: entries.length,
+          totalDeduped: processedTraces.reduce((acc, t) => acc + t.dedupedCount, 0),
+        };
+      }
+
+      // =============================================================================
+      // PRETTY VIEW RENDERING
+      // =============================================================================
+
+      // Check if two traces are similar enough to collapse
+      function areTracesSimilar(trace1, trace2) {
+        if (!trace1 || !trace2) return false;
+        // Same component/handler description
+        if (trace1.summary.componentText !== trace2.summary.componentText) return false;
+        // Same handler names
+        const h1 = trace1.summary.handlerNames.join(",");
+        const h2 = trace2.summary.handlerNames.join(",");
+        return h1 === h2;
+      }
+
+      // Group consecutive similar traces
+      function groupSimilarTraces(items) {
+        const result = [];
+        let currentGroup = null;
+
+        items.forEach((item) => {
+          if (item.type === "trace") {
+            // Skip 0-diff traces
+            if (item.summary.changeCount === 0 && !item.summary.hasError) return;
+
+            if (!currentGroup) {
+              currentGroup = { type: "trace-group", traces: [item] };
+            } else if (areTracesSimilar(currentGroup.traces[0], item)) {
+              currentGroup.traces.push(item);
+            } else {
+              result.push(currentGroup);
+              currentGroup = { type: "trace-group", traces: [item] };
+            }
+          } else {
+            // Push any pending trace group before interaction
+            if (currentGroup) {
+              result.push(currentGroup);
+              currentGroup = null;
+            }
+            result.push(item);
+          }
+        });
+
+        // Push final trace group
+        if (currentGroup) {
+          result.push(currentGroup);
+        }
+
+        return result;
+      }
+
+      function renderPrettyView(processed) {
+        const blocks = [];
+        const notes = [];
+
+        // Group similar consecutive traces
+        const groupedItems = groupSimilarTraces(processed.timelineItems);
+
+        groupedItems.forEach((item) => {
+          if (item.type === "trace-group") {
+            const traces = item.traces;
+            if (traces.length === 1) {
+              // Single trace - render normally
+              blocks.push(renderTraceGroupPretty(traces[0]));
+            } else if (traces.length === 2) {
+              // Two traces - render both (reverse order: oldest first for readability)
+              blocks.push(renderTraceGroupPretty(traces[1]));
+              blocks.push(renderTraceGroupPretty(traces[0]));
+            } else {
+              // 3+ traces - show first (chronologically), ellipsis, last (chronologically)
+              // Since timeline is reverse-chron, traces[length-1] is oldest, traces[0] is newest
+              blocks.push(renderTraceGroupPretty(traces[traces.length - 1]));
+              const skipped = traces.length - 2;
+              blocks.push(`
+                <div class="trace-group" style="text-align: center; padding: 8px; color: var(--color-text-muted); font-style: italic;">
+                  … ${skipped} more similar "${traces[0].summary.componentText}" trace${skipped > 1 ? "s" : ""} …
+                </div>
+              `);
+              blocks.push(renderTraceGroupPretty(traces[0]));
+            }
+          } else if (item.type === "trace") {
+            // Should not happen after grouping, but handle just in case
+            if (item.summary.changeCount === 0 && !item.summary.hasError) return;
+            blocks.push(renderTraceGroupPretty(item));
+          } else if (item.type === "interaction") {
+            blocks.push(renderInteractionPretty(item));
+          }
+        });
+
+        if (processed.groupedDataSources.length) {
+          blocks.push(`<div class="section-header">DataSource updates (async):</div>`);
+          blocks.push(renderDataSourceGroupsPretty(processed.groupedDataSources));
+        }
+
+        if (processed.otherOrphans.length) {
+          blocks.push(`<div class="section-header">Other events without trace:</div>`);
+          processed.otherOrphans.slice().reverse().forEach((orphan) => blocks.push(renderOrphanPretty(orphan)));
+        }
+
+        if (processed.collisions.length) {
+          const items = processed.collisions.map((c) => {
+            const rows = c.entries.map((item) => {
+              const parts = item.meta.parts.filter((p) => !p.startsWith("perfTs"));
+              return `<div class="note-item">- ${parts.join(" | ")}</div>`;
+            }).join("");
+            return `<div class="note-key">${c.key}</div>${rows}`;
+          }).join("");
+          notes.push(`
+            <div class="note-title">DataSource identity reused across components</div>
+            <div class="note-description">These are independent instances that share the same id/uid. If you intended shared state, lift the DataSource to a common parent.</div>
+            <div class="note-items">${items}</div>
+          `);
+        }
+
+        if (notes.length) {
+          blocks.push(`
+            <details class="collapsible-section">
+              <summary>Notes (${notes.length})</summary>
+              <div class="collapsible-content">
+                <ol class="notes-list">${notes.map((note) => `<li>${note}</li>`).join("")}</ol>
+              </div>
+            </details>
+          `);
+        }
+
+        if (processed.sourceFiles.length) {
+          const items = processed.sourceFiles.map((file, idx) => `<div class="source-file">[${idx}] <span class="file-link" data-file="${file}">${file}</span></div>`).join("");
+          blocks.push(`
+            <details class="collapsible-section">
+              <summary>Source files (${processed.sourceFiles.length})</summary>
+              <div class="collapsible-content">${items}</div>
+            </details>
+          `);
+        }
+
+        return blocks.join("");
+      }
+
+      function renderTraceGroupPretty(trace) {
+        const { summary, events, dedupedCount, traceId } = trace;
+        const age = formatAge(summary.timestamp);
+
+        // Build header: just error badge and total duration
+        let changesHtml = "";
+        if (summary.hasError) {
+          changesHtml = `<span class="badge-error">error</span> `;
+        }
+
+        let durationHtml = "";
+        if (summary.totalDuration !== null) {
+          durationHtml = `<span class="text-muted">duration: ${summary.totalDuration.toFixed(0)}ms</span>`;
+        }
+
+        let bodyHtml = "";
+
+        // Show timeline breakdown as a table (chronological order)
+        if (summary.timelineBreakdown.length > 0 && summary.totalDuration) {
+          const sorted = summary.timelineBreakdown.slice().sort((a, b) => a.order - b.order);
+          let tableRows = sorted.map(item => {
+            return `<tr><td>${item.phase}</td><td class="text-right">${item.duration.toFixed(0)}ms</td></tr>`;
+          }).join("");
+          tableRows += `<tr class="timeline-total"><td><strong>total</strong></td><td class="text-right"><strong>${summary.totalDuration.toFixed(0)}ms</strong></td></tr>`;
+          bodyHtml += `<table class="timeline-table"><thead><tr><th>phase</th><th class="text-right">duration</th></tr></thead><tbody>${tableRows}</tbody></table>`;
+        }
+
+        events.forEach((evt) => {
+          const e = evt.entry;
+          const metaInline = evt.meta.parts.length ? `<span class="meta-inline">(${evt.meta.parts.join(" | ")})</span>` : "";
+
+          bodyHtml += `<div class="trace-event">`;
+
+          if (e.kind === "api:start" || e.kind === "api:complete" || e.kind === "api:error") {
+            const method = e.method || "GET";
+            const url = e.url || "";
+            const errorClass = e.kind === "api:error" ? "text-error" : "";
+            const errorInfo = e.kind === "api:error" && e.error ? ` <span class="text-error">- ${e.error}</span>` : "";
+            const durationInfo = e.kind === "api:complete" && typeof e._apiDuration === "number" ? ` (${e._apiDuration.toFixed(1)}ms)` : "";
+            const statusInfo = e.kind === "api:complete" && e.status ? ` <span class="badge-success">${e.status}</span>` : "";
+            bodyHtml += `<div class="trace-event-header ${errorClass}">[${e.kind}]${statusInfo}${durationInfo} <strong>${method}</strong> ${url}${errorInfo}${metaInline}</div>`;
+            // Show request body if present (for api:start)
+            if (e.body && e.kind === "api:start") {
+              const bodyStr = typeof e.body === "string" ? e.body : JSON.stringify(e.body, null, 2);
+              const truncatedBody = bodyStr.length > 500 ? bodyStr.substring(0, 500) + "..." : bodyStr;
+              bodyHtml += `<details><summary>Request</summary><pre class="api-body">${truncatedBody}</pre></details>`;
+            }
+            // Show response for api:complete
+            if (e.kind === "api:complete") {
+              let resultStr;
+              if (e.result === undefined) {
+                resultStr = "(no response body)";
+              } else if (e.result === null) {
+                resultStr = "null";
+              } else if (e.result === "") {
+                resultStr = "(empty string)";
+              } else if (typeof e.result === "string") {
+                resultStr = e.result || "(empty string)";
+              } else {
+                resultStr = JSON.stringify(e.result, null, 2);
+              }
+              const truncatedResult = resultStr.length > 500 ? resultStr.substring(0, 500) + "..." : resultStr;
+              bodyHtml += `<details><summary>Response</summary><pre class="api-body">${truncatedResult}</pre></details>`;
+            }
+          } else if (e.kind === "error:boundary") {
+            const location = e.location ? ` in <code>${e.location}</code>` : "";
+            bodyHtml += `<div class="trace-event-header text-error">[${e.kind}] <strong>${e.error || "Unknown error"}</strong>${location}${metaInline}</div>`;
+            if (e.stack) bodyHtml += `<details><summary>Stack trace</summary><pre class="stack-trace">${e.stack}</pre></details>`;
+            if (e.componentStack) bodyHtml += `<details><summary>Component stack</summary><pre class="stack-trace">${e.componentStack}</pre></details>`;
+          } else if (e.kind === "handler:error") {
+            const errorMsg = e.error?.message || "Unknown error";
+            const fileLabel = e.ownerFileId !== undefined ? resolveFileLabel(e.ownerFileId) : null;
+            const fileInfo = fileLabel ? ` <span class="text-muted">in ${fileLabel}</span>` : "";
+            // Filter file from metadata since we show it prominently in the error text
+            const filteredParts = evt.meta.parts.filter(p => !p.startsWith("file "));
+            const errorMetaInline = filteredParts.length ? `<span class="meta-inline">(${filteredParts.join(" | ")})</span>` : "";
+            bodyHtml += `<div class="trace-event-header text-error">[${e.kind}] ${e.eventName || ""} <strong>${errorMsg}</strong>${fileInfo}${errorMetaInline}</div>`;
+            if (e.error?.stack) bodyHtml += `<details><summary>Stack trace</summary><pre class="stack-trace">${e.error.stack}</pre></details>`;
+            // Add XMLUI source expander if available
+            if (e.ownerSource && fileLabel) {
+              const [startChar, endChar] = [e.ownerSource.start, e.ownerSource.end];
+              bodyHtml += `<details class="source-loader" data-file="${fileLabel}" data-start="${startChar}" data-end="${endChar}">`;
+              bodyHtml += `<summary>XMLUI Source</summary>`;
+              bodyHtml += `<pre class="source-code">Click to load...</pre>`;
+              bodyHtml += `</details>`;
+            }
+          } else if (e.kind === "navigate") {
+            const from = e.from || "/";
+            const to = e.to || "?";
+            bodyHtml += `<div class="trace-event-header">[navigate] <strong>${from}</strong> → <strong>${to}</strong>${metaInline}</div>`;
+          } else if (e.kind === "modal:show" || e.kind === "modal:confirm" || e.kind === "modal:cancel") {
+            const icon = e.kind === "modal:show" ? "📋" : e.kind === "modal:confirm" ? "✓" : "✗";
+            const title = e.title ? ` "${e.title}"` : "";
+            bodyHtml += `<div class="trace-event-header">[${e.kind}] ${icon}${title}${metaInline}</div>`;
+          } else if (e.kind === "state:changes" && (e.componentType === "DataSource" || (e.eventName && e.eventName.startsWith("DataSource:")))) {
+            // DataSource state change - structured display
+            const dsName = e.eventName?.replace("DataSource:", "") || e.uid || "unknown";
+            bodyHtml += `<div class="trace-event-header">[state:changes] <strong>DataSource:${dsName}</strong></div>`;
+
+            // Add expandable metadata section
+            bodyHtml += `<div class="event-metadata">`;
+
+            // Instance details expander
+            if (e.instanceId || e.dataSourceUrl || e.ownerUid || evt.meta.resolvedFile) {
+              bodyHtml += `<details><summary>Instance Details</summary><dl class="metadata-grid">`;
+              if (e.instanceId) bodyHtml += `<dt>Instance</dt><dd>${e.instanceId}</dd>`;
+              if (e.dataSourceUrl) {
+                // Try to resolve window variable expressions like { window.query }
+                let resolvedUrl = e.dataSourceUrl;
+                const windowVarMatch = e.dataSourceUrl.match(/^\{\s*window\.(\w+)\s*\}$/);
+                if (windowVarMatch) {
+                  try {
+                    const varName = windowVarMatch[1];
+                    const parentWindow = window.parent || window;
+                    if (parentWindow[varName]) {
+                      resolvedUrl = parentWindow[varName];
+                    }
+                  } catch (err) { /* ignore resolution errors */ }
+                }
+                bodyHtml += `<dt>API URL</dt><dd>${resolvedUrl}</dd>`;
+              }
+              if (e.dataSourceBody) {
+                // Show body expression
+                const bodyExpr = e.dataSourceBody;
+                bodyHtml += `<dt>Body</dt><dd><code>${bodyExpr}</code></dd>`;
+                // If it's a function call like { window.functionName() } or { window.functionName(args) }, try to show function source
+                const funcMatch = bodyExpr.match(/^\{\s*window\.(\w+)\s*\([^)]*\)\s*\}$/);
+                if (funcMatch) {
+                  const funcName = funcMatch[1];
+                  bodyHtml += `<dt></dt><dd><details class="function-source-loader" data-func-name="${funcName}"><summary>Function Source</summary><pre class="source-code">Click to load...</pre></details></dd>`;
+                }
+              }
+              if (e.ownerUid) bodyHtml += `<dt>uid</dt><dd>${e.ownerUid}</dd>`;
+              if (evt.meta.resolvedFile) bodyHtml += `<dt>File</dt><dd><span class="file-link" data-file="${evt.meta.resolvedFile}">${evt.meta.resolvedFile}</span></dd>`;
+              if (evt.meta.sourceRange) bodyHtml += `<dt>Source</dt><dd>chars ${evt.meta.sourceRange}</dd>`;
+              bodyHtml += `</dl></details>`;
+            }
+
+            // XMLUI source expander (lazy-loaded)
+            if (evt.meta.hasSource && evt.meta.resolvedFile) {
+              const sourceId = `src-${Math.random().toString(36).slice(2, 10)}`;
+              const [startChar, endChar] = evt.meta.sourceRange.split("-").map(Number);
+              bodyHtml += `<details class="source-loader" data-file="${evt.meta.resolvedFile}" data-start="${startChar}" data-end="${endChar}">`;
+              bodyHtml += `<summary>XMLUI Source</summary>`;
+              bodyHtml += `<pre class="source-code">Click to load...</pre>`;
+              bodyHtml += `</details>`;
+            }
+
+            bodyHtml += `</div>`;
+          } else if (e.kind === "component:vars:init" || e.kind === "component:vars:change") {
+            // Component variable initialization/change - show var names and file
+            const varNames = e.eventName || "unknown";
+            const fileLabel = e.ownerFileId !== undefined ? resolveFileLabel(e.ownerFileId) : e.file;
+            const kindLabel = e.kind === "component:vars:init" ? "init" : "change";
+            const dedupCount = e._dedupCount || 1;
+            const dedupInfo = dedupCount > 1 ? ` <span class="badge-warning">×${dedupCount} instances</span>` : "";
+            const perfTsInfo = e.perfTs !== undefined ? `<span class="meta-inline">(perfTs ${e.perfTs.toFixed(1)})</span>` : "";
+            bodyHtml += `<div class="trace-event-header">[component:vars:${kindLabel}] <strong>${varNames}</strong>${dedupInfo} ${perfTsInfo}</div>`;
+
+            // Add expandable metadata section (matching state:changes structure)
+            bodyHtml += `<div class="event-metadata">`;
+
+            // Instance details expander (omit source char range - not useful for vars)
+            if (e.componentLabel || e.componentType || evt.meta.resolvedFile) {
+              bodyHtml += `<details><summary>Instance Details</summary><dl class="metadata-grid">`;
+              if (e.componentLabel) bodyHtml += `<dt>Component</dt><dd>${e.componentLabel}</dd>`;
+              if (e.componentType && e.componentType !== e.componentLabel) bodyHtml += `<dt>Type</dt><dd>${e.componentType}</dd>`;
+              if (evt.meta.resolvedFile) bodyHtml += `<dt>File</dt><dd><span class="file-link" data-file="${evt.meta.resolvedFile}">${evt.meta.resolvedFile}</span></dd>`;
+              if (dedupCount > 1) bodyHtml += `<dt>Instances</dt><dd>${dedupCount} identical</dd>`;
+              bodyHtml += `</dl></details>`;
+            }
+
+            // XMLUI source expander (lazy-loaded) - for vars, search for declaration
+            if (evt.meta.resolvedFile) {
+              const varName = e.eventName || "";
+              // For component:vars, load whole file and search for var declaration
+              bodyHtml += `<details class="source-loader" data-file="${evt.meta.resolvedFile}" data-var-name="${varName}" data-search-var="true">`;
+              bodyHtml += `<summary>XMLUI Source</summary>`;
+              bodyHtml += `<pre class="source-code">Click to load...</pre>`;
+              bodyHtml += `</details>`;
+            }
+
+            // Diff expander - use pretty diff like state:changes does, with array summary for large arrays
+            if (Array.isArray(e.diff) && e.diff.length) {
+              let usedArraySummary = false;
+              // Check if this is an array diff that should be summarized
+              if (e.diff.length === 1) {
+                const only = e.diff[0];
+                if (Array.isArray(only.before) && Array.isArray(only.after) && (isKeyedArray(only.before) || isKeyedArray(only.after))) {
+                  const analysis = analyzeArrayDiff(only.before, only.after);
+                  if (analysis.isSignificant) {
+                    bodyHtml += `<div>${renderArrayDiffSummary(analysis)}</div>`;
+                    usedArraySummary = true;
+                  }
+                } else if (only.before === undefined && Array.isArray(only.after) && isKeyedArray(only.after)) {
+                  // Init case: undefined → array
+                  bodyHtml += `<div class="text-success">${only.after.length} item${only.after.length !== 1 ? "s" : ""} initialized</div>`;
+                  usedArraySummary = true;
+                }
+              }
+
+              const snapshots = buildSnapshotsFromDiff(e.diff);
+              const delta = jsondiffpatch.diff(snapshots.left, snapshots.right);
+              if (delta) {
+                const diffHtml = htmlFormatter.format(delta, snapshots.left);
+                const summary = usedArraySummary ? "Show full diff" : "Diff";
+                // Force collapsed when we already have a good summary
+                bodyHtml += wrapDiffInExpander(diffHtml, summary, usedArraySummary);
+              }
+            } else if (e.diffPretty) {
+              // Fallback to text display in expander
+              const cleanDiff = e.diffPretty.replace(/^file:.*\n/m, "");
+              bodyHtml += `<details><summary>Diff</summary><pre class="source-code">${cleanDiff.replace(/</g, "&lt;")}</pre></details>`;
+            }
+
+            bodyHtml += `</div>`;
+          } else if (e.kind === "handler:start" || e.kind === "handler:complete") {
+            // Handler events - show with source info if available
+            bodyHtml += `<div class="trace-event-header">${evt.eventTitle}${evt.label ? ` ${evt.label}` : ""}${metaInline}</div>`;
+
+            // Show handler code if available
+            if (e.handlerCode) {
+              const code = e.handlerCode.trim();
+              // Check if it's a .xs function call (just function name with parens, like "functionName()")
+              const xsFuncMatch = code.match(/^(\w+)\(\)$/);
+              // Check if it's a window function call pattern
+              const windowMatch = code.match(/^\{\s*window\.(\w+)\s*\([^)]*\)\s*\}$/);
+              // Check if it's a simple function call inside braces
+              const simpleFuncMatch = code.match(/^\{\s*(\w+)\s*\([^)]*\)\s*\}$/);
+              // Check if it's an arrow function like (data) => { ... } or () => { ... }
+              const arrowMatch = code.match(/^\([^)]*\)\s*=>\s*\{/);
+
+              if (xsFuncMatch) {
+                // .xs function reference
+                bodyHtml += `<div class="trace-meta">.xs: <code>${xsFuncMatch[1]}()</code></div>`;
+              } else if (windowMatch) {
+                // Window function call
+                bodyHtml += `<div class="trace-meta">window: <code>${windowMatch[1]}()</code></div>`;
+              } else if (simpleFuncMatch && !windowMatch) {
+                // Simple function call (probably from .xs)
+                bodyHtml += `<div class="trace-meta">calls: <code>${simpleFuncMatch[1]}()</code></div>`;
+              } else if (arrowMatch) {
+                // Arrow function - show in expander (usually longer code)
+                bodyHtml += `<details><summary>Handler Code</summary><pre class="source-code">${code.replace(/</g, "&lt;")}</pre></details>`;
+              } else if (code.startsWith("{") && code.endsWith("}")) {
+                // Inline handler code
+                const innerCode = code.slice(1, -1).trim();
+                if (innerCode.length < 80) {
+                  bodyHtml += `<div class="trace-meta">inline: <code>${innerCode.replace(/</g, "&lt;")}</code></div>`;
+                } else {
+                  bodyHtml += `<details><summary>Inline Handler</summary><pre class="source-code">${innerCode.replace(/</g, "&lt;")}</pre></details>`;
+                }
+              } else if (code.length < 100) {
+                // Other short code
+                bodyHtml += `<div class="trace-meta">code: <code>${code.replace(/</g, "&lt;")}</code></div>`;
+              } else {
+                // Longer code - show in expander
+                bodyHtml += `<details><summary>Handler Code</summary><pre class="source-code">${code.replace(/</g, "&lt;")}</pre></details>`;
+              }
+            }
+
+            // Add XMLUI source expander only when we don't already have handlerCode shown
+            // (if handlerCode is displayed, the expander would be redundant)
+            if (e.kind === "handler:complete" && !e.handlerCode && evt.meta.hasSource && evt.meta.resolvedFile) {
+              bodyHtml += `<div class="event-metadata">`;
+              const eventName = e.eventName || "";
+              const componentLabel = e.componentLabel || "";
+              // Use special handler source loader that highlights the handler attribute and shows .xs code
+              bodyHtml += `<details class="source-loader" data-file="${evt.meta.resolvedFile}" data-handler-name="${eventName}" data-component-label="${componentLabel}" data-search-handler="true">`;
+              bodyHtml += `<summary>XMLUI Source</summary>`;
+              bodyHtml += `<pre class="source-code">Click to load...</pre>`;
+              bodyHtml += `</details>`;
+              bodyHtml += `</div>`;
+            }
+          } else {
+            bodyHtml += `<div class="trace-event-header">${evt.eventTitle}${evt.label ? ` ${evt.label}` : ""}${metaInline}</div>`;
+
+            // Show source range for non-DataSource events too
+            if (evt.meta.hasSource) {
+              bodyHtml += `<div class="trace-meta">source ${evt.meta.sourceRange}</div>`;
+            }
+          }
+
+          if (Array.isArray(e.diffJson) && e.diffJson.length && e.kind !== "component:vars:init" && e.kind !== "component:vars:change") {
+            let usedArraySummary = false;
+            if (e.diffJson.length === 1) {
+              const only = e.diffJson[0];
+              if (Array.isArray(only.before) && Array.isArray(only.after) && (isKeyedArray(only.before) || isKeyedArray(only.after))) {
+                const analysis = analyzeArrayDiff(only.before, only.after);
+                if (analysis.isSignificant) {
+                  bodyHtml += `<div>${renderArrayDiffSummary(analysis)}</div>`;
+                  usedArraySummary = true;
+                }
+              } else if (Array.isArray(only.before) && only.after === undefined && isKeyedArray(only.before)) {
+                bodyHtml += `<div class="text-error">${only.before.length} item${only.before.length !== 1 ? "s" : ""} → cleared</div>`;
+                usedArraySummary = true;
+              }
+            }
+
+            const snapshots = buildSnapshotsFromDiff(e.diffJson);
+            const delta = jsondiffpatch.diff(snapshots.left, snapshots.right);
+            if (delta) {
+              const diffHtml = htmlFormatter.format(delta, snapshots.left);
+              const summary = usedArraySummary ? "Show full diff" : "Diff";
+              // Force collapsed when we already have a good summary
+              bodyHtml += wrapDiffInExpander(diffHtml, summary, usedArraySummary);
+            }
+          }
+
+          bodyHtml += `</div>`;
+        });
+
+        if (dedupedCount > 0) {
+          bodyHtml += `<div class="trace-event text-warning">Deduped ${dedupedCount} repeated state change${dedupedCount > 1 ? "s" : ""}.</div>`;
+        }
+
+        return `
+          <div class="trace-group" data-trace-id="${traceId}">
+            <div class="trace-header" onclick="this.parentElement.classList.toggle('expanded'); this.classList.toggle('expanded');">
+              <span class="arrow">▶</span>
+              <div class="trace-summary">
+                <span class="component">${summary.componentText}</span>
+                ${changesHtml}${durationHtml}
+              </div>
+              <span class="trace-age">${age}</span>
+            </div>
+            <div class="trace-body">
+              <div class="trace-meta">trace: ${traceId}</div>
+              ${bodyHtml}
+            </div>
+          </div>
+        `;
+      }
+
+      function renderInteractionPretty(interaction) {
+        const { entry, componentText } = interaction;
+        const age = formatAge(entry.ts);
+        const detailText = entry.detail ? JSON.stringify(entry.detail) : "";
+
+        return `
+          <div class="trace-group trace-group--interaction">
+            <div class="trace-header trace-header--interaction" onclick="this.parentElement.classList.toggle('expanded'); this.classList.toggle('expanded');">
+              <span class="arrow">▶</span>
+              <div class="trace-summary">
+                <span class="badge-info">⚡</span>
+                <span class="component">${componentText}</span>
+                <span class="badge-info">${entry.interaction}</span>
+              </div>
+              <span class="trace-age">${age}</span>
+            </div>
+            <div class="trace-body">
+              ${detailText ? `<pre class="stack-trace">${detailText}</pre>` : '<div class="text-faint">No additional detail</div>'}
+            </div>
+          </div>
+        `;
+      }
+
+      function renderDataSourceGroupsPretty(groups) {
+        let html = "";
+        for (const group of groups) {
+          const { name, instanceId, entries, timeline, isRedundant, updateCount, lastTs, meta } = group;
+          const redundancyNote = isRedundant ? ` <span class="badge-error">⚠️ redundant</span>` : "";
+          const countClass = updateCount > 1 ? "text-warning" : "";
+          const sourceMetaParts = meta.parts.filter((p) => !p.startsWith("perfTs"));
+          const sourceMeta = sourceMetaParts.length ? ` <span class="meta-inline">(${sourceMetaParts.join(" | ")})</span>` : "";
+
+          html += `
+            <div class="trace-group" data-datasource="${name}">
+              <div class="trace-header" onclick="this.parentElement.classList.toggle('expanded'); this.classList.toggle('expanded');">
+                <span class="arrow">▶</span>
+                <div class="trace-summary">
+                  <span class="component">DataSource "${name}"</span>
+                  ${instanceId ? `<span class="meta-inline">(instance: ${instanceId})</span>` : ""}
+                  ${sourceMeta}
+                  <span class="${countClass}"> updated ${updateCount}x</span>
+                  <span class="text-muted"> (${timeline.join(", ")})</span>
+                  ${redundancyNote}
+                </div>
+                <span class="trace-age">${formatAge(lastTs)}</span>
+              </div>
+              <div class="trace-body">
+          `;
+
+          entries.forEach((item, i) => {
+            const e = item.entry;
+            const metaParts = item.meta.parts.filter((p) => !p.startsWith("perfTs"));
+
+            html += `<div class="trace-event">`;
+            html += `<div class="trace-event-header">Update ${i + 1} @ ${item.relTime}</div>`;
+            if (metaParts.length) html += `<div class="trace-meta">${metaParts.join(" | ")}</div>`;
+
+            if (Array.isArray(e.diffJson) && e.diffJson.length) {
+              let usedArraySummary = false;
+              if (e.diffJson.length === 1) {
+                const only = e.diffJson[0];
+                if (Array.isArray(only.before) && Array.isArray(only.after) && (isKeyedArray(only.before) || isKeyedArray(only.after))) {
+                  const analysis = analyzeArrayDiff(only.before, only.after);
+                  if (analysis.isSignificant) {
+                    html += `<div>${renderArrayDiffSummary(analysis)}</div>`;
+                    usedArraySummary = true;
+                  }
+                } else if (Array.isArray(only.before) && only.after === undefined && isKeyedArray(only.before)) {
+                  html += `<div class="text-error">${only.before.length} item${only.before.length !== 1 ? "s" : ""} → cleared</div>`;
+                  usedArraySummary = true;
+                }
+              }
+              const snapshots = buildSnapshotsFromDiff(e.diffJson);
+              const delta = jsondiffpatch.diff(snapshots.left, snapshots.right);
+              if (delta) {
+                const diffHtml = htmlFormatter.format(delta, snapshots.left);
+                const summary = usedArraySummary ? "Show full diff" : "Diff";
+                // Force collapsed when we already have a good summary
+                html += wrapDiffInExpander(diffHtml, summary, usedArraySummary);
+              }
+            }
+            html += `</div>`;
+          });
+
+          html += `</div></div>`;
+        }
+        return html;
+      }
+
+      function renderOrphanPretty(orphan) {
+        const { entry, meta, title } = orphan;
+        const age = formatAge(entry.ts);
+        const instanceTag = entry.instanceId ? ` (instance: ${entry.instanceId})` : "";
+
+        let html = `<div class="text-muted">${age} ${title}${instanceTag}</div>`;
+
+        if (Array.isArray(entry.diffJson) && entry.diffJson.length) {
+          let usedArraySummary = false;
+          if (entry.diffJson.length === 1) {
+            const only = entry.diffJson[0];
+            if (Array.isArray(only.before) && Array.isArray(only.after) && (isKeyedArray(only.before) || isKeyedArray(only.after))) {
+              const analysis = analyzeArrayDiff(only.before, only.after);
+              if (analysis.isSignificant) {
+                html += `<div>${renderArrayDiffSummary(analysis)}</div>`;
+                usedArraySummary = true;
+              }
+            } else if (Array.isArray(only.before) && only.after === undefined && isKeyedArray(only.before)) {
+              html += `<div class="text-error">${only.before.length} item${only.before.length !== 1 ? "s" : ""} → cleared</div>`;
+              usedArraySummary = true;
+            }
+          }
+          const snapshots = buildSnapshotsFromDiff(entry.diffJson);
+          const delta = jsondiffpatch.diff(snapshots.left, snapshots.right);
+          if (delta) {
+            const diffHtml = htmlFormatter.format(delta, snapshots.left);
+            const summary = usedArraySummary ? "Show full diff" : "Diff";
+            // Force collapsed when we already have a good summary
+            html += wrapDiffInExpander(diffHtml, summary, usedArraySummary);
+          }
+        }
+
+        return html;
+      }
+
+      // =============================================================================
+      // RAW VIEW RENDERING
+      // =============================================================================
+
+      function renderRawView(processed) {
+        const lines = [];
+
+        lines.push("=== XMLUI Inspector Export ===");
+        lines.push(`Total events: ${processed.totalEvents}`);
+        lines.push("");
+
+        let traceIndex = 0;
+        processed.timelineItems.forEach((item) => {
+          if (item.type === "trace") {
+            // Skip 0-diff traces (mostly keydown noise)
+            if (item.summary.changeCount === 0 && !item.summary.hasError) return;
+            traceIndex++;
+            lines.push(...renderTraceRaw(item, traceIndex));
+            lines.push("");
+          }
+        });
+
+        const standaloneInteractions = processed.timelineItems.filter((item) => item.type === "interaction");
+        if (standaloneInteractions.length) {
+          lines.push("--- Standalone interactions ---");
+          standaloneInteractions.forEach((item) => {
+            lines.push(`    [interaction] ${item.componentText} ${item.entry.interaction}`);
+          });
+          lines.push("");
+        }
+
+        if (processed.groupedDataSources.length) {
+          lines.push("--- DataSource updates (async) ---");
+          processed.groupedDataSources.forEach((group) => {
+            lines.push(`    DataSource "${group.name}"${group.instanceId ? ` (instance: ${group.instanceId})` : ""} updated ${group.updateCount}x${group.isRedundant ? " [REDUNDANT]" : ""}`);
+            group.entries.forEach((item, i) => {
+              const e = item.entry;
+              lines.push(`        Update ${i + 1} @ ${item.relTime}`);
+              if (e.diffJson) {
+                e.diffJson.forEach((d) => {
+                  if (Array.isArray(d.before) && Array.isArray(d.after) && (isKeyedArray(d.before) || isKeyedArray(d.after))) {
+                    const summary = summarizeArrayDiff(d.before, d.after);
+                    lines.push(`            ${d.path}:`);
+                    summary.split("\n").forEach((line) => lines.push(`                ${line}`));
+                  } else if (Array.isArray(d.after) && d.before === undefined && isKeyedArray(d.after)) {
+                    lines.push(`            ${d.path}: initialized with ${d.after.length} items`);
+                  } else if (Array.isArray(d.before) && d.after === undefined && isKeyedArray(d.before)) {
+                    lines.push(`            ${d.path}: ${d.before.length} items → cleared`);
+                  } else {
+                    lines.push(`            ${d.path}: ${JSON.stringify(d.before)?.slice(0, 80) || "undefined"} → ${JSON.stringify(d.after)?.slice(0, 80) || "undefined"}`);
+                  }
+                });
+              }
+            });
+          });
+          lines.push("");
+        }
+
+        if (processed.otherOrphans.length) {
+          lines.push("--- Other events (no trace) ---");
+          processed.otherOrphans.forEach((orphan) => {
+            lines.push(`    [${orphan.entry.kind}] ${orphan.entry.eventName || ""} (perfTs: ${orphan.entry.perfTs?.toFixed(1) || "?"})`);
+          });
+          lines.push("");
+        }
+
+        if (processed.collisions.length) {
+          lines.push("--- Notes ---");
+          lines.push("1. DataSource identity reused across components. These are independent instances that share the same id/uid.");
+          processed.collisions.forEach((c) => {
+            lines.push(`    id/uid: ${c.key}`);
+            c.entries.forEach((item) => {
+              const parts = item.meta.parts.filter((p) => !p.startsWith("perfTs"));
+              if (item.meta.hasSource) parts.push(`source: ${item.meta.sourceRange}`);
+              lines.push(`        - ${parts.join(", ")}`);
+            });
+          });
+          lines.push("");
+        }
+
+        if (processed.sourceFiles.length) {
+          lines.push("--- Source files (index → path) ---");
+          processed.sourceFiles.forEach((file, idx) => lines.push(`    [${idx}] ${file}`));
+        }
+
+        return lines.join("\n");
+      }
+
+      function renderTraceRaw(trace, index) {
+        const { summary, events, dedupedCount, traceId } = trace;
+        const lines = [];
+
+        lines.push(`--- Trace ${index}: ${summary.componentText}${summary.totalDuration !== null ? ` (${summary.totalDuration.toFixed(0)}ms)` : ""} ---`);
+        lines.push(`    traceId: ${traceId}`);
+        if (summary.timelineBreakdown.length > 0 && summary.totalDuration) {
+          lines.push(`    timeline:`);
+          const sorted = summary.timelineBreakdown.slice().sort((a, b) => a.order - b.order);
+          sorted.forEach(item => {
+            lines.push(`      ${item.phase.padEnd(40)} ${String(item.duration.toFixed(0) + "ms").padStart(8)}`);
+          });
+          lines.push(`      ${"total".padEnd(40)} ${String(summary.totalDuration.toFixed(0) + "ms").padStart(8)}`);
+        } else if (summary.totalDuration !== null) {
+          lines.push(`    duration: ${summary.totalDuration.toFixed(0)}ms`);
+        }
+
+        events.forEach((evt) => {
+          const e = evt.entry;
+          const metaParts = evt.meta.parts;
+
+          if (e.kind === "api:start" || e.kind === "api:complete" || e.kind === "api:error") {
+            const method = e.method || "GET";
+            const url = e.url || "";
+            const errorSuffix = e.kind === "api:error" && e.error ? ` - ${e.error}` : "";
+            const statusSuffix = e.kind === "api:complete" && e.status ? ` [${e.status}]` : "";
+            const durationSuffix = e.kind === "api:complete" && typeof e._apiDuration === "number" ? ` (${e._apiDuration.toFixed(1)}ms)` : "";
+            lines.push(`    [${e.kind}]${statusSuffix}${durationSuffix} ${method} ${url}${errorSuffix}${metaParts.length ? ` (${metaParts.join(" | ")})` : ""}`);
+            // Show request body for api:start
+            if (e.body && e.kind === "api:start") {
+              const bodyStr = typeof e.body === "string" ? e.body : JSON.stringify(e.body, null, 2);
+              const truncatedBody = bodyStr.length > 200 ? bodyStr.substring(0, 200) + "..." : bodyStr;
+              lines.push(`      request: ${truncatedBody}`);
+            }
+            // Show response for api:complete
+            if (e.kind === "api:complete" && e.result !== undefined) {
+              const resultStr = typeof e.result === "string" ? e.result : JSON.stringify(e.result, null, 2);
+              const truncatedResult = resultStr.length > 200 ? resultStr.substring(0, 200) + "..." : resultStr;
+              lines.push(`      response: ${truncatedResult}`);
+            }
+            return;
+          }
+          if (e.kind === "error:boundary") {
+            lines.push(`    [${e.kind}] ${e.error || "Unknown error"}${e.location ? ` in ${e.location}` : ""}${metaParts.length ? ` (${metaParts.join(" | ")})` : ""}`);
+            return;
+          }
+          if (e.kind === "handler:error") {
+            const fileLabel = e.ownerFileId !== undefined ? resolveFileLabel(e.ownerFileId) : null;
+            const fileInfo = fileLabel ? ` in ${fileLabel}` : "";
+            lines.push(`    [${e.kind}] ${e.eventName || ""} - ${e.error?.message || "Unknown error"}${fileInfo}${metaParts.length ? ` (${metaParts.join(" | ")})` : ""}`);
+            return;
+          }
+          if (e.kind === "navigate") {
+            lines.push(`    [navigate] ${e.from || "/"} → ${e.to || "?"}${metaParts.length ? ` (${metaParts.join(" | ")})` : ""}`);
+            return;
+          }
+          if (e.kind === "modal:show" || e.kind === "modal:confirm" || e.kind === "modal:cancel") {
+            const title = e.title ? ` "${e.title}"` : "";
+            lines.push(`    [${e.kind}]${title}${metaParts.length ? ` (${metaParts.join(" | ")})` : ""}`);
+            return;
+          }
+          if (e.kind === "handler:start" || e.kind === "handler:complete") {
+            lines.push(`    [${e.kind}]${e.eventName ? ` ${e.eventName}` : ""}${evt.label ? ` ${evt.label}` : ""}${metaParts.length ? ` (${metaParts.join(" | ")})` : ""}`);
+            // Show handler code if available
+            if (e.handlerCode) {
+              const code = e.handlerCode.trim();
+              const xsFuncMatch = code.match(/^(\w+)\(\)$/);
+              const windowMatch = code.match(/^\{\s*window\.(\w+)\s*\([^)]*\)\s*\}$/);
+              const simpleFuncMatch = code.match(/^\{\s*(\w+)\s*\([^)]*\)\s*\}$/);
+              const arrowMatch = code.match(/^\([^)]*\)\s*=>\s*\{/);
+
+              if (xsFuncMatch) {
+                lines.push(`      .xs: ${xsFuncMatch[1]}()`);
+              } else if (windowMatch) {
+                lines.push(`      window: ${windowMatch[1]}()`);
+              } else if (simpleFuncMatch && !windowMatch) {
+                lines.push(`      calls: ${simpleFuncMatch[1]}()`);
+              } else if (arrowMatch) {
+                // Arrow function - show first line
+                const firstLine = code.split('\n')[0];
+                lines.push(`      arrow: ${firstLine.length < 60 ? firstLine : firstLine.substring(0, 60) + "..."}`);
+              } else if (code.startsWith("{") && code.endsWith("}")) {
+                const innerCode = code.slice(1, -1).trim();
+                if (innerCode.length < 60) {
+                  lines.push(`      inline: ${innerCode}`);
+                } else {
+                  lines.push(`      inline: ${innerCode.substring(0, 60)}...`);
+                }
+              } else if (code.length < 80) {
+                lines.push(`      code: ${code}`);
+              } else {
+                lines.push(`      code: ${code.substring(0, 80)}...`);
+              }
+            }
+            return;
+          }
+
+          lines.push(`    [${e.kind}]${e.eventName ? ` ${e.eventName}` : ""}${evt.label ? ` ${evt.label}` : ""}${metaParts.length ? ` (${metaParts.join(" | ")})` : ""}`);
+
+          if (evt.meta.hasSource) lines.push(`        source ${evt.meta.sourceRange}`);
+
+          // Show component:vars diffs inline with array summaries
+          if ((e.kind === "component:vars:init" || e.kind === "component:vars:change") && e.diff) {
+            const dedupCount = e._dedupCount || 1;
+            if (dedupCount > 1) {
+              lines.push(`        (×${dedupCount} identical instances)`);
+            }
+            // Show file if available
+            if (e.file) {
+              lines.push(`        file: ${e.file}`);
+            }
+            // Summarize each var change
+            e.diff.forEach((d) => {
+              const varName = d.path || "value";
+              if (Array.isArray(d.before) && Array.isArray(d.after) && (isKeyedArray(d.before) || isKeyedArray(d.after))) {
+                // Array diff - summarize
+                const summary = summarizeArrayDiff(d.before, d.after);
+                lines.push(`        ${varName}:`);
+                summary.split("\n").forEach((line) => lines.push(`            ${line}`));
+              } else if (Array.isArray(d.after) && d.before === undefined && isKeyedArray(d.after)) {
+                // Init with array
+                lines.push(`        ${varName}: initialized with ${d.after.length} items`);
+                d.after.slice(0, 5).forEach((item) => lines.push(`            • ${getItemLabel(item)}`));
+                if (d.after.length > 5) lines.push(`            … and ${d.after.length - 5} more`);
+              } else if (d.after === undefined && d.before === undefined) {
+                // Skip no-op
+              } else {
+                // Simple value change - show compact
+                const beforeStr = d.before === undefined ? "undefined" : JSON.stringify(d.before);
+                const afterStr = d.after === undefined ? "undefined" : JSON.stringify(d.after);
+                // Truncate if too long
+                const maxLen = 80;
+                const beforeDisplay = beforeStr.length > maxLen ? beforeStr.slice(0, maxLen) + "..." : beforeStr;
+                const afterDisplay = afterStr.length > maxLen ? afterStr.slice(0, maxLen) + "..." : afterStr;
+                lines.push(`        ${varName}: ${beforeDisplay} → ${afterDisplay}`);
+              }
+            });
+          }
+
+          if (e.kind === "state:changes" && e.diffJson) {
+            e.diffJson.forEach((d) => {
+              if (Array.isArray(d.before) && Array.isArray(d.after) && (isKeyedArray(d.before) || isKeyedArray(d.after))) {
+                const summary = summarizeArrayDiff(d.before, d.after);
+                lines.push(`        ${d.path}:`);
+                summary.split("\n").forEach((line) => lines.push(`            ${line}`));
+              } else if (Array.isArray(d.after) && d.before === undefined && isKeyedArray(d.after)) {
+                lines.push(`        ${d.path}: initialized with ${d.after.length} items`);
+                d.after.slice(0, 5).forEach((item) => lines.push(`            • ${getItemLabel(item)}`));
+                if (d.after.length > 5) lines.push(`            … and ${d.after.length - 5} more`);
+              } else if (Array.isArray(d.before) && d.after === undefined && isKeyedArray(d.before)) {
+                lines.push(`        ${d.path}: ${d.before.length} items → cleared`);
+              } else {
+                lines.push(`        ${d.path}: ${JSON.stringify(d.before)?.slice(0, 80) || "undefined"} → ${JSON.stringify(d.after)?.slice(0, 80) || "undefined"}`);
+              }
+            });
+          }
+        });
+
+        if (dedupedCount > 0) lines.push(`    [dedupe] ${dedupedCount} repeated state change${dedupedCount > 1 ? "s" : ""} removed`);
+
+        return lines;
+      }
+
+      // =============================================================================
+      // MAIN RENDER FUNCTION
+      // =============================================================================
+
+      function render() {
+        const showRaw = document.getElementById("viewRaw").checked;
+        const container = document.getElementById("diff");
+        container.innerHTML = "";
+
+        const allEntries = getAllEntries();
+        const diffEntries = allEntries.filter((entry) => entryMatches(entry, ""));
+
+        if (!diffEntries.length) return;
+
+        const processed = processAllEntries(diffEntries);
+
+        if (showRaw) {
+          container.innerHTML = '<div class="trace-group"><div class="trace-body" style="display:block;"><pre>' + renderRawView(processed).replace(/</g, "&lt;") + "</pre></div></div>";
+        } else {
+          container.innerHTML = renderPrettyView(processed);
+          htmlFormatter.hideUnchanged();
+
+          // Wire up lazy source loaders
+          container.querySelectorAll("details.source-loader").forEach((details) => {
+            const filePath = details.dataset.file;
+            const searchVar = details.dataset.searchVar === "true";
+            const searchHandler = details.dataset.searchHandler === "true";
+            const varName = details.dataset.varName;
+            const handlerName = details.dataset.handlerName;
+
+            if (searchHandler && filePath && handlerName) {
+              // For handlers - load file and search for handler attribute + .xs function
+              const componentLabel = details.dataset.componentLabel || "";
+              setupHandlerSourceLoader(details, filePath, handlerName, componentLabel);
+            } else if (searchVar && filePath && varName) {
+              // For component:vars - load file and search for variable declaration
+              setupVarSourceLoader(details, filePath, varName);
+            } else {
+              const startChar = parseInt(details.dataset.start, 10);
+              const endChar = parseInt(details.dataset.end, 10);
+              if (filePath && !isNaN(startChar) && !isNaN(endChar)) {
+                setupSourceLoader(details, filePath, startChar, endChar);
+              }
+            }
+          });
+
+          // Wire up function source loaders (for window.* functions)
+          container.querySelectorAll("details.function-source-loader").forEach((details) => {
+            const funcName = details.dataset.funcName;
+            if (!funcName) return;
+
+            let loaded = false;
+            details.addEventListener("toggle", () => {
+              if (!details.open || loaded) return;
+              loaded = true;
+
+              const pre = details.querySelector("pre");
+              try {
+                const parentWindow = window.parent || window;
+                const func = parentWindow[funcName];
+                if (typeof func === "function") {
+                  const source = func.toString();
+                  // Format with line numbers
+                  const lines = source.split("\n");
+                  const formatted = lines.map((line, i) => {
+                    const lineNum = String(i + 1).padStart(4, " ");
+                    return `${lineNum}: ${line}`;
+                  }).join("\n");
+                  pre.textContent = `// window.${funcName}\n${formatted}`;
+                } else {
+                  pre.textContent = `// window.${funcName} is not a function (type: ${typeof func})`;
+                }
+              } catch (err) {
+                pre.textContent = `// Error loading function: ${err.message}`;
+              }
+            });
+          });
+        }
+      }
+
+      // =============================================================================
+      // EVENT HANDLERS
+      // =============================================================================
+
+      document.getElementById("viewPretty").addEventListener("change", render);
+      document.getElementById("viewRaw").addEventListener("change", render);
+
+      document.getElementById("clear").addEventListener("click", () => {
+        if (window.parent && window.parent._xsLogs) window.parent._xsLogs.length = 0;
+        render();
+      });
+
+      // =============================================================================
+      // FILE PREVIEW MODAL
+      // =============================================================================
+
+      const fileModal = document.getElementById("fileModal");
+      const modalFilePath = document.getElementById("modalFilePath");
+      const modalFileContent = document.getElementById("modalFileContent");
+      const modalClose = document.getElementById("modalClose");
+
+      function openFileModal(filePath, highlight) {
+        modalFilePath.textContent = filePath;
+        modalFileContent.textContent = "Loading...";
+        fileModal.classList.add("open");
+
+        fetch(filePath)
+          .then(res => {
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            return res.text();
+          })
+          .then(content => {
+            if (highlight) {
+              // Search for the highlight text and mark it
+              // Clean up the highlight - remove surrounding braces if present
+              let searchText = highlight.trim();
+              if (searchText.startsWith("{") && searchText.endsWith("}")) {
+                searchText = searchText.slice(1, -1).trim();
+              }
+
+              // Find the line containing the highlight text
+              const lines = content.split("\n");
+              let highlightedContent = "";
+              let found = false;
+              let foundLineNum = -1;
+
+              for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+                const escaped = line.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                if (!found && line.includes(searchText)) {
+                  // Highlight this line
+                  highlightedContent += `<span class="highlight-line">→ ${escaped}</span>\n`;
+                  found = true;
+                  foundLineNum = i;
+                } else {
+                  highlightedContent += escaped + "\n";
+                }
+              }
+
+              modalFileContent.innerHTML = highlightedContent;
+
+              // Scroll to the highlighted line
+              if (foundLineNum >= 0) {
+                setTimeout(() => {
+                  const highlighted = modalFileContent.querySelector(".highlight-line");
+                  if (highlighted) {
+                    highlighted.scrollIntoView({ block: "center" });
+                  }
+                }, 50);
+              }
+            } else {
+              modalFileContent.textContent = content;
+            }
+          })
+          .catch(err => {
+            modalFileContent.textContent = `Error loading file: ${err.message}`;
+          });
+      }
+
+      function closeFileModal() {
+        fileModal.classList.remove("open");
+      }
+
+      modalClose.addEventListener("click", closeFileModal);
+      fileModal.addEventListener("click", (e) => {
+        if (e.target === fileModal) closeFileModal();
+      });
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && fileModal.classList.contains("open")) {
+          closeFileModal();
+        }
+      });
+
+      // Handle clicks on file links
+      document.addEventListener("click", (e) => {
+        const fileLink = e.target.closest(".file-link");
+        if (fileLink) {
+          e.preventDefault();
+          const filePath = fileLink.dataset.file;
+          const highlight = fileLink.dataset.highlight;
+          if (filePath) openFileModal(filePath, highlight);
+        }
+      });
+
+      function downloadFile(filename, content, mimeType) {
+        const blob = new Blob([content], { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+
+      function generateMarkdownExport(processed) {
+        const lines = [];
+        lines.push("# XMLUI Inspector Export");
+        lines.push("");
+        lines.push(`**Generated:** ${new Date().toISOString()}`);
+        lines.push(`**Total events:** ${processed.totalEvents}`);
+        lines.push("");
+
+        processed.timelineItems.forEach((item, idx) => {
+          if (item.type === "trace") {
+            const { summary, events, traceId } = item;
+            lines.push(`## Trace ${idx + 1}: ${summary.componentText}${summary.totalDuration !== null ? ` (${summary.totalDuration.toFixed(0)}ms)` : ""}`);
+            lines.push("");
+            lines.push(`- **traceId:** \`${traceId}\``);
+            if (summary.timelineBreakdown.length > 0 && summary.totalDuration) {
+              lines.push("");
+              lines.push("| Phase | Duration |");
+              lines.push("|-------|----------|");
+              const sorted = summary.timelineBreakdown.slice().sort((a, b) => a.order - b.order);
+              sorted.forEach(item => {
+                lines.push(`| ${item.phase} | ${item.duration.toFixed(0)}ms |`);
+              });
+              lines.push(`| **total** | **${summary.totalDuration.toFixed(0)}ms** |`);
+            } else if (summary.totalDuration !== null) {
+              lines.push(`- **duration:** ${summary.totalDuration.toFixed(0)}ms`);
+            }
+            lines.push("");
+
+            events.forEach((evt) => {
+              const e = evt.entry;
+              const meta = evt.meta.parts.length ? ` _(${evt.meta.parts.join(" | ")})_` : "";
+
+              if (e.kind === "api:start" || e.kind === "api:complete" || e.kind === "api:error") {
+                const durationSuffix = e.kind === "api:complete" && typeof e._apiDuration === "number" ? ` (${e._apiDuration.toFixed(1)}ms)` : "";
+                lines.push(`- \`[${e.kind}]\`${durationSuffix} **${e.method || "GET"}** ${e.url || ""}${meta}`);
+                if (e.body) {
+                  const bodyStr = typeof e.body === "string" ? e.body : JSON.stringify(e.body);
+                  const truncatedBody = bodyStr.length > 100 ? bodyStr.substring(0, 100) + "..." : bodyStr;
+                  lines.push(`  - body: \`${truncatedBody}\``);
+                }
+              } else if (e.kind === "navigate") {
+                lines.push(`- \`[navigate]\` **${e.from || "/"}** → **${e.to || "?"}**${meta}`);
+              } else if (e.kind === "modal:show" || e.kind === "modal:confirm" || e.kind === "modal:cancel") {
+                const title = e.title ? ` "${e.title}"` : "";
+                lines.push(`- \`[${e.kind}]\`${title}${meta}`);
+              } else if (e.kind === "state:changes") {
+                lines.push(`- \`[${e.kind}]\` ${e.eventName || ""}${meta}`);
+                if (e.diffJson) {
+                  e.diffJson.forEach((d) => {
+                    lines.push(`  - \`${d.path}\`: ${JSON.stringify(d.before)} → ${JSON.stringify(d.after)}`);
+                  });
+                }
+              } else {
+                lines.push(`- \`[${e.kind}]\` ${e.eventName || ""}${evt.label ? ` ${evt.label}` : ""}${meta}`);
+              }
+            });
+            lines.push("");
+          }
+        });
+
+        if (processed.sourceFiles.length) {
+          lines.push("## Source Files");
+          lines.push("");
+          processed.sourceFiles.forEach((file, idx) => {
+            lines.push(`${idx}. \`${file}\``);
+          });
+        }
+
+        return lines.join("\n");
+      }
+
+      function generateHtmlExport(processed) {
+        // Static HTML snapshot - captures current rendered state
+        const styles = document.querySelector("style").textContent;
+        const diffContent = document.getElementById("diff").innerHTML;
+
+        return `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>XMLUI Inspector Export - ${new Date().toISOString()}</title>
+  <link rel="stylesheet" href="https://unpkg.com/jsondiffpatch@0.7.3/lib/formatters/styles/html.css" />
+  <style>${styles}</style>
+  <style>
+    /* Export-specific: expand all trace groups by default */
+    .trace-group { }
+    .trace-group .trace-body { display: block; }
+    .trace-group .trace-header .arrow { transform: rotate(90deg); }
+  </style>
+</head>
+<body>
+  <h1>XMLUI Inspector</h1>
+  <p style="color: var(--color-text-muted); font-size: var(--font-sm);">
+    Exported: ${new Date().toISOString()} | Events: ${processed.totalEvents}
+  </p>
+  <div id="diff">${diffContent}</div>
+  <script>
+    // Simple interactivity for exported file
+    document.querySelectorAll(".trace-header").forEach(header => {
+      header.addEventListener("click", () => {
+        header.parentElement.classList.toggle("expanded");
+        header.classList.toggle("expanded");
+      });
+    });
+  <` + `/script>
+</body>
+</html>`;
+      }
+
+      document.getElementById("exportFormat").addEventListener("change", (e) => {
+        const format = e.target.value;
+        if (!format) return;
+        e.target.value = ""; // Reset select
+
+        const allEntries = getAllEntries();
+        const filtered = allEntries.filter((entry) => entryMatches(entry, ""));
+        if (!filtered.length) { alert("No entries to export"); return; }
+
+        const processed = processAllEntries(filtered);
+        const timestamp = new Date().toISOString().slice(0, 19).replace(/[:-]/g, "");
+
+        if (format === "md") {
+          downloadFile(`xs-diff-${timestamp}.md`, generateMarkdownExport(processed), "text/markdown");
+        } else if (format === "html") {
+          downloadFile(`xs-diff-${timestamp}.html`, generateHtmlExport(processed), "text/html");
+        }
+      });
+
+      let lastLogCount = -1;
+      setInterval(() => {
+        const logs = (window.parent && window.parent._xsLogs) || [];
+        if (logs.length !== lastLogCount) {
+          lastLogCount = logs.length;
+          render();
+        }
+      }, 250);
+
+      render();
+    </script>
+  </body>
+</html>

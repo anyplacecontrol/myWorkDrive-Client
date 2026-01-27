@@ -1,4 +1,4 @@
-import { ApiInterceptorDefinition } from "xmlui";
+import type { ApiInterceptorDefinition } from "xmlui";
 
 let id = 1;
 
@@ -279,7 +279,7 @@ const mock: ApiInterceptorDefinition = {
       // language=JavaScript
       handler: `
                 const file = FileRepository.findByIdAndDriveId($pathParams.itemId, $pathParams.driveId);
-                
+
                 if (file.contents) {
                     return createFile([file.contents], file.name, {
                         type: file.contents.type
@@ -317,7 +317,7 @@ const mock: ApiInterceptorDefinition = {
                     throw Errors.Conflict409({
                       error: {
                         code: 183,
-                        message: 'File already exists'  
+                        message: 'File already exists'
                       }
                     });
                 }
@@ -327,13 +327,13 @@ const mock: ApiInterceptorDefinition = {
                         "id": itemWithSameName.id
                     }).delete();
                 }
-                
+
                 return $db.$files.insert({
                     id: crypto.randomUUID(),
                     name: filename,
                     parentReference: {
                         driveId: safeDriveId,
-                        id: parentId 
+                        id: parentId
                     },
                     size: $requestBody.size,
                     file: {},
@@ -352,7 +352,7 @@ const mock: ApiInterceptorDefinition = {
                 const {name, parentReference} = $requestBody;
                 const safeDriveId = $pathParams.driveId === 'me' ? $loggedInUser.id : $pathParams.driveId;
                 const item = FileRepository.findByIdAndDriveId($pathParams.itemId, safeDriveId);
-                
+
                 if(!parentReference){           //rename
                   const itemWithSameName = $db.$files.toArray().find((file) =>
                       file.parentReference.id === item.parentReference.id &&
@@ -379,15 +379,15 @@ const mock: ApiInterceptorDefinition = {
                     "id": $pathParams.itemId
                   }).modify({
                     name: name
-                  });  
+                  });
                 } else {        //move
-                  const safeParentId = parentReference.id === 'root' ? null : parentReference.id; 
+                  const safeParentId = parentReference.id === 'root' ? null : parentReference.id;
                   const itemWithSameName = $db.$files.toArray().find((file) =>
                       file.parentReference.id === safeParentId &&
                       file.parentReference.driveId === item.parentReference.driveId &&
                       file.name === name &&
                       file.id !== $pathParams.itemId);
-                  
+
                   if (conflictBehavior === 'fail' && itemWithSameName) {
                     throw Errors.Conflict409({
                       error: {
@@ -425,24 +425,24 @@ const mock: ApiInterceptorDefinition = {
                 const {parentReference} = $requestBody;
                 const safeParentId = parentReference.id === 'root' ? null : parentReference.id;
                 const safeDriveId = $pathParams.driveId === 'me' ? $loggedInUser.id : $pathParams.driveId;
-                
+
                 const itemToCopy = {...($db.$files.native().where({
                     "parentReference.driveId": safeDriveId,
                     "id": $pathParams.itemId
                   }).first())};
-                
+
                 const itemWithSameName = $db.$files.toArray().find((file) =>
                     file.parentReference.id === safeParentId &&
                     file.parentReference.driveId === safeDriveId &&
                     file.name === itemToCopy.name &&
                     file.id !== $pathParams.itemId);
-                
+
                 // 'fail', 'replace'
                 if (conflictBehavior === 'fail' && itemWithSameName) {
                     throw Errors.Conflict409({
                       error: {
                         code: 183,
-                        message: 'File already exists'  
+                        message: 'File already exists'
                       }
                     });
                 }
@@ -455,7 +455,7 @@ const mock: ApiInterceptorDefinition = {
                 itemToCopy.id = crypto.randomUUID();
                 itemToCopy.parentReference = {
                     driveId: safeDriveId,
-                    id: safeParentId  
+                    id: safeParentId
                 };
                 return $db.$files.insert(itemToCopy);
             `,
@@ -503,7 +503,7 @@ const mock: ApiInterceptorDefinition = {
                             }
                         })
                     }
-                
+
                 })
             };
       `
@@ -535,20 +535,20 @@ const mock: ApiInterceptorDefinition = {
       handler: `
             const {itemId, driveId} = $pathParams;
             const {type, scope} = $requestBody;
-            
+
             let roles = [];
             if(type === 'view'){
-              roles = ['read'];  
+              roles = ['read'];
             } else if(type === 'edit'){
-              roles = ['write'];  
+              roles = ['write'];
             } else {
               throw Errors.HttpError(500, {
                   error: {
                       message: 'Unsupported share link type: ' + type
                   }
-              });  
+              });
             }
-            
+
             const share = {
                 id: crypto.randomUUID(),
                 sharedBy: $loggedInUser.id,

@@ -16,6 +16,7 @@
 
   <Theme space-4="0px">
     <AppHeader padding="0" height="$space-11">
+
       <Toolbar
         drive="{defaultTo($queryParams.drive, currentDrive)}"
         folder="{defaultTo($queryParams.folder, '/')}"
@@ -32,6 +33,8 @@
       </template>
     </AppHeader>
   </Theme>
+
+
 
   <Pages fallbackPath="/my-files">
 
