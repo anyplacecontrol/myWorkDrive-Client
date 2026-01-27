@@ -12,24 +12,43 @@
     <script type="module" src="/index.ts"></script>
     <script>
       window.MwdHelpers = {
-        // --- Converts a FileitemInfo into query parameters for navigation
+        // Converts a file/folder path into query parameters for navigation
         fileItemQueryParams: (item) => {
-          const segments = item.path.split(":");
-          const drive =
-            segments.length === 4
-              ? ":" + segments.slice(1, 3).join(":") + ":"
-              : path;
-          const filePath =
-            segments.length === 4 ? segments.slice(3).join(":") : path;
-          if (item.isFolder) {
-            return { drive, folder: filePath };
+          const segs = (item?.path || '').split(':');
+          const drive = segs.length === 4
+            ? `:${segs.slice(1, 3).join(':')}:`
+            : item?.drive || '';
+          const path = segs.length === 4
+            ? segs.slice(3).join(':')
+            : item?.path || '';
+
+          if (item?.isFolder) {
+            return { drive, folder: path };
           }
-          const fileSegments = filePath.split("/");
+
+          const parts = path.split('/');
           return {
             drive,
-            folder: fileSegments.slice(0, -1).join("/"),
-            file: fileSegments[fileSegments.length - 1],
+            folder: parts.slice(0, -1).join('/'),
+            file: parts[parts.length - 1]
           };
+        },
+
+        // Build navigation URL for a folder path
+        buildNavigationUrl: (folderPath) => {
+          const queryParams = MwdHelpers.fileItemQueryParams({
+            path: folderPath,
+            isFolder: true
+          });
+
+          const queryString = Object.entries(queryParams || {})
+            .filter(([key, value]) => value)
+            .map(([key, value]) =>
+              `${encodeURIComponent(key)}=${encodeURIComponent(value)}`
+            )
+            .join('&');
+
+          return queryString ? `/my-files?${queryString}` : '/my-files';
         },
 
         // --- Get the file extension from the full file path

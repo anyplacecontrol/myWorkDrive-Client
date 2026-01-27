@@ -7,12 +7,21 @@
   var.currentDrive=":sh:Documents:"
 >
 
+  <!-- Let's keep the sorting and view state here -->
+  <AppState
+    id="appState"
+    bucket="fileCatalogView"
+    initialValue="{{ view: 'table', sortBy: 'name', sortDirection: 'ascending', isFoldersVisible: true }}"
+  />
+
   <Theme space-4="0px">
     <AppHeader padding="0" height="$space-11">
-      <Toolbar />
-
+      <Toolbar
+        drive="{defaultTo($queryParams.drive, currentDrive)}"
+        folder="{defaultTo($queryParams.folder, '/')}"
+      />
       <template name="profileMenuTemplate">
-        <Stack padding="1rem" >
+        <Stack padding="1rem">
           <DropdownMenu>
             <template name="triggerTemplate">
               <Avatar size="xs" name="{loggedInUser.displayName}" />
@@ -21,20 +30,34 @@
           </DropdownMenu>
         </Stack>
       </template>
-
     </AppHeader>
   </Theme>
 
   <Pages fallbackPath="/my-files">
+
     <!-- We have a single main page for browsing files -->
     <Page url="/my-files" padding="0">
-      <HSplitter initialPrimarySize="260px">
-        <FoldersTree drive="{defaultTo($queryParams.drive, currentDrive)}" />
-        <FilesContainer
-          drive="{defaultTo($queryParams.drive, currentDrive)}"
-          folder="{defaultTo($queryParams.folder, '/')}"
-        />
-      </HSplitter>
+      <Theme
+        thickness-resizer-Splitter="$space-1"
+        backgroundColor-resizer-Splitter="transparent"
+      >
+        <HSplitter initialPrimarySize="260px">
+          <property name="splitterTemplate">
+            <Stack
+              height="100%"
+              borderLeft="1px solid $borderColor"
+            />
+          </property>
+          <FoldersTree
+            drive="{defaultTo($queryParams.drive, currentDrive)}"
+            when="{appState.value.isFoldersVisible}"
+          />
+          <FilesContainer
+            drive="{defaultTo($queryParams.drive, currentDrive)}"
+            folder="{defaultTo($queryParams.folder, '/')}"
+          />
+        </HSplitter>
+      </Theme>
     </Page>
   </Pages>
 

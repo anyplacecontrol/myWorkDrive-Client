@@ -13,20 +13,7 @@ const appDef: StandaloneAppDescription = {
       details: "{$response.error.innerError}",
     },
     defaultToOptionalMemberAccess: false,
-    filesTableColumns: {
-      header: 52,
-      name: 172,
-      type: 90,
-      lastModified: 160,
-      size: 96,
-      created: 160,
-      actions: 70,
-    },
     fileTileWidth: 140,
-    targetSelectorModal: {
-      height: 680,
-      maxWidth: 1000
-    }
   },
   resources: {
     favicon: "resources/favicon.ico",

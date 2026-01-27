@@ -22,15 +22,14 @@
     transformResult="{(result) => result.map(item => ({
         ...item,
         id: (item.drive || '') + (item.path || '') + (item.file || ''),
-        type: item.isFolder ? '' : getFileExtension(item.path)
+        type: item.isFolder ? 'Folder' : 'File ' + getFileExtension(item.path)
       })
     )}"
   />
-  <!-- Let's keep the sorting and view state here -->
+  <!--  sorting and view state here -->
   <AppState
     id="appState"
     bucket="fileCatalogView"
-    initialValue="{{ view: 'table', sortBy: 'name', sortDirection: 'ascending' }}"
   />
   <!-- Selection state management using AppState -->
   <AppState

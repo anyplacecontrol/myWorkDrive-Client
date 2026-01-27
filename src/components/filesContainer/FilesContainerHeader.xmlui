@@ -7,37 +7,30 @@
 
 -->
 <Component name="FilesContainerHeader">
-  <!-- We obtain the view mode and sorting state from the AppState -->
-  <AppState id="appState" bucket="fileCatalogView" />
-  <!-- Selection state management using AppState -->
-  <AppState id="selectionState" bucket="fileCatalogSelection" />
-  <VStack
-    paddingTop="{0}"
-    gap="$space-4"
-    canShrink="false"
-    paddingVertical="$space-4">
-    <!-- Actions available when no items are selected -->
+
+
     <HStack
-      height="46px"
+      marginTop="$space-7"
+      paddingBottom="$space-5"
       verticalAlignment="center"
-      borderBottom="1px solid $borderColor"
-      gap="{mediaSize.largeScreen ? '$space-2' : 0}">
+      gap="0">
+
     <HStack
-      height="46px"
       verticalAlignment="center"
-      paddingHorizontal="$space-4"
+      paddingLeft="$space-8"
+      paddingRight="$space-4"
+      width="320px"
       gap="0"
-      borderBottom="1px solid $borderColor"
     >
       <TextBox
-        height="36px"
+        height="40px"
         canShrink="true"
         width="100%"
         testId="tree-search"
         placeholder="Search"
         startIcon="search"
+
       />
-      <SpaceFiller />
     </HStack>
 
     <FilesContainerBreadcrumbs
@@ -46,5 +39,5 @@
     />
     </HStack>
 
-  </VStack>
+
 </Component>

@@ -9,29 +9,15 @@ var treeData = [
 ];
 
 function navigateToNode(node) {
-  if (!node || !node.id) return;
-  const queryParams = MwdHelpers.fileItemQueryParams({
-    path: node.id,
-    isFolder: true,
-  });
-  const entries = Object.entries(queryParams || {});
-  const parts = [];
-  for (let i = 0; i < entries.length; i++) {
-    const key = entries[i][0];
-    const value = entries[i][1];
-    if (value == null || value === "") {
-      continue;
-    }
-    parts.push(encodeURIComponent(key) + "=" + encodeURIComponent(String(value)));
-  }
-  const queryString = parts.join("&");
-  const targetUrl = queryString ? `/my-files?${queryString}` : "/my-files";
+  if (!node.id) return;
+
+  // Build URL and navigate to folder
+  const targetUrl = MwdHelpers.buildNavigationUrl(node.id);
   Actions.navigate(targetUrl);
 }
 
 function onTreeSelectionDidChange(event) {
-  console.log("Tree selection changed:", event);
-  if (!event || !event.newNode) return;
+  if (!event.newNode) return;
   navigateToNode(event.newNode);
 }
 
@@ -72,26 +58,19 @@ function loadChildren(node) {
   const items = Array.isArray(response) ? response : [];
   const mapped = mapFolderItemsToNodes(items);
 
-  // Insert mapped children into local treeData so we can inspect local state
+  // Insert children into local treeData
   const inserted = findAndUpdate(treeData, node.id, (n) => {
     n.children = mapped;
   });
 
-  // Only return mapped children if they were attached to local treeData;
-  // otherwise signal failure with null so caller can handle it.
-  if (inserted) return mapped;
-  return null;
+  return inserted ? mapped : null;
 }
 
 function onNodeCollapse(node) {
-  // Remove children from local treeData because of potential filesystem change
-  try {
-    findAndUpdate(treeData, node.id, (n) => {
-      n.children = [];
-    });
-  } catch (e) {
-    // swallow logging errors silently
-  }
+  // Clear children from local treeData on collapse
+  findAndUpdate(treeData, node.id, (n) => {
+    n.children = [];
+  });
 
   tree.collapseNode(node.id);
   tree.markNodeUnloaded(node.id);

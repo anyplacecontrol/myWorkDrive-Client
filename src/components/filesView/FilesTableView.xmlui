@@ -16,9 +16,10 @@
   <AppState id="appState" bucket="fileCatalogView" />
   <AppState id="selectionState" bucket="fileCatalogSelection" />
   <Table
+
     height="100%"
     id="filesTable"
-    headerHeight="32px"
+    headerHeight="$space-10"
     sortBy="{appState.value.sortBy}"
     sortDirection="{appState.value.sortDirection}"
     syncWithAppState="{ selectionState }"
@@ -29,6 +30,7 @@
     iconSortDesc="arrowdown"
     iconNoSort="-"
     alwaysShowSelectionHeader="true"
+    rowsSelectable="true"
     onWillSort="(sortBy, direction) => {
       appState.update({ sortBy, sortDirection: direction });
       return true;
@@ -40,7 +42,7 @@
 
     <Column
       header="Name"
-      minWidth="{appGlobals.filesTableColumns.name}"
+      width="2*"
       bindTo="name"
       canSort="true"
     >
@@ -52,44 +54,23 @@
           }}"
         testId="link-{$item.name}"
       >
-      <Icon
-        name="{ $item.isFolder ? 'folder' : getFileExtension($item.name) }"
-        width="20"
-        height="20"
-        fallback="unknownfile"
-      />
+        <Icon
+          name="{ $item.isFolder ? 'folder' : getFileExtension($item.name) }"
+          fallback="unknownfile"
+        />
         <Text
-          paddingLeft="10px"
+          paddingLeft="$space-2"
           id="nameText"
           value="{$item.name}"
           maxLines="1"
         />
       </SafeLink>
     </Column>
-    <Column
-      header="Type"
-      bindTo="type"
-      width="{appGlobals.filesTableColumns.type}"
-      canSort="true"
-    >
-      <Link>
-        <Text value="{ $item.type}" />
-      </Link>
-    </Column>
-    <Column
-      header="Last modified"
-      bindTo="modified"
-      width="{appGlobals.filesTableColumns.lastModified}"
-      canSort="true"
-    >
-      <Link>
-        <Text value="{ formatDate($item.modified) }" />
-      </Link>
-    </Column>
+
     <Column
       header="Size"
       bindTo="size"
-      width="{appGlobals.filesTableColumns.size}"
+      width="*"
       canSort="true"
     >
       <Link>
@@ -100,15 +81,27 @@
       </Link>
     </Column>
     <Column
-      header="Creation date"
-      bindTo="created"
-      width="{appGlobals.filesTableColumns.created}"
+      header="Type"
+      bindTo="type"
+      width="*"
+      canSort="true"
+    >
+    <Link>
+     <Badge variant="badge">{ $item.type}</Badge>
+     </Link>
+
+    </Column>
+    <Column
+      header="Date modified"
+      bindTo="modified"
+      width="*"
       canSort="true"
     >
       <Link>
-        <Text value="{ formatDate($item.created) }" />
+        <Text value="{ formatDateTime($item.modified, 'M/d/yyyy h:mm a') }" />
       </Link>
     </Column>
+
 
   </Table>
 </Component>
