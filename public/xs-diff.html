@@ -547,13 +547,34 @@
         }
       }
 
+      // Strip functions from objects (jsondiffpatch can't handle them)
+      function stripFunctions(obj, seen = new WeakSet()) {
+        if (obj === null || typeof obj !== "object") return obj;
+        if (typeof obj === "function") return "[function]";
+        if (seen.has(obj)) return "[circular]";
+        seen.add(obj);
+        if (Array.isArray(obj)) {
+          return obj.map(item => stripFunctions(item, seen));
+        }
+        const result = {};
+        for (const key of Object.keys(obj)) {
+          const val = obj[key];
+          if (typeof val === "function") {
+            result[key] = "[function]";
+          } else {
+            result[key] = stripFunctions(val, seen);
+          }
+        }
+        return result;
+      }
+
       function buildSnapshotsFromDiff(diffArray) {
         const left = {};
         const right = {};
         diffArray.forEach((d) => {
           if (!d || !d.path) return;
-          const beforeVal = d.before === undefined ? null : d.before;
-          const afterVal = d.after === undefined ? null : d.after;
+          const beforeVal = d.before === undefined ? null : stripFunctions(d.before);
+          const afterVal = d.after === undefined ? null : stripFunctions(d.after);
           setByPath(left, d.path, beforeVal);
           setByPath(right, d.path, afterVal);
         });
@@ -2045,13 +2066,17 @@
               }
             }
 
-            const snapshots = buildSnapshotsFromDiff(e.diffJson);
-            const delta = jsondiffpatch.diff(snapshots.left, snapshots.right);
-            if (delta) {
-              const diffHtml = htmlFormatter.format(delta, snapshots.left);
-              const summary = usedArraySummary ? "Show full diff" : "Diff";
-              // Force collapsed when we already have a good summary
-              bodyHtml += wrapDiffInExpander(diffHtml, summary, usedArraySummary);
+            try {
+              const snapshots = buildSnapshotsFromDiff(e.diffJson);
+              const delta = jsondiffpatch.diff(snapshots.left, snapshots.right);
+              if (delta) {
+                const diffHtml = htmlFormatter.format(delta, snapshots.left);
+                const summary = usedArraySummary ? "Show full diff" : "Diff";
+                // Force collapsed when we already have a good summary
+                bodyHtml += wrapDiffInExpander(diffHtml, summary, usedArraySummary);
+              }
+            } catch (diffErr) {
+              bodyHtml += `<div class="text-warning">Could not render diff: ${diffErr.message}</div>`;
             }
           }
 
