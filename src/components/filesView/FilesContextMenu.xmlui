@@ -1,0 +1,23 @@
+<!--
+  Content of Context Menu for files view
+
+  Properties:
+  - `selectedIds`: The list of currently selected files/folders (their paths)
+
+-->
+
+<Component name="FilesContextMenu">
+<AppState id="selectionState" bucket="fileCatalogSelection" />
+
+  <MenuItem onClick="">
+    Rename {JSON.stringify($props.selectedIds)}
+  </MenuItem>
+  <MenuItem onClick="">
+    Copy
+  </MenuItem>
+  <MenuSeparator />
+  <MenuItem onClick="">
+    Delete
+  </MenuItem>
+
+</Component>

@@ -15,6 +15,7 @@
   <!-- We obtain the view mode and sorting state from the AppState -->
   <AppState id="appState" bucket="fileCatalogView" />
   <AppState id="selectionState" bucket="fileCatalogSelection" />
+
   <script>
     function navigateToItem(item) {
       try {
@@ -29,7 +30,23 @@
       } catch (e) {
       }
     }
+
+    function reselectAndOpenMenu(ev, item) {
+    //Repeat Windows Explorer behavior with right click
+      try {
+        const selectedItem = selectionState.value.selectedIds ?? [];
+        const newSelection = !item ? [] : (selectedItem.includes(item.id) ? selectedItem : [item.id]);
+
+        selectionState.update({ selectedIds: newSelection });
+
+        contextMenu.openAt(ev, newSelection);
+      } catch (e) {}
+    }
   </script>
+
+  <ContextMenu id="contextMenu" menuWidth="200px">
+    <FilesContextMenu selectedIds="{selectionState.value.selectedIds}"/>
+  </ContextMenu>
 
   <Table
     when="{$props.fileEntries.length > 0 && !$props.loading}"
@@ -55,18 +72,15 @@
     }"
     onRowDoubleClick="(item)=>navigateToItem(item)"
     hideSelectionCheckboxes="true"
+
   >
-
-
-
-
     <Column
       header="Name"
       width="2*"
       bindTo="name"
       canSort="true"
     >
-      <Link>
+      <Link onContextMenu="ev => {reselectAndOpenMenu(ev, $item)}">
         <HStack
           testId="link-{$item.name}"
           gap="0"
@@ -93,7 +107,7 @@
       width="*"
       canSort="true"
     >
-      <Link>
+      <Link onContextMenu="ev => {reselectAndOpenMenu(ev, null)}">
         <Text
           value="{ $item.size==null ? '' : formatFileSizeInBytes($item.size) }"
           maxLines="1"
