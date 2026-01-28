@@ -287,6 +287,35 @@
         color: var(--color-text);
       }
 
+      .api-pair-link {
+        font-size: var(--font-sm);
+        color: var(--color-link);
+        text-decoration: none;
+        margin-left: var(--space-2);
+        opacity: 0.8;
+      }
+      .api-pair-link:hover {
+        opacity: 1;
+        text-decoration: underline;
+      }
+
+      /* Anchor elements for API event linking */
+      .api-anchor {
+        display: block;
+        position: relative;
+        top: -60px; /* offset for sticky toolbar */
+        visibility: hidden;
+      }
+
+      /* Highlight target when jumping via link */
+      .trace-event.jump-target {
+        animation: highlight-flash 1.5s ease-out;
+      }
+      @keyframes highlight-flash {
+        0% { background-color: rgba(59, 130, 246, 0.3); }
+        100% { background-color: transparent; }
+      }
+
       .highlight-line {
         display: block;
         background: rgba(255, 200, 0, 0.2);
@@ -1346,12 +1375,13 @@
           const traceStart = sorted[0].perfTs;
           const traceEnd = sorted[sorted.length - 1].perfTs;
 
-          // Build map of api:start events to calculate duration for api:complete
-          const apiStarts = new Map();
+          // Build queue of api:start events to calculate duration for api:complete (FIFO for same URLs)
+          const apiStartQueues = new Map(); // key -> array of perfTs values
           sorted.forEach(e => {
             if (e.kind === "api:start" && e.url) {
               const key = `${e.method || "GET"}:${e.url}`;
-              apiStarts.set(key, e.perfTs);
+              if (!apiStartQueues.has(key)) apiStartQueues.set(key, []);
+              apiStartQueues.get(key).push(e.perfTs);
             }
           });
 
@@ -1399,11 +1429,14 @@
             if (e.kind === "api:complete") {
               const method = e.method || "GET";
               const key = `${method}:${e.url}`;
-              // Calculate duration from api:start if not already present
+              // Calculate duration from api:start if not already present (FIFO matching)
               let duration = e.duration;
-              if (typeof duration !== "number" && apiStarts.has(key)) {
-                duration = e.perfTs - apiStarts.get(key);
-                apiStarts.delete(key); // Remove so we don't match again
+              if (typeof duration !== "number") {
+                const queue = apiStartQueues.get(key);
+                if (queue && queue.length > 0) {
+                  const startTs = queue.shift(); // FIFO - take earliest unmatched start
+                  duration = e.perfTs - startTs;
+                }
               }
               if (typeof duration === "number" && duration > 10) {
                 const urlPath = e.url ? new URL(e.url, "http://x").pathname.split("/").pop() : "";
@@ -1600,6 +1633,25 @@
       }
 
       function processAllEntries(entries) {
+        // Pre-pass: build instanceId -> traceId map from api:start events
+        // This allows us to inherit traceId for orphaned api:complete events
+        const apiInstanceTraceMap = new Map();
+        entries.forEach((e) => {
+          if (e.kind === "api:start" && e.instanceId && e.traceId) {
+            apiInstanceTraceMap.set(e.instanceId, e.traceId);
+          }
+        });
+
+        // Inherit traceId for api:complete events that are missing it
+        entries.forEach((e) => {
+          if ((e.kind === "api:complete" || e.kind === "api:error") && e.instanceId && !e.traceId) {
+            const inheritedTraceId = apiInstanceTraceMap.get(e.instanceId);
+            if (inheritedTraceId) {
+              e.traceId = inheritedTraceId;
+            }
+          }
+        });
+
         const interactions = entries.filter((e) => e.kind === "interaction" && !e.traceId);
         const nonInteractions = entries.filter((e) => e.kind !== "interaction" || e.traceId);
 
@@ -1814,10 +1866,28 @@
           bodyHtml += `<table class="timeline-table"><thead><tr><th>phase</th><th class="text-right">duration</th></tr></thead><tbody>${tableRows}</tbody></table>`;
         }
 
-        events.forEach((evt) => {
+        // Build map of API event pairs by instanceId for linking
+        const apiPairs = new Map(); // instanceId -> { startIdx, completeIdx }
+        events.forEach((evt, idx) => {
+          const e = evt.entry;
+          if ((e.kind === "api:start" || e.kind === "api:complete") && e.instanceId) {
+            if (!apiPairs.has(e.instanceId)) apiPairs.set(e.instanceId, {});
+            if (e.kind === "api:start") apiPairs.get(e.instanceId).startIdx = idx;
+            if (e.kind === "api:complete") apiPairs.get(e.instanceId).completeIdx = idx;
+          }
+        });
+
+        events.forEach((evt, idx) => {
           const e = evt.entry;
           const metaInline = evt.meta.parts.length ? `<span class="meta-inline">(${evt.meta.parts.join(" | ")})</span>` : "";
 
+          // Add anchor above the event for API events to enable linking (anchor above for better scroll position)
+          const anchorId = (e.kind === "api:start" || e.kind === "api:complete") && e.instanceId
+            ? `api-${e.kind.replace(':', '-')}-${e.instanceId}`
+            : "";
+          if (anchorId) {
+            bodyHtml += `<a id="${anchorId}" class="api-anchor"></a>`;
+          }
           bodyHtml += `<div class="trace-event">`;
 
           if (e.kind === "api:start" || e.kind === "api:complete" || e.kind === "api:error") {
@@ -1827,7 +1897,19 @@
             const errorInfo = e.kind === "api:error" && e.error ? ` <span class="text-error">- ${e.error}</span>` : "";
             const durationInfo = e.kind === "api:complete" && typeof e._apiDuration === "number" ? ` (${e._apiDuration.toFixed(1)}ms)` : "";
             const statusInfo = e.kind === "api:complete" && e.status ? ` <span class="badge-success">${e.status}</span>` : "";
-            bodyHtml += `<div class="trace-event-header ${errorClass}">[${e.kind}]${statusInfo}${durationInfo} <strong>${method}</strong> ${url}${errorInfo}${metaInline}</div>`;
+
+            // Build link to paired event
+            let pairLink = "";
+            if (e.instanceId && apiPairs.has(e.instanceId)) {
+              const pair = apiPairs.get(e.instanceId);
+              if (e.kind === "api:start" && pair.completeIdx !== undefined) {
+                pairLink = ` <a href="#api-api-complete-${e.instanceId}" class="api-pair-link">→ response</a>`;
+              } else if (e.kind === "api:complete" && pair.startIdx !== undefined) {
+                pairLink = ` <a href="#api-api-start-${e.instanceId}" class="api-pair-link">← request</a>`;
+              }
+            }
+
+            bodyHtml += `<div class="trace-event-header ${errorClass}">[${e.kind}]${statusInfo}${durationInfo} <strong>${method}</strong> ${url}${errorInfo}${pairLink}${metaInline}</div>`;
             // Show request body if present (for api:start)
             if (e.body && e.kind === "api:start") {
               const bodyStr = typeof e.body === "string" ? e.body : JSON.stringify(e.body, null, 2);
@@ -2885,6 +2967,57 @@
           downloadFile(`xs-diff-${timestamp}.md`, generateMarkdownExport(processed), "text/markdown");
         } else if (format === "html") {
           downloadFile(`xs-diff-${timestamp}.html`, generateHtmlExport(processed), "text/html");
+        }
+      });
+
+      // Handle hash navigation - expand parent trace-group and highlight target
+      function handleHashNavigation() {
+        const hash = window.location.hash;
+        if (!hash) return;
+
+        const targetId = hash.slice(1);
+        const anchor = document.getElementById(targetId);
+        if (!anchor) return;
+
+        // Find the trace-event sibling (the div right after the anchor)
+        const traceEvent = anchor.nextElementSibling;
+        if (!traceEvent || !traceEvent.classList.contains("trace-event")) return;
+
+        // Find and expand the parent trace-group
+        const traceGroup = traceEvent.closest(".trace-group");
+        if (traceGroup && !traceGroup.classList.contains("expanded")) {
+          traceGroup.classList.add("expanded");
+          const header = traceGroup.querySelector(".trace-header");
+          if (header) header.classList.add("expanded");
+        }
+
+        // Auto-expand the Request/Response details within the trace event
+        const details = traceEvent.querySelectorAll("details");
+        details.forEach(d => d.setAttribute("open", ""));
+
+        // Apply highlight animation
+        traceEvent.classList.remove("jump-target");
+        void traceEvent.offsetWidth; // Force reflow
+        traceEvent.classList.add("jump-target");
+
+        // Scroll into view
+        anchor.scrollIntoView({ block: "start", behavior: "smooth" });
+      }
+
+      window.addEventListener("hashchange", handleHashNavigation);
+      // Also handle initial page load with hash
+      window.addEventListener("load", () => {
+        if (window.location.hash) {
+          setTimeout(handleHashNavigation, 100);
+        }
+      });
+
+      // Handle clicks on API pair links - ensures expand happens even when hash doesn't change
+      document.addEventListener("click", (e) => {
+        const pairLink = e.target.closest(".api-pair-link");
+        if (pairLink) {
+          // Let the browser update the hash, then handle navigation
+          setTimeout(handleHashNavigation, 0);
         }
       });
 
