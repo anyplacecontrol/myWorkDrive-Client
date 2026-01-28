@@ -1213,6 +1213,11 @@
         }
       }
 
+      // Strip HTML tags from a string (for raw text export)
+      function stripHtml(str) {
+        return str.replace(/<[^>]*>/g, "");
+      }
+
       // =============================================================================
       // COMMON DATA PROCESSING
       // =============================================================================
@@ -1238,16 +1243,25 @@
 
       function buildTraceSummary(traceEntries) {
         const starts = traceEntries.filter((e) => e.kind === "handler:start");
-        const start = starts[0];
         const error = traceEntries.find((e) => e.kind === "handler:error");
         const stateChanges = traceEntries.filter((e) => e.kind === "state:changes");
+        const traceId = traceEntries[0]?.traceId || "";
+
+        // Check if this is a startup trace
+        const isStartup = traceId.startsWith("startup-");
 
         let componentText = "";
-        if (start) {
-          const type = start.componentType || "";
-          const label = start.componentLabel || "";
-          const uid = start.uid || "";
-          const event = start.eventName || "";
+
+        // For startup traces, use "Startup" as the title
+        if (isStartup) {
+          componentText = "Startup";
+        } else if (starts.length > 0) {
+          // Prefer handlers that aren't ChangeListener (those are less informative)
+          const preferredStart = starts.find((s) => s.componentType !== "ChangeListener") || starts[0];
+          const type = preferredStart.componentType || "";
+          const label = preferredStart.componentLabel || "";
+          const uid = preferredStart.uid || "";
+          const event = preferredStart.eventName || "";
           const parts = [];
           if (type) parts.push(type);
           if (label) parts.push(`"${label}"`);
@@ -1265,8 +1279,6 @@
             componentText = action ? `${label}${contextText} ${action}` : label + contextText;
           }
         }
-
-        const traceId = traceEntries[0]?.traceId || "";
 
         // If still no componentText, try to derive from state changes (e.g. DataSource updates)
         if (!componentText && stateChanges.length > 0) {
@@ -1416,8 +1428,9 @@
         }
 
         // Get file info from first handler:start
-        const sourceFile = start ? resolveFileLabel(start.ownerFileId) : null;
-        const handlerCode = start?.handlerCode || null;
+        const firstStart = starts[0];
+        const sourceFile = firstStart ? resolveFileLabel(firstStart.ownerFileId) : null;
+        const handlerCode = firstStart?.handlerCode || null;
 
         return {
           componentText: componentText || "Unknown trace",
@@ -1427,7 +1440,7 @@
           handlerNames,
           handlerDurations,
           startCount: starts.length,
-          timestamp: start?.ts || traceEntries[0]?.ts,
+          timestamp: firstStart?.ts || traceEntries[0]?.ts,
           traceId,
           totalDuration,
           expensiveParts: topExpensive,
@@ -1656,8 +1669,9 @@
 
         items.forEach((item) => {
           if (item.type === "trace") {
-            // Skip 0-diff traces
-            if (item.summary.changeCount === 0 && !item.summary.hasError) return;
+            // Skip 0-diff traces (but keep startup traces)
+            const isStartup = item.traceId && item.traceId.startsWith("startup-");
+            if (item.summary.changeCount === 0 && !item.summary.hasError && !isStartup) return;
 
             if (!currentGroup) {
               currentGroup = { type: "trace-group", traces: [item] };
@@ -1716,7 +1730,8 @@
             }
           } else if (item.type === "trace") {
             // Should not happen after grouping, but handle just in case
-            if (item.summary.changeCount === 0 && !item.summary.hasError) return;
+            const isStartup = item.traceId && item.traceId.startsWith("startup-");
+            if (item.summary.changeCount === 0 && !item.summary.hasError && !isStartup) return;
             blocks.push(renderTraceGroupPretty(item));
           } else if (item.type === "interaction") {
             blocks.push(renderInteractionPretty(item));
@@ -2092,18 +2107,13 @@
           bodyHtml += `<div class="trace-event text-warning">Deduped ${dedupedCount} repeated state change${dedupedCount > 1 ? "s" : ""}.</div>`;
         }
 
-        // Build file link for header if available
-        const fileLink = summary.sourceFile
-          ? ` <span class="file-link" data-file="${summary.sourceFile}"${summary.handlerCode ? ` data-highlight="${summary.handlerCode.replace(/"/g, '&quot;')}"` : ""}>${summary.sourceFile}</span>`
-          : "";
-
         return `
           <div class="trace-group" data-trace-id="${traceId}">
             <div class="trace-header" onclick="this.parentElement.classList.toggle('expanded'); this.classList.toggle('expanded');">
               <span class="arrow">▶</span>
               <div class="trace-summary">
                 <span class="component">${summary.componentText}</span>
-                ${changesHtml}${durationHtml}${fileLink}
+                ${changesHtml}${durationHtml}
               </div>
               <span class="trace-age">${age}</span>
             </div>
@@ -2253,8 +2263,9 @@
         let traceIndex = 0;
         processed.timelineItems.forEach((item) => {
           if (item.type === "trace") {
-            // Skip 0-diff traces (mostly keydown noise)
-            if (item.summary.changeCount === 0 && !item.summary.hasError) return;
+            // Skip 0-diff traces (mostly keydown noise), but keep startup traces
+            const isStartup = item.traceId && item.traceId.startsWith("startup-");
+            if (item.summary.changeCount === 0 && !item.summary.hasError && !isStartup) return;
             traceIndex++;
             lines.push(...renderTraceRaw(item, traceIndex));
             lines.push("");
@@ -2287,6 +2298,27 @@
                     lines.push(`            ${d.path}: initialized with ${d.after.length} items`);
                   } else if (Array.isArray(d.before) && d.after === undefined && isKeyedArray(d.before)) {
                     lines.push(`            ${d.path}: ${d.before.length} items → cleared`);
+                  } else if (d.before && d.after && typeof d.before === "object" && typeof d.after === "object" && !Array.isArray(d.before) && !Array.isArray(d.after)) {
+                    // Object diff - show which fields changed
+                    const allKeys = new Set([...Object.keys(d.before), ...Object.keys(d.after)]);
+                    const changedKeys = [];
+                    allKeys.forEach((key) => {
+                      const bv = JSON.stringify(d.before[key]);
+                      const av = JSON.stringify(d.after[key]);
+                      if (bv !== av) changedKeys.push(key);
+                    });
+                    if (changedKeys.length === 0) {
+                      lines.push(`            ${d.path}: (no visible change)`);
+                    } else {
+                      lines.push(`            ${d.path}:`);
+                      changedKeys.forEach((key) => {
+                        const bv = d.before[key];
+                        const av = d.after[key];
+                        const bvStr = bv === undefined ? "undefined" : JSON.stringify(bv)?.slice(0, 60) || "null";
+                        const avStr = av === undefined ? "undefined" : JSON.stringify(av)?.slice(0, 60) || "null";
+                        lines.push(`                ${key}: ${bvStr} → ${avStr}`);
+                      });
+                    }
                   } else {
                     lines.push(`            ${d.path}: ${JSON.stringify(d.before)?.slice(0, 80) || "undefined"} → ${JSON.stringify(d.after)?.slice(0, 80) || "undefined"}`);
                   }
@@ -2346,7 +2378,8 @@
 
         events.forEach((evt) => {
           const e = evt.entry;
-          const metaParts = evt.meta.parts;
+          // Strip HTML tags from meta parts for raw text output
+          const metaParts = evt.meta.parts.map(stripHtml);
 
           if (e.kind === "api:start" || e.kind === "api:complete" || e.kind === "api:error") {
             const method = e.method || "GET";
@@ -2478,6 +2511,27 @@
                 if (d.after.length > 5) lines.push(`            … and ${d.after.length - 5} more`);
               } else if (Array.isArray(d.before) && d.after === undefined && isKeyedArray(d.before)) {
                 lines.push(`        ${d.path}: ${d.before.length} items → cleared`);
+              } else if (d.before && d.after && typeof d.before === "object" && typeof d.after === "object" && !Array.isArray(d.before) && !Array.isArray(d.after)) {
+                // Object diff - show which fields changed
+                const allKeys = new Set([...Object.keys(d.before), ...Object.keys(d.after)]);
+                const changedKeys = [];
+                allKeys.forEach((key) => {
+                  const bv = JSON.stringify(d.before[key]);
+                  const av = JSON.stringify(d.after[key]);
+                  if (bv !== av) changedKeys.push(key);
+                });
+                if (changedKeys.length === 0) {
+                  lines.push(`        ${d.path}: (no visible change)`);
+                } else {
+                  lines.push(`        ${d.path}:`);
+                  changedKeys.forEach((key) => {
+                    const bv = d.before[key];
+                    const av = d.after[key];
+                    const bvStr = bv === undefined ? "undefined" : JSON.stringify(bv)?.slice(0, 60) || "null";
+                    const avStr = av === undefined ? "undefined" : JSON.stringify(av)?.slice(0, 60) || "null";
+                    lines.push(`            ${key}: ${bvStr} → ${avStr}`);
+                  });
+                }
               } else {
                 lines.push(`        ${d.path}: ${JSON.stringify(d.before)?.slice(0, 80) || "undefined"} → ${JSON.stringify(d.after)?.slice(0, 80) || "undefined"}`);
               }
@@ -2716,7 +2770,9 @@
 
             events.forEach((evt) => {
               const e = evt.entry;
-              const meta = evt.meta.parts.length ? ` _(${evt.meta.parts.join(" | ")})_` : "";
+              // Strip HTML tags from meta parts for markdown export
+              const metaParts = evt.meta.parts.map(stripHtml);
+              const meta = metaParts.length ? ` _(${metaParts.join(" | ")})_` : "";
 
               if (e.kind === "api:start" || e.kind === "api:complete" || e.kind === "api:error") {
                 const durationSuffix = e.kind === "api:complete" && typeof e._apiDuration === "number" ? ` (${e._apiDuration.toFixed(1)}ms)` : "";
@@ -2735,7 +2791,24 @@
                 lines.push(`- \`[${e.kind}]\` ${e.eventName || ""}${meta}`);
                 if (e.diffJson) {
                   e.diffJson.forEach((d) => {
-                    lines.push(`  - \`${d.path}\`: ${JSON.stringify(d.before)} → ${JSON.stringify(d.after)}`);
+                    if (d.before && d.after && typeof d.before === "object" && typeof d.after === "object" && !Array.isArray(d.before) && !Array.isArray(d.after)) {
+                      // Object diff
+                      const allKeys = new Set([...Object.keys(d.before), ...Object.keys(d.after)]);
+                      const changedKeys = [];
+                      allKeys.forEach((key) => {
+                        if (JSON.stringify(d.before[key]) !== JSON.stringify(d.after[key])) changedKeys.push(key);
+                      });
+                      if (changedKeys.length === 0) {
+                        lines.push(`  - \`${d.path}\`: (no visible change)`);
+                      } else {
+                        lines.push(`  - \`${d.path}\`:`);
+                        changedKeys.forEach((key) => {
+                          lines.push(`    - \`${key}\`: ${JSON.stringify(d.before[key])?.slice(0, 60) || "undefined"} → ${JSON.stringify(d.after[key])?.slice(0, 60) || "undefined"}`);
+                        });
+                      }
+                    } else {
+                      lines.push(`  - \`${d.path}\`: ${JSON.stringify(d.before)?.slice(0, 80) || "undefined"} → ${JSON.stringify(d.after)?.slice(0, 80) || "undefined"}`);
+                    }
                   });
                 }
               } else {
