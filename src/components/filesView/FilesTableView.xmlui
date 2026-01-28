@@ -30,10 +30,13 @@
       }
     }
   </script>
+
   <Table
     height="100%"
     id="filesTable"
     headerHeight="$space-10"
+    paddingLeft="$space-6"
+    paddingRight="$space-4"
     sortBy="{appState.value.sortBy}"
     sortDirection="{appState.value.sortDirection}"
     syncWithAppState="{ selectionState }"
@@ -50,6 +53,7 @@
       return true;
     }"
     onRowDoubleClick="(item)=>navigateToItem(item)"
+    hideSelectionCheckboxes="true"
   >
     <property name="noDataTemplate">
       <EmptyDataView />
@@ -61,25 +65,25 @@
       bindTo="name"
       canSort="true"
     >
-    <Link>
-      <HStack
-        testId="link-{$item.name}"
-        gap="0"
-        verticalAlignment="center"
-        onDoubleClick="() => navigateToItem($item)"
-      >
-        <Icon
-          name="{ $item.isFolder ? 'folder' : getFileExtension($item.name) }"
-          fallback="unknownfile"
-        />
-        <Text
-          paddingLeft="$space-2"
-          id="nameText"
-          value="{$item.name}"
-          maxLines="1"
-        />
-      </HStack>
-    </Link>
+      <Link>
+        <HStack
+          testId="link-{$item.name}"
+          gap="0"
+          verticalAlignment="center"
+          onDoubleClick="() => navigateToItem($item)"
+        >
+          <Icon
+            name="{ $item.isFolder ? 'folder' : getFileExtension($item.name) }"
+            fallback="unknownfile"
+          />
+          <Text
+            paddingLeft="$space-2"
+            id="nameText"
+            value="{$item.name}"
+            maxLines="1"
+          />
+        </HStack>
+      </Link>
     </Column>
 
     <Column
