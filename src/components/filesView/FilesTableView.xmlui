@@ -32,6 +32,7 @@
   </script>
 
   <Table
+    when="{$props.fileEntries.length > 0 && !$props.loading}"
     height="100%"
     id="filesTable"
     headerHeight="$space-10"
@@ -55,9 +56,9 @@
     onRowDoubleClick="(item)=>navigateToItem(item)"
     hideSelectionCheckboxes="true"
   >
-    <property name="noDataTemplate">
-      <EmptyDataView />
-    </property>
+
+
+
 
     <Column
       header="Name"

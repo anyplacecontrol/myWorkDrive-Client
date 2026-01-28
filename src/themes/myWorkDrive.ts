@@ -64,6 +64,8 @@ export const MyWorkDriveTheme: ThemeDefinition = {
     "icon.btn_new": "resources/btn-new.svg",
     "icon.btn_view": "resources/btn-view.svg",
     "icon.btn-mediumIcons": "resources/btn-mediumIcons.svg",
+    //icons
+    "icon.info_circle": "resources/info-circle.svg",
     //file type icons
     "icon.folder": "resources/folder.svg",
     "icon.emptyfolder": "resources/folder.svg",

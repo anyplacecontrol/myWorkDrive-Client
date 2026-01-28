@@ -14,6 +14,7 @@
       fileCatalogData.value,
       appState.value.sortBy,
       appState.value.sortDirection);
+     var isAnyFiles = (sortedFiles.length > 0 && !fileCatalogData.loading);
   </script>
 
   <!-- Get the content of the folder (ignore the file property) -->
@@ -30,7 +31,8 @@
 
   <ChangeListener
     listenTo="{fileCatalogData}"
-    onDidChange="{ appState.update({ fileCatalogDataRef: fileCatalogData })}" />
+    onDidChange="{ appState.update({ fileCatalogDataRef: fileCatalogData })}"
+  />
 
   <!--  sorting and view state here -->
   <AppState
@@ -50,15 +52,21 @@
     onUpload="()=>{}"
     overflowX="hidden"
   >
+
     <FilesContainerHeader
       drive="{$props.drive}"
       folder="{$props.folder}"
+      isAnyFiles="{isAnyFiles}"
     />
-    <!-- Display the files  -->
 
+    <EmptyDataView
+      when="{!isAnyFiles}"
+    />
+
+    <!-- Display the files  -->
     <!-- Use the table or tiles view according to the current app state -->
     <FilesTableView
-      when="{appState.value.view === 'table'}"
+      when="{isAnyFiles}"
       fileEntries="{sortedFiles}"
       loading="{fileCatalogData.loading}"
       height="*"
@@ -74,6 +82,7 @@
     />
    -->
 
-  </FileUploadDropZone>
+  </FileUploadDropZone
+  >
 
 </Component>
