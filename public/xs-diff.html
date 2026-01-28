@@ -1719,6 +1719,9 @@
         return result;
       }
 
+      // Counter for generating unique request IDs
+      let _requestIdCounter = 0;
+
       function processAllEntries(entries) {
         // Pre-pass: build instanceId -> traceId map from api:start events
         // This allows us to inherit traceId for orphaned api:complete events
@@ -1735,6 +1738,55 @@
             const inheritedTraceId = apiInstanceTraceMap.get(e.instanceId);
             if (inheritedTraceId) {
               e.traceId = inheritedTraceId;
+            }
+          }
+        });
+
+        // Assign unique requestId to each API request lifecycle
+        // This disambiguates multiple requests from the same DataSource (instanceId)
+        // Also store traceId so we can correctly group api:complete with its api:start
+        const pendingRequests = new Map(); // instanceId -> queue of {requestId, perfTs, method, url, traceId}
+        entries.forEach((e) => {
+          if (e.kind === "api:start") {
+            const requestId = `req-${++_requestIdCounter}`;
+            e._requestId = requestId;
+            const key = e.instanceId || "unknown";
+            if (!pendingRequests.has(key)) pendingRequests.set(key, []);
+            pendingRequests.get(key).push({
+              requestId,
+              perfTs: e.perfTs,
+              method: e.method || "GET",
+              url: e.url,
+              traceId: e.traceId, // Store traceId for inheritance
+            });
+          }
+        });
+
+        // Match api:complete and api:error to pending requests (FIFO within same instanceId)
+        // Also inherit the correct traceId from the matched api:start
+        entries.forEach((e) => {
+          if ((e.kind === "api:complete" || e.kind === "api:error") && !e._requestId) {
+            const key = e.instanceId || "unknown";
+            const queue = pendingRequests.get(key);
+            if (queue && queue.length > 0) {
+              // Find matching request by method+url (FIFO)
+              const method = e.method || "GET";
+              const matchIdx = queue.findIndex(r => r.method === method && r.url === e.url);
+              if (matchIdx !== -1) {
+                const matched = queue.splice(matchIdx, 1)[0];
+                e._requestId = matched.requestId;
+                // Inherit traceId from api:start so response groups with request
+                if (matched.traceId) {
+                  e.traceId = matched.traceId;
+                }
+              } else {
+                // Fallback: just take the first one (FIFO)
+                const matched = queue.shift();
+                e._requestId = matched.requestId;
+                if (matched.traceId) {
+                  e.traceId = matched.traceId;
+                }
+              }
             }
           }
         });
@@ -1953,14 +2005,15 @@
           bodyHtml += `<table class="timeline-table"><thead><tr><th>phase</th><th class="text-right">duration</th></tr></thead><tbody>${tableRows}</tbody></table>`;
         }
 
-        // Build map of API event pairs by instanceId for linking
-        const apiPairs = new Map(); // instanceId -> { startIdx, completeIdx }
+        // Build map of API event pairs by requestId for linking (supports multiple requests per instanceId)
+        const apiPairs = new Map(); // requestId -> { startIdx, completeIdx, errorIdx }
         events.forEach((evt, idx) => {
           const e = evt.entry;
-          if ((e.kind === "api:start" || e.kind === "api:complete") && e.instanceId) {
-            if (!apiPairs.has(e.instanceId)) apiPairs.set(e.instanceId, {});
-            if (e.kind === "api:start") apiPairs.get(e.instanceId).startIdx = idx;
-            if (e.kind === "api:complete") apiPairs.get(e.instanceId).completeIdx = idx;
+          if ((e.kind === "api:start" || e.kind === "api:complete" || e.kind === "api:error") && e._requestId) {
+            if (!apiPairs.has(e._requestId)) apiPairs.set(e._requestId, {});
+            if (e.kind === "api:start") apiPairs.get(e._requestId).startIdx = idx;
+            if (e.kind === "api:complete") apiPairs.get(e._requestId).completeIdx = idx;
+            if (e.kind === "api:error") apiPairs.get(e._requestId).errorIdx = idx;
           }
         });
 
@@ -1969,8 +2022,10 @@
           const metaInline = evt.meta.parts.length ? `<span class="meta-inline">(${evt.meta.parts.join(" | ")})</span>` : "";
 
           // Add anchor above the event for API events to enable linking (anchor above for better scroll position)
-          const anchorId = (e.kind === "api:start" || e.kind === "api:complete") && e.instanceId
-            ? `api-${e.kind.replace(':', '-')}-${e.instanceId}`
+          // Use _requestId if available for precise linking, fall back to instanceId
+          const anchorKey = e._requestId || e.instanceId;
+          const anchorId = (e.kind === "api:start" || e.kind === "api:complete" || e.kind === "api:error") && anchorKey
+            ? `api-${e.kind.replace(':', '-')}-${anchorKey}`
             : "";
           if (anchorId) {
             bodyHtml += `<a id="${anchorId}" class="api-anchor"></a>`;
@@ -1984,19 +2039,25 @@
             const errorInfo = e.kind === "api:error" && e.error ? ` <span class="text-error">- ${e.error.message || e.error}</span>` : "";
             const durationInfo = e.kind === "api:complete" && typeof e._apiDuration === "number" ? ` (${e._apiDuration.toFixed(1)}ms)` : "";
             const statusInfo = e.kind === "api:complete" && e.status ? ` <span class="badge-success">${e.status}</span>` : "";
+            // Show short requestId to disambiguate multiple requests from same DataSource
+            const requestIdInfo = e._requestId ? ` <span class="badge-muted">${e._requestId}</span>` : "";
 
-            // Build link to paired event
+            // Build link to paired event using requestId
             let pairLink = "";
-            if (e.instanceId && apiPairs.has(e.instanceId)) {
-              const pair = apiPairs.get(e.instanceId);
-              if (e.kind === "api:start" && pair.completeIdx !== undefined) {
-                pairLink = ` <a href="#api-api-complete-${e.instanceId}" class="api-pair-link">→ response</a>`;
-              } else if (e.kind === "api:complete" && pair.startIdx !== undefined) {
-                pairLink = ` <a href="#api-api-start-${e.instanceId}" class="api-pair-link">← request</a>`;
+            if (e._requestId && apiPairs.has(e._requestId)) {
+              const pair = apiPairs.get(e._requestId);
+              if (e.kind === "api:start") {
+                if (pair.completeIdx !== undefined) {
+                  pairLink = ` <a href="#api-api-complete-${e._requestId}" class="api-pair-link">→ response</a>`;
+                } else if (pair.errorIdx !== undefined) {
+                  pairLink = ` <a href="#api-api-error-${e._requestId}" class="api-pair-link">→ error</a>`;
+                }
+              } else if ((e.kind === "api:complete" || e.kind === "api:error") && pair.startIdx !== undefined) {
+                pairLink = ` <a href="#api-api-start-${e._requestId}" class="api-pair-link">← request</a>`;
               }
             }
 
-            bodyHtml += `<div class="trace-event-header ${errorClass}">[${e.kind}]${statusInfo}${durationInfo} <strong>${method}</strong> ${url}${errorInfo}${pairLink}${metaInline}</div>`;
+            bodyHtml += `<div class="trace-event-header ${errorClass}">[${e.kind}]${statusInfo}${durationInfo} <strong>${method}</strong> ${url}${errorInfo}${requestIdInfo}${pairLink}${metaInline}</div>`;
             // Show request body if present (for api:start)
             if (e.body && e.kind === "api:start") {
               const bodyStr = typeof e.body === "string" ? e.body : JSON.stringify(e.body, null, 2);
@@ -2560,7 +2621,8 @@
             const errorSuffix = e.kind === "api:error" && e.error ? ` - ${e.error.message || e.error}` : "";
             const statusSuffix = e.kind === "api:complete" && e.status ? ` [${e.status}]` : "";
             const durationSuffix = e.kind === "api:complete" && typeof e._apiDuration === "number" ? ` (${e._apiDuration.toFixed(1)}ms)` : "";
-            lines.push(`    [${e.kind}]${statusSuffix}${durationSuffix} ${method} ${url}${errorSuffix}${metaParts.length ? ` (${metaParts.join(" | ")})` : ""}`);
+            const requestIdSuffix = e._requestId ? ` [${e._requestId}]` : "";
+            lines.push(`    [${e.kind}]${statusSuffix}${durationSuffix} ${method} ${url}${errorSuffix}${requestIdSuffix}${metaParts.length ? ` (${metaParts.join(" | ")})` : ""}`);
             // Show request body for api:start
             if (e.body && e.kind === "api:start") {
               const bodyStr = typeof e.body === "string" ? e.body : JSON.stringify(e.body, null, 2);
@@ -3232,6 +3294,207 @@
               TestFramework.events.handlerComplete("click", { traceId, componentType: "Button", componentLabel: "Publish Post", duration: 2689, ts: baseTs + 2690, perfTs: basePerfTs + 2690 }),
             ];
           },
+
+          // Typeahead search with cancelled requests (AbortController pattern)
+          // Based on Mastodon trace: rapid keystrokes trigger searches, earlier ones get aborted
+          typeaheadSearch() {
+            const instanceId = TestFramework.instanceId(); // Same DataSource instance reused
+            const baseTs = TestFramework.ts();
+            const basePerfTs = TestFramework.perfTs();
+            const events = [];
+
+            // First keystroke: "w" - this request will complete
+            const traceId1 = TestFramework.interactionTraceId();
+            events.push(
+              TestFramework.events.interaction("keydown", "TextBox", { traceId: traceId1, ts: baseTs, perfTs: basePerfTs }),
+              TestFramework.events.handlerStart("didChange", { traceId: traceId1, componentType: "TextBox", componentLabel: "Enter search term...", ts: baseTs + 1, perfTs: basePerfTs + 1 }),
+              TestFramework.events.stateChange("didChange Enter search term...", [
+                { path: "query", before: "", after: "w" }
+              ], { traceId: traceId1, ts: baseTs + 2, perfTs: basePerfTs + 2 }),
+              TestFramework.events.apiStart("POST", "/api/query", { traceId: traceId1, instanceId, ts: baseTs + 5, perfTs: basePerfTs + 5, body: { sql: "SELECT * FROM search WHERE term MATCH ?" } }),
+            );
+
+            // Second keystroke: "wa" - previous request gets aborted
+            const traceId2 = TestFramework.interactionTraceId();
+            events.push(
+              TestFramework.events.interaction("keydown", "TextBox", { traceId: traceId2, ts: baseTs + 150, perfTs: basePerfTs + 150 }),
+              TestFramework.events.handlerStart("didChange", { traceId: traceId2, componentType: "TextBox", componentLabel: "Enter search term...", ts: baseTs + 151, perfTs: basePerfTs + 151 }),
+              TestFramework.events.stateChange("didChange Enter search term...", [
+                { path: "query", before: "w", after: "wa" }
+              ], { traceId: traceId2, ts: baseTs + 152, perfTs: basePerfTs + 152 }),
+              TestFramework.events.apiStart("POST", "/api/query", { traceId: traceId2, instanceId, ts: baseTs + 155, perfTs: basePerfTs + 155 }),
+              // First request aborted
+              TestFramework.events.apiError("POST", "/api/query", "signal is aborted without reason", { traceId: traceId1, instanceId, ts: baseTs + 156, perfTs: basePerfTs + 156 }),
+            );
+
+            // Third keystroke: "wal" - second request gets aborted
+            const traceId3 = TestFramework.interactionTraceId();
+            events.push(
+              TestFramework.events.interaction("keydown", "TextBox", { traceId: traceId3, ts: baseTs + 300, perfTs: basePerfTs + 300 }),
+              TestFramework.events.handlerStart("didChange", { traceId: traceId3, componentType: "TextBox", componentLabel: "Enter search term...", ts: baseTs + 301, perfTs: basePerfTs + 301 }),
+              TestFramework.events.stateChange("didChange Enter search term...", [
+                { path: "query", before: "wa", after: "wal" }
+              ], { traceId: traceId3, ts: baseTs + 302, perfTs: basePerfTs + 302 }),
+              TestFramework.events.apiStart("POST", "/api/query", { traceId: traceId3, instanceId, ts: baseTs + 305, perfTs: basePerfTs + 305 }),
+              // Second request aborted
+              TestFramework.events.apiError("POST", "/api/query", "signal is aborted without reason", { traceId: traceId2, instanceId, ts: baseTs + 306, perfTs: basePerfTs + 306 }),
+            );
+
+            // Final request completes successfully
+            events.push(
+              TestFramework.events.apiComplete("POST", "/api/query", { traceId: traceId3, instanceId, duration: 48, ts: baseTs + 353, perfTs: basePerfTs + 353, response: [{ id: 1, text: "result" }] }),
+              TestFramework.events.stateChange("DataSource:searchResults", [
+                { path: "value", before: [], after: [{ id: 1, text: "result" }] }
+              ], { traceId: traceId3, componentType: "DataSource", instanceId, ts: baseTs + 355, perfTs: basePerfTs + 355 }),
+              // All handlers complete (long-spanning)
+              TestFramework.events.handlerComplete("didChange", { traceId: traceId1, componentType: "TextBox", componentLabel: "Enter search term...", duration: 360, startPerfTs: basePerfTs + 1, ts: baseTs + 360, perfTs: basePerfTs + 360 }),
+              TestFramework.events.handlerComplete("didChange", { traceId: traceId2, componentType: "TextBox", componentLabel: "Enter search term...", duration: 210, startPerfTs: basePerfTs + 151, ts: baseTs + 360, perfTs: basePerfTs + 360 }),
+              TestFramework.events.handlerComplete("didChange", { traceId: traceId3, componentType: "TextBox", componentLabel: "Enter search term...", duration: 60, startPerfTs: basePerfTs + 301, ts: baseTs + 360, perfTs: basePerfTs + 360 }),
+            );
+
+            return events;
+          },
+
+          // Parallel API burst - multiple simultaneous requests (like post-publish refresh)
+          parallelApiBurst() {
+            const traceId = TestFramework.interactionTraceId();
+            const baseTs = TestFramework.ts();
+            const basePerfTs = TestFramework.perfTs();
+            const instanceIds = Array.from({ length: 6 }, () => TestFramework.instanceId());
+
+            return [
+              TestFramework.events.interaction("click", "Refresh All", { traceId, ts: baseTs, perfTs: basePerfTs }),
+              TestFramework.events.handlerStart("click", { traceId, componentType: "Button", componentLabel: "Refresh All", ts: baseTs + 1, perfTs: basePerfTs + 1 }),
+              // Six parallel API calls
+              TestFramework.events.apiStart("POST", "/api/query", { traceId, instanceId: instanceIds[0], ts: baseTs + 5, perfTs: basePerfTs + 5, body: { sql: "SELECT * FROM config" } }),
+              TestFramework.events.apiStart("POST", "/api/query", { traceId, instanceId: instanceIds[1], ts: baseTs + 6, perfTs: basePerfTs + 6, body: { sql: "CREATE TABLE IF NOT EXISTS cache" } }),
+              TestFramework.events.apiStart("POST", "/api/query", { traceId, instanceId: instanceIds[2], ts: baseTs + 7, perfTs: basePerfTs + 7, body: { sql: "INSERT INTO cache SELECT * FROM source" } }),
+              TestFramework.events.apiStart("POST", "/api/query", { traceId, instanceId: instanceIds[3], ts: baseTs + 8, perfTs: basePerfTs + 8, body: { sql: "CREATE TABLE IF NOT EXISTS index" } }),
+              TestFramework.events.apiStart("POST", "/api/query", { traceId, instanceId: instanceIds[4], ts: baseTs + 9, perfTs: basePerfTs + 9, body: { sql: "INSERT INTO index SELECT * FROM data" } }),
+              TestFramework.events.apiStart("GET", "/api/user/me", { traceId, instanceId: instanceIds[5], ts: baseTs + 10, perfTs: basePerfTs + 10 }),
+              // Completions come back in different order
+              TestFramework.events.apiComplete("POST", "/api/query", { traceId, instanceId: instanceIds[0], duration: 35, ts: baseTs + 40, perfTs: basePerfTs + 40 }),
+              TestFramework.events.apiComplete("POST", "/api/query", { traceId, instanceId: instanceIds[1], duration: 34, ts: baseTs + 40, perfTs: basePerfTs + 40 }),
+              TestFramework.events.apiComplete("POST", "/api/query", { traceId, instanceId: instanceIds[3], duration: 34, ts: baseTs + 42, perfTs: basePerfTs + 42 }),
+              TestFramework.events.apiComplete("GET", "/api/user/me", { traceId, instanceId: instanceIds[5], duration: 280, ts: baseTs + 290, perfTs: basePerfTs + 290, response: { id: "user123", name: "Test User" } }),
+              TestFramework.events.apiComplete("POST", "/api/query", { traceId, instanceId: instanceIds[2], duration: 295, ts: baseTs + 302, perfTs: basePerfTs + 302 }),
+              TestFramework.events.apiComplete("POST", "/api/query", { traceId, instanceId: instanceIds[4], duration: 307, ts: baseTs + 316, perfTs: basePerfTs + 316 }),
+              TestFramework.events.handlerComplete("click", { traceId, componentType: "Button", componentLabel: "Refresh All", duration: 320, ts: baseTs + 321, perfTs: basePerfTs + 321 }),
+            ];
+          },
+
+          // Component vars init with many variables (like Compose panel)
+          componentVarsInitComplex() {
+            const traceId = TestFramework.interactionTraceId();
+            const baseTs = TestFramework.ts();
+            const basePerfTs = TestFramework.perfTs();
+            return [
+              TestFramework.events.interaction("click", "Compose", { traceId, ts: baseTs, perfTs: basePerfTs }),
+              TestFramework.events.stateChange("DataSource:previousData", [
+                { path: "value", before: [{ id: 1 }, { id: 2 }], after: [] }
+              ], { traceId, componentType: "DataSource", ts: baseTs + 50, perfTs: basePerfTs + 50 }),
+              TestFramework.events.componentVarsInit(
+                ["postContent", "isPublishing", "publishStatus", "currentLength", "visibility", "visibilityOptions"],
+                "Compose",
+                {
+                  traceId,
+                  ts: baseTs + 97,
+                  perfTs: basePerfTs + 97,
+                  fileId: "http://localhost:8080/components/Compose.xmlui",
+                  diffs: [
+                    { path: "postContent", before: undefined, after: "" },
+                    { path: "isPublishing", before: undefined, after: false },
+                    { path: "publishStatus", before: undefined, after: "" },
+                    { path: "currentLength", before: undefined, after: 0 },
+                    { path: "visibility", before: undefined, after: "direct" },
+                    { path: "visibilityOptions", before: undefined, after: [
+                      { value: "public", label: "Public", description: "all", icon: "globe", enabled: true },
+                      { value: "unlisted", label: "Unlisted", description: "all", icon: "unlock", enabled: true },
+                      { value: "private", label: "Followers only", description: "followers", icon: "lock", enabled: true },
+                      { value: "direct", label: "Direct", description: "mentioned", icon: "mail", enabled: true },
+                    ]},
+                  ],
+                }
+              ),
+            ];
+          },
+
+          // Large array diff with many items added/removed (like search results changing)
+          largeArrayDiff() {
+            const traceId = TestFramework.traceId();
+            const instanceId = TestFramework.instanceId();
+            const baseTs = TestFramework.ts();
+            const basePerfTs = TestFramework.perfTs();
+            // Generate 30 IDs for before, 3 for after (simulating search refinement)
+            const beforeIds = Array.from({ length: 30 }, (_, i) => `id-${1000 + i}`);
+            const afterIds = ["id-1005", "id-1012", "id-1025"]; // 3 that remain
+            return [
+              TestFramework.events.handlerStart("didChange", { traceId, componentType: "TextBox", componentLabel: "Enter search term...", ts: baseTs, perfTs: basePerfTs }),
+              TestFramework.events.stateChange("DataSource:searchResults", [
+                {
+                  path: "value",
+                  before: beforeIds.map(id => ({ id, name: `Item ${id}` })),
+                  after: afterIds.map(id => ({ id, name: `Item ${id}` })),
+                }
+              ], { traceId, componentType: "DataSource", instanceId, uid: "searchResults", ts: baseTs + 50, perfTs: basePerfTs + 50 }),
+              TestFramework.events.handlerComplete("didChange", { traceId, componentType: "TextBox", componentLabel: "Enter search term...", duration: 55, ts: baseTs + 55, perfTs: basePerfTs + 55 }),
+            ];
+          },
+
+          // Query execution with SQL and results (like Run Query button)
+          sqlQueryExecution() {
+            const traceId = TestFramework.interactionTraceId();
+            const instanceId = TestFramework.instanceId();
+            const baseTs = TestFramework.ts();
+            const basePerfTs = TestFramework.perfTs();
+            return [
+              TestFramework.events.interaction("click", "Run Query", { traceId, ts: baseTs, perfTs: basePerfTs }),
+              TestFramework.events.handlerStart("click", { traceId, componentType: "Button", componentLabel: "Run Query", ts: baseTs + 1, perfTs: basePerfTs + 1, fileId: "http://localhost:8080/components/Query.xmlui" }),
+              TestFramework.events.stateChange("AppState:queryState", [
+                { path: "loading", before: false, after: true },
+                { path: "runSql", before: "", after: "SELECT count(*) as count FROM notifications" },
+                { path: "nonce", before: 0, after: 1 },
+              ], { traceId, ts: baseTs + 2, perfTs: basePerfTs + 2 }),
+              TestFramework.events.apiStart("POST", "/api/query", { traceId, instanceId, ts: baseTs + 20, perfTs: basePerfTs + 20, body: { sql: "-- 1\nSELECT count(*) as count FROM notifications" } }),
+              TestFramework.events.handlerComplete("click", { traceId, componentType: "Button", componentLabel: "Run Query", duration: 24, startPerfTs: basePerfTs + 1, ts: baseTs + 25, perfTs: basePerfTs + 25 }),
+              TestFramework.events.apiComplete("POST", "/api/query", { traceId, instanceId, duration: 9, ts: baseTs + 29, perfTs: basePerfTs + 29, response: [{ count: 2351 }] }),
+              TestFramework.events.stateChange("DataSource:queryResults", [
+                { path: "DataSource:queryResults", before: undefined, after: [{ count: 2351 }] }
+              ], { traceId, componentType: "DataSource", instanceId, uid: "queryResults", ts: baseTs + 30, perfTs: basePerfTs + 30 }),
+              TestFramework.events.handlerStart("loaded", { traceId, componentLabel: "queryResults", ts: baseTs + 35, perfTs: basePerfTs + 35 }),
+              TestFramework.events.stateChange("AppState:queryState", [
+                { path: "loading", before: true, after: false },
+                { path: "results", before: [], after: [{ count: 2351 }] },
+              ], { traceId, ts: baseTs + 36, perfTs: basePerfTs + 36 }),
+              TestFramework.events.handlerComplete("loaded", { traceId, componentLabel: "queryResults", duration: 1, startPerfTs: basePerfTs + 35, ts: baseTs + 36, perfTs: basePerfTs + 36 }),
+            ];
+          },
+
+          // Tab/panel navigation clearing previous DataSource
+          panelNavigation(fromPanel = "Home", toPanel = "Search") {
+            const traceId = TestFramework.interactionTraceId();
+            const baseTs = TestFramework.ts();
+            const basePerfTs = TestFramework.perfTs();
+            return [
+              TestFramework.events.interaction("click", toPanel, { traceId, ts: baseTs, perfTs: basePerfTs }),
+              // Previous panel's DataSource gets cleared
+              TestFramework.events.stateChange("DataSource:homeData", [
+                { path: "value", before: Array.from({ length: 50 }, (_, i) => ({ id: i })), after: [] }
+              ], { traceId, componentType: "DataSource", uid: "homeData", ts: baseTs + 15, perfTs: basePerfTs + 15 }),
+              // New panel initializes its variables
+              TestFramework.events.componentVarsInit(
+                ["query"],
+                toPanel,
+                {
+                  traceId,
+                  ts: baseTs + 30,
+                  perfTs: basePerfTs + 30,
+                  fileId: `http://localhost:8080/components/${toPanel}.xmlui`,
+                  diffs: [{ path: "query", before: undefined, after: "" }],
+                }
+              ),
+            ];
+          },
         },
       };
 
@@ -3430,6 +3693,31 @@
           assertEqual(interactions.length, 1);
         });
 
+        test("Trace Processing", "processAllEntries assigns unique requestIds to API events", () => {
+          const events = TestFramework.scenarios.typeaheadSearch();
+          processAllEntries(events); // This mutates events to add _requestId
+          const apiStarts = events.filter(e => e.kind === "api:start");
+          const apiErrors = events.filter(e => e.kind === "api:error");
+          const apiCompletes = events.filter(e => e.kind === "api:complete");
+          // All api:start events should have unique requestIds
+          const startRequestIds = apiStarts.map(e => e._requestId);
+          assertTrue(startRequestIds.every(id => id), "All api:start should have _requestId");
+          assertEqual(new Set(startRequestIds).size, apiStarts.length, "All requestIds should be unique");
+          // Errors and completes should have matching requestIds
+          apiErrors.forEach(e => assertTrue(e._requestId, "api:error should have _requestId"));
+          apiCompletes.forEach(e => assertTrue(e._requestId, "api:complete should have _requestId"));
+        });
+
+        test("Trace Processing", "requestIds link api:start to api:complete/error correctly", () => {
+          const events = TestFramework.scenarios.typeaheadSearch();
+          processAllEntries(events);
+          // Find api:start and its corresponding api:error for first aborted request
+          const firstStart = events.find(e => e.kind === "api:start");
+          const matchingError = events.find(e => e.kind === "api:error" && e._requestId === firstStart._requestId);
+          assertTrue(matchingError, "First api:start should have matching api:error with same requestId");
+          assertTrue(matchingError.error.includes("signal is aborted"), "Matched error should be abort error");
+        });
+
         // =========================================================================
         // TEST SUITE: Timeline Calculation
         // =========================================================================
@@ -3613,6 +3901,151 @@
           const diff = stateChange.entry.diffJson[0];
           assertTrue(Array.isArray(diff.before), "Before should be array");
           assertTrue(Array.isArray(diff.after), "After should be array");
+        });
+
+        // =========================================================================
+        // TEST SUITE: Typeahead & Cancellation (Mastodon-inspired)
+        // =========================================================================
+        test("Typeahead & Cancellation", "typeaheadSearch generates multiple traces", () => {
+          const events = TestFramework.scenarios.typeaheadSearch();
+          const processed = processAllEntries(events);
+          // Should have 3 traces (one per keystroke)
+          assertEqual(processed.timelineItems.length, 3);
+        });
+
+        test("Typeahead & Cancellation", "typeaheadSearch includes api:error for aborted requests", () => {
+          const events = TestFramework.scenarios.typeaheadSearch();
+          const apiErrors = events.filter(e => e.kind === "api:error");
+          assertEqual(apiErrors.length, 2, "Should have 2 aborted requests");
+          assertTrue(apiErrors[0].error.includes("signal is aborted"), "Should be AbortController error");
+        });
+
+        test("Typeahead & Cancellation", "typeaheadSearch reuses same instanceId", () => {
+          const events = TestFramework.scenarios.typeaheadSearch();
+          const apiStarts = events.filter(e => e.kind === "api:start");
+          const instanceIds = new Set(apiStarts.map(e => e.instanceId));
+          assertEqual(instanceIds.size, 1, "All requests should use same DataSource instanceId");
+        });
+
+        test("Typeahead & Cancellation", "typeaheadSearch has long-spanning handlers", () => {
+          const events = TestFramework.scenarios.typeaheadSearch();
+          const completes = events.filter(e => e.kind === "handler:complete");
+          const longHandler = completes.find(e => e.duration > 200);
+          assertTrue(longHandler, "Should have long-spanning handler");
+          assertTrue(longHandler.startPerfTs !== undefined, "Should have startPerfTs");
+        });
+
+        // =========================================================================
+        // TEST SUITE: Parallel API Requests
+        // =========================================================================
+        test("Parallel API Requests", "parallelApiBurst generates 6 API starts", () => {
+          const events = TestFramework.scenarios.parallelApiBurst();
+          const apiStarts = events.filter(e => e.kind === "api:start");
+          assertEqual(apiStarts.length, 6);
+        });
+
+        test("Parallel API Requests", "parallelApiBurst has unique instanceIds", () => {
+          const events = TestFramework.scenarios.parallelApiBurst();
+          const apiStarts = events.filter(e => e.kind === "api:start");
+          const instanceIds = new Set(apiStarts.map(e => e.instanceId));
+          assertEqual(instanceIds.size, 6, "Each request should have unique instanceId");
+        });
+
+        test("Parallel API Requests", "parallelApiBurst completions arrive out of order", () => {
+          const events = TestFramework.scenarios.parallelApiBurst();
+          const apiCompletes = events.filter(e => e.kind === "api:complete");
+          // Check that the /api/user/me (last to start) completes before the INSERT queries
+          const userComplete = apiCompletes.find(e => e.url === "/api/user/me");
+          const insertCompletes = apiCompletes.filter(e => e.body?.sql?.includes("INSERT") || e.duration > 290);
+          assertTrue(userComplete, "Should have user API complete");
+          // userComplete should be before some INSERT completes in the event order
+          const userIdx = events.indexOf(userComplete);
+          const lastInsertIdx = Math.max(...insertCompletes.map(e => events.indexOf(e)));
+          assertTrue(userIdx < lastInsertIdx, "User API should complete before some INSERT queries");
+        });
+
+        // =========================================================================
+        // TEST SUITE: Component Initialization
+        // =========================================================================
+        test("Component Initialization", "componentVarsInitComplex has 6 variables", () => {
+          const events = TestFramework.scenarios.componentVarsInitComplex();
+          const varsInit = events.find(e => e.kind === "component:vars:init");
+          assertTrue(varsInit, "Should have component:vars:init");
+          assertEqual(varsInit.varNames.length, 6);
+          assertContains(varsInit.varNames.join(","), "postContent");
+          assertContains(varsInit.varNames.join(","), "visibilityOptions");
+        });
+
+        test("Component Initialization", "componentVarsInitComplex includes complex object in diffs", () => {
+          const events = TestFramework.scenarios.componentVarsInitComplex();
+          const varsInit = events.find(e => e.kind === "component:vars:init");
+          const visibilityDiff = varsInit.diffJson.find(d => d.path === "visibilityOptions");
+          assertTrue(visibilityDiff, "Should have visibilityOptions diff");
+          assertTrue(Array.isArray(visibilityDiff.after), "visibilityOptions should be array");
+          assertEqual(visibilityDiff.after.length, 4, "Should have 4 visibility options");
+        });
+
+        test("Component Initialization", "panelNavigation clears previous DataSource", () => {
+          const events = TestFramework.scenarios.panelNavigation("Home", "Search");
+          const stateChange = events.find(e => e.kind === "state:changes");
+          assertTrue(stateChange, "Should have state change for cleared DataSource");
+          const diff = stateChange.diffJson[0];
+          assertEqual(diff.after.length, 0, "DataSource should be cleared");
+          assertGreaterThan(diff.before.length, 0, "DataSource should have had items before");
+        });
+
+        // =========================================================================
+        // TEST SUITE: Large Array Diffs
+        // =========================================================================
+        test("Large Array Diffs", "largeArrayDiff has 30 items before, 3 after", () => {
+          const events = TestFramework.scenarios.largeArrayDiff();
+          const stateChange = events.find(e => e.kind === "state:changes");
+          const diff = stateChange.diffJson[0];
+          assertEqual(diff.before.length, 30);
+          assertEqual(diff.after.length, 3);
+        });
+
+        test("Large Array Diffs", "analyzeArrayDiff handles large removals", () => {
+          const events = TestFramework.scenarios.largeArrayDiff();
+          const stateChange = events.find(e => e.kind === "state:changes");
+          const diff = stateChange.diffJson[0];
+          const analysis = analyzeArrayDiff(diff.before, diff.after);
+          assertEqual(analysis.removed.length, 27, "Should have 27 removed items");
+          assertEqual(analysis.added.length, 0, "Should have 0 added items");
+          // unchanged = afterCount - added (items that were already there)
+          assertEqual(analysis.afterCount - analysis.added.length, 3, "Should have 3 unchanged items");
+        });
+
+        // =========================================================================
+        // TEST SUITE: SQL Query Execution
+        // =========================================================================
+        test("SQL Query Execution", "sqlQueryExecution has correct event sequence", () => {
+          const events = TestFramework.scenarios.sqlQueryExecution();
+          const kinds = events.map(e => e.kind);
+          assertTrue(kinds.includes("interaction"), "Should have interaction");
+          assertTrue(kinds.includes("api:start"), "Should have api:start");
+          assertTrue(kinds.includes("api:complete"), "Should have api:complete");
+          // Handler complete should come before api:complete (async pattern)
+          const handlerCompleteIdx = kinds.indexOf("handler:complete");
+          const apiStartIdx = kinds.indexOf("api:start");
+          assertTrue(handlerCompleteIdx > apiStartIdx, "Handler complete after API start");
+        });
+
+        test("SQL Query Execution", "sqlQueryExecution captures SQL in request body", () => {
+          const events = TestFramework.scenarios.sqlQueryExecution();
+          const apiStart = events.find(e => e.kind === "api:start");
+          assertTrue(apiStart.body, "Should have request body");
+          assertContains(apiStart.body.sql, "SELECT count(*)", "Should have SQL in body");
+        });
+
+        test("SQL Query Execution", "sqlQueryExecution shows loading state transition", () => {
+          const events = TestFramework.scenarios.sqlQueryExecution();
+          const stateChanges = events.filter(e => e.kind === "state:changes" && e.eventName === "AppState:queryState");
+          assertEqual(stateChanges.length, 2, "Should have 2 AppState changes");
+          // First sets loading: true, second sets loading: false
+          const firstDiffs = stateChanges[0].diffJson;
+          const loadingDiff = firstDiffs.find(d => d.path === "loading");
+          assertEqual(loadingDiff.after, true, "First change should set loading: true");
         });
 
         // =========================================================================
@@ -3803,7 +4236,8 @@
 
               if (e.kind === "api:start" || e.kind === "api:complete" || e.kind === "api:error") {
                 const durationSuffix = e.kind === "api:complete" && typeof e._apiDuration === "number" ? ` (${e._apiDuration.toFixed(1)}ms)` : "";
-                lines.push(`- \`[${e.kind}]\`${durationSuffix} **${e.method || "GET"}** ${e.url || ""}${meta}`);
+                const requestIdSuffix = e._requestId ? ` \`[${e._requestId}]\`` : "";
+                lines.push(`- \`[${e.kind}]\`${durationSuffix} **${e.method || "GET"}** ${e.url || ""}${requestIdSuffix}${meta}`);
                 if (e.body) {
                   const bodyStr = typeof e.body === "string" ? e.body : JSON.stringify(e.body);
                   const truncatedBody = bodyStr.length > 100 ? bodyStr.substring(0, 100) + "..." : bodyStr;
