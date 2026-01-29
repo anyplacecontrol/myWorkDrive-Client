@@ -88,6 +88,10 @@ export const MyWorkDriveTheme: ThemeDefinition = {
     "icon.cmd_share": "resources/cmd-share.svg",
     "icon.cmd_upload_files": "resources/cmd-upload-files.svg",
     "icon.cmd_upload_folder": "resources/cmd-upload-folder.svg",
+    // new/updated icons
+    "icon.cmd_download_file": "resources/cmd-download-file.svg",
+    "icon.cmd_save_copy": "resources/cmd-save-copy.svg",
+    "icon.cmd_view_file": "resources/cmd-view-file.svg",
   },
 };
 
