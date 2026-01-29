@@ -1,0 +1,11 @@
+<!--
+  Content of Context Menu for folders tree
+
+  Properties:
+  - `selectedNode`: The list of currently selected folders (path)
+
+-->
+
+<Component name="FoldersContextMenu">
+  <MenuItem icon="cmd_upload_files" onClick="">Upload files + {$props.selectedNode.id}</MenuItem>
+</Component>

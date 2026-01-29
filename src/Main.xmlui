@@ -44,10 +44,6 @@
 
     <!-- We have a single main page for browsing files -->
     <Page url="/my-files" padding="0">
-      <Theme
-        thickness-resizer-Splitter="$space-1"
-        backgroundColor-resizer-Splitter="transparent"
-      >
         <HSplitter initialPrimarySize="260px">
           <property name="splitterTemplate">
             <Stack
@@ -64,7 +60,7 @@
             folder="{defaultTo($queryParams.folder, '/')}"
           />
         </HSplitter>
-      </Theme>
+
     </Page>
   </Pages>
 

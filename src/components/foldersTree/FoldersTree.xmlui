@@ -9,6 +9,12 @@
 
 <Component name="FoldersTree">
 
+
+  <!-- Context menu for tree nodes -->
+  <ContextMenu id="contextMenu" menuWidth="220px">
+    <FoldersContextMenu selectedNode="{$context}" />
+  </ContextMenu>
+
   <!-- Panel with fixed toolbar (46px) and scrollable tree area below -->
   <VStack
     height="100%"
@@ -34,6 +40,7 @@
       onLoadChildren="loadChildren"
       onNodeDidCollapse="onNodeCollapse"
       onSelectionDidChange="onTreeSelectionDidChange"
+      onContextMenu="ev => {delay(300); contextMenu.openAt(ev, $item)}"
     >
       <template name="itemTemplate">
         <HStack verticalAlignment="center" gap="$space-2" height="$space-10" >

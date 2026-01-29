@@ -52,7 +52,11 @@ export const MyWorkDriveTheme: ThemeDefinition = {
     //Badge
     "border-Badge": "1px solid $color-secondary-300",
     "backgroundColor-Badge": "transparent",
-    "textColor-Badge": "$textColor-primary"
+    "textColor-Badge": "$textColor-primary",
+
+    //Splitter
+    "thickness-resizer-Splitter": "$space-1",
+    "backgroundColor-resizer-Splitter": "transparent"
   },
   resources: {
     //button icons

@@ -6,43 +6,90 @@
 
 -->
 
-<Component name="FilesContextMenu">
-<AppState id="selectionState" bucket="fileCatalogSelection" />
-
+<Component
+  name="FilesContextMenu"
+  var.isSingleSelection="{$props.selectedIds.length === 1}"
+>
+  <AppState id="selectionState" bucket="fileCatalogSelection" />
 
   <!-- Upload group -->
-  <MenuItem icon="cmd_upload_files" onClick="toast.success('Upload files')">Upload files</MenuItem>
-  <MenuItem icon="cmd_upload_folder" onClick="toast.success('Upload folder')">Upload folder</MenuItem>
+  <MenuItem
+    icon="cmd_upload_files"
+    when="{isSingleSelection}"
+    onClick="toast.success('Upload files')"
+  >
+    Upload files
+  </MenuItem>
+  <MenuItem
+    icon="cmd_upload_folder"
+    when="{isSingleSelection}"
+    onClick="toast.success('Upload folder')"
+  >
+    Upload folder
+  </MenuItem>
   <MenuSeparator />
 
   <!-- Zip / archive actions -->
-  <MenuItem icon="cmd_download_zip" onClick="toast.success('Download as zip')">Download as zip</MenuItem>
-  <MenuItem icon="cmd_add_zip" onClick="toast.success('Add to zip')">Add to zip</MenuItem>
+  <MenuItem icon="cmd_download_zip" onClick="toast.success('Download as zip')">
+    Download as zip
+  </MenuItem>
+  <MenuItem icon="cmd_add_zip" onClick="toast.success('Add to zip')">
+    Add to zip
+  </MenuItem>
 
-  <!-- Share submenu -->
-  <SubMenuItem label="Share" icon="cmd_share">
-    <MenuItem onClick="toast.success('Share via link')">Share via link</MenuItem>
-    <MenuItem onClick="toast.success('Share with people')">Share with people</MenuItem>
+  <!-- Share submenu (single selection only) -->
+  <SubMenuItem icon="cmd_share" label="Share" when="{isSingleSelection}">
+    <MenuItem onClick="toast.success('Share via link')">
+      Share via link
+    </MenuItem>
+    <MenuItem onClick="toast.success('Share with people')">
+      Share with people
+    </MenuItem>
   </SubMenuItem>
 
   <MenuSeparator />
 
   <!-- Clipboard group -->
-  <MenuItem icon="cmd_copy" onClick="toast.success('Copy')">Copy</MenuItem>
-  <MenuItem icon="cmd_cut" onClick="toast.success('Cut')">Cut</MenuItem>
-  <MenuItem icon="cmd_paste" onClick="toast.success('Paste')">Paste</MenuItem>
+  <MenuItem icon="cmd_copy" onClick="toast.success('Copy')">
+    Copy
+  </MenuItem>
+  <MenuItem icon="cmd_cut" onClick="toast.success('Cut')">
+    Cut
+  </MenuItem>
+  <MenuItem
+    icon="cmd_paste"
+    when="{isSingleSelection}"
+    onClick="toast.success('Paste')"
+  >
+    Paste
+  </MenuItem>
 
   <MenuSeparator />
 
   <!-- File operations -->
-  <MenuItem icon="cmd_rename" onClick="toast.success('Rename')">Rename</MenuItem>
-  <MenuItem icon="cmd_delete" onClick="toast.success('Delete')">Delete</MenuItem>
+  <MenuItem
+    icon="cmd_rename"
+    when="{isSingleSelection}"
+    onClick="toast.success('Rename')"
+  >
+    Rename
+  </MenuItem>
+  <MenuItem icon="cmd_delete" onClick="toast.success('Delete')">
+    Delete
+  </MenuItem>
 
   <MenuSeparator />
 
-  <!-- Properties -->
-  <MenuItem icon="cmd_properties" onClick="toast.success('Properties')">Properties</MenuItem>
+  <!-- Properties (single selection only) -->
+  <MenuItem
+    icon="cmd_properties"
+    when="{isSingleSelection}"
+    onClick="toast.success('Properties')"
+  >
+    Properties
+  </MenuItem>
 
   <!-- Note: handlers use toast for placeholders; replace with real actions as needed -->
 
-</Component>
+</Component
+>
