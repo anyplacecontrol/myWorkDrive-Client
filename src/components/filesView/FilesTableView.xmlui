@@ -75,7 +75,26 @@
     }"
     onRowDoubleClick="(item)=>navigateToItem(item)"
     hideSelectionCheckboxes="true"
-
+    onSelectAllAction="(row, selectedItems, selectedIds) => {
+      console.log('SelectAllAction - row:', row, 'selectedItems:', selectedItems, 'selectedIds:', selectedIds);
+      toast.success('Select All: ' + selectedIds.length + ' items selected');
+    }"
+    onCutAction="(row, selectedItems, selectedIds) => {
+      console.log('CutAction - row:', row, 'selectedItems:', selectedItems, 'selectedIds:', selectedIds);
+     toast.success('Cut: ' + selectedIds.length + ' items');
+    }"
+    onCopyAction="(row, selectedItems, selectedIds) => {
+      console.log('CopyAction - row:', row, 'selectedItems:', selectedItems, 'selectedIds:', selectedIds);
+      toast.success('Copy: ' + selectedIds.length + ' items');
+    }"
+    onPasteAction="(row, selectedItems, selectedIds) => {
+      console.log('PasteAction - row:', row, 'selectedItems:', selectedItems, 'selectedIds:', selectedIds);
+      toast.success('Paste action triggered');
+    }"
+    onDeleteAction="(row, selectedItems, selectedIds) => {
+      console.log('DeleteAction - row:', row, 'selectedItems:', selectedItems, 'selectedIds:', selectedIds);
+      toast.success('Delete: ' + selectedIds.length + ' items');
+    }"
   >
     <Column
       header="Name"
