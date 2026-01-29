@@ -2076,8 +2076,13 @@
 
         // Match api:complete and api:error to pending requests by method+url+timing+traceId
         // Also inherit the correct traceId from the matched api:start
-        entries.forEach((e) => {
-          if ((e.kind === "api:complete" || e.kind === "api:error") && !e._requestId) {
+        // IMPORTANT: Process completions in chronological order so earlier completions
+        // get matched to earlier starts (prevents later completion from "stealing" a match)
+        const apiCompletions = entries
+          .filter((e) => (e.kind === "api:complete" || e.kind === "api:error") && !e._requestId)
+          .sort((a, b) => (a.perfTs || 0) - (b.perfTs || 0));
+
+        apiCompletions.forEach((e) => {
             const key = e.instanceId || "unknown";
             const queue = pendingRequests.get(key);
             if (queue && queue.length > 0) {
@@ -2128,7 +2133,6 @@
                 e.traceId = matched.traceId || undefined;
               }
             }
-          }
         });
 
         const interactions = entries.filter((e) => e.kind === "interaction" && !e.traceId);
@@ -4274,6 +4278,33 @@
           // Errors and completes should have matching requestIds
           apiErrors.forEach(e => assertTrue(e._requestId, "api:error should have _requestId"));
           apiCompletes.forEach(e => assertTrue(e._requestId, "api:complete should have _requestId"));
+        });
+
+        test("Trace Processing", "out-of-order api:completes matched correctly by perfTs", () => {
+          // Scenario: Two overlapping requests, but api:completes arrive in array in wrong order
+          // api:start A at t=100, api:start B at t=200
+          // api:complete B at t=250 (appears first in array)
+          // api:complete A at t=300 (appears second in array)
+          // Without sorting, A's completion would match B's start (wrong!)
+          const instanceId = TestFramework.instanceId();
+          const traceId = TestFramework.traceId();
+          const events = [
+            { kind: "api:start", method: "GET", url: "/api/data", instanceId, traceId, perfTs: 100 },
+            { kind: "api:start", method: "GET", url: "/api/data", instanceId, traceId, perfTs: 200 },
+            // Note: completes are in WRONG order in array (later completion first)
+            { kind: "api:complete", method: "GET", url: "/api/data", instanceId, traceId, perfTs: 300 },
+            { kind: "api:complete", method: "GET", url: "/api/data", instanceId, traceId, perfTs: 250 },
+          ];
+          processAllEntries(events);
+          // Find the api:starts and their matched completes
+          const start100 = events.find(e => e.kind === "api:start" && e.perfTs === 100);
+          const start200 = events.find(e => e.kind === "api:start" && e.perfTs === 200);
+          const complete250 = events.find(e => e.kind === "api:complete" && e.perfTs === 250);
+          const complete300 = events.find(e => e.kind === "api:complete" && e.perfTs === 300);
+          // complete at 250 should match start at 200 (started before 250, closest)
+          assertEqual(complete250._requestId, start200._requestId, "Complete at 250 should match start at 200");
+          // complete at 300 should match start at 100 (only one left)
+          assertEqual(complete300._requestId, start100._requestId, "Complete at 300 should match start at 100");
         });
 
         test("Trace Processing", "requestIds link api:start to api:complete/error correctly", () => {
