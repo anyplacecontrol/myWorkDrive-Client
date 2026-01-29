@@ -1847,8 +1847,11 @@
         const pendingRequests = new Map(); // instanceId -> queue of {requestId, perfTs, method, url, traceId}
         entries.forEach((e) => {
           if (e.kind === "api:start") {
-            const requestId = `req-${++_requestIdCounter}`;
-            e._requestId = requestId;
+            // Don't reassign if already has requestId (from previous processing)
+            if (!e._requestId) {
+              e._requestId = `req-${++_requestIdCounter}`;
+            }
+            const requestId = e._requestId;
             const key = e.instanceId || "unknown";
             if (!pendingRequests.has(key)) pendingRequests.set(key, []);
             pendingRequests.get(key).push({
@@ -1861,28 +1864,58 @@
           }
         });
 
-        // Match api:complete and api:error to pending requests (FIFO within same instanceId)
+        // Match api:complete and api:error to pending requests by method+url+timing+traceId
         // Also inherit the correct traceId from the matched api:start
         entries.forEach((e) => {
           if ((e.kind === "api:complete" || e.kind === "api:error") && !e._requestId) {
             const key = e.instanceId || "unknown";
             const queue = pendingRequests.get(key);
             if (queue && queue.length > 0) {
-              // Find matching request by method+url (FIFO)
               const method = (e.method || "GET").toUpperCase(); // Normalize case for matching
-              const matchIdx = queue.findIndex(r => r.method === method && r.url === e.url);
-              if (matchIdx !== -1) {
-                const matched = queue.splice(matchIdx, 1)[0];
+              const completePerfTs = e.perfTs || Infinity;
+              const completeTraceId = e.traceId; // May be undefined
+
+              // Find the best match: same method+url+traceId, started before completion, most recent start time
+              let bestMatchIdx = -1;
+              let bestMatchPerfTs = -1;
+
+              queue.forEach((r, idx) => {
+                if (r.method === method && r.url === e.url) {
+                  // If completion has traceId, require matching traceId
+                  if (completeTraceId && r.traceId && r.traceId !== completeTraceId) {
+                    return; // Skip - traceId mismatch
+                  }
+                  // Match must have started before (or at same time as) completion
+                  if (r.perfTs <= completePerfTs && r.perfTs > bestMatchPerfTs) {
+                    bestMatchIdx = idx;
+                    bestMatchPerfTs = r.perfTs;
+                  }
+                }
+              });
+
+              if (bestMatchIdx !== -1) {
+                const matched = queue.splice(bestMatchIdx, 1)[0];
                 e._requestId = matched.requestId;
                 // Inherit traceId from api:start so response groups with request
-                if (matched.traceId) {
+                if (matched.traceId && !e.traceId) {
                   e.traceId = matched.traceId;
                 }
               } else {
-                // Fallback: just take the first one (FIFO)
-                const matched = queue.shift();
+                // Fallback: take the most recent pending request with matching traceId (if any)
+                let fallbackIdx = -1;
+                let fallbackPerfTs = -1;
+                queue.forEach((r, idx) => {
+                  // Prefer same traceId, or any if no traceId match
+                  const traceMatch = !completeTraceId || !r.traceId || r.traceId === completeTraceId;
+                  if (traceMatch && r.perfTs > fallbackPerfTs) {
+                    fallbackIdx = idx;
+                    fallbackPerfTs = r.perfTs;
+                  }
+                });
+                if (fallbackIdx === -1) fallbackIdx = 0; // Last resort: first in queue
+                const matched = queue.splice(fallbackIdx, 1)[0];
                 e._requestId = matched.requestId;
-                if (matched.traceId) {
+                if (matched.traceId && !e.traceId) {
                   e.traceId = matched.traceId;
                 }
               }
@@ -2996,6 +3029,7 @@
 
       document.getElementById("clear").addEventListener("click", () => {
         if (window.parent && window.parent._xsLogs) window.parent._xsLogs.length = 0;
+        _requestIdCounter = 0; // Reset counter for fresh numbering
         render();
       });
 
@@ -3840,6 +3874,68 @@
           const matchingError = events.find(e => e.kind === "api:error" && e._requestId === firstStart._requestId);
           assertTrue(matchingError, "First api:start should have matching api:error with same requestId");
           assertTrue(matchingError.error.includes("signal is aborted"), "Matched error should be abort error");
+        });
+
+        test("Trace Processing", "method case normalization - lowercase get matches uppercase GET", () => {
+          const traceId = TestFramework.traceId();
+          const instanceId = TestFramework.instanceId();
+          const baseTs = 1000;
+          const events = [
+            { kind: "api:start", method: "get", url: "/api/test", instanceId, traceId, perfTs: baseTs },
+            { kind: "api:complete", method: "GET", url: "/api/test", instanceId, traceId, perfTs: baseTs + 50 },
+          ];
+          processAllEntries(events);
+          const apiStart = events.find(e => e.kind === "api:start");
+          const apiComplete = events.find(e => e.kind === "api:complete");
+          assertEqual(apiStart._requestId, apiComplete._requestId, "Lowercase get should match uppercase GET");
+        });
+
+        test("Trace Processing", "timing-based matching - most recent api:start matches completion", () => {
+          const traceId = TestFramework.traceId();
+          const instanceId = TestFramework.instanceId();
+          const baseTs = 1000;
+          // Two requests to same URL, second one completes
+          const events = [
+            { kind: "api:start", method: "GET", url: "/api/data", instanceId, traceId, perfTs: baseTs },
+            { kind: "api:start", method: "GET", url: "/api/data", instanceId, traceId, perfTs: baseTs + 100 },
+            { kind: "api:complete", method: "GET", url: "/api/data", instanceId, traceId, perfTs: baseTs + 150 },
+          ];
+          processAllEntries(events);
+          const apiStarts = events.filter(e => e.kind === "api:start");
+          const apiComplete = events.find(e => e.kind === "api:complete");
+          // Should match the second (more recent) api:start, not the first
+          assertEqual(apiComplete._requestId, apiStarts[1]._requestId, "Should match most recent api:start");
+        });
+
+        test("Trace Processing", "traceId matching - completion matches start with same traceId", () => {
+          const traceId1 = TestFramework.traceId();
+          const traceId2 = TestFramework.traceId();
+          const instanceId = TestFramework.instanceId();
+          const baseTs = 1000;
+          // Two requests from different traces to same URL
+          const events = [
+            { kind: "api:start", method: "GET", url: "/api/data", instanceId, traceId: traceId1, perfTs: baseTs },
+            { kind: "api:start", method: "GET", url: "/api/data", instanceId, traceId: traceId2, perfTs: baseTs + 50 },
+            { kind: "api:complete", method: "GET", url: "/api/data", instanceId, traceId: traceId1, perfTs: baseTs + 100 },
+          ];
+          processAllEntries(events);
+          const start1 = events.find(e => e.kind === "api:start" && e.traceId === traceId1);
+          const apiComplete = events.find(e => e.kind === "api:complete");
+          assertEqual(apiComplete._requestId, start1._requestId, "Should match api:start with same traceId");
+        });
+
+        test("Trace Processing", "idempotent reprocessing - double processing preserves requestIds", () => {
+          const events = TestFramework.scenarios.apiRequest();
+          processAllEntries(events);
+          const apiStart = events.find(e => e.kind === "api:start");
+          const apiComplete = events.find(e => e.kind === "api:complete");
+          const originalStartId = apiStart._requestId;
+          const originalCompleteId = apiComplete._requestId;
+          // Process again
+          processAllEntries(events);
+          assertEqual(apiStart._requestId, originalStartId, "api:start requestId should not change on reprocessing");
+          assertEqual(apiComplete._requestId, originalCompleteId, "api:complete requestId should not change on reprocessing");
+          assertEqual(apiStart._requestId, apiComplete._requestId, "Should still match after reprocessing");
         });
 
         // =========================================================================
