@@ -173,6 +173,7 @@
       .badge-warning { color: var(--color-warning); font-size: var(--font-base); }
       .badge-info { color: var(--color-info); font-weight: 500; }
       .badge-muted { color: var(--color-text-muted); font-size: var(--font-base); }
+      .badge-bootstrap { color: #6b7280; background: #f3f4f6; padding: 1px 6px; border-radius: 3px; font-size: var(--font-sm); }
 
       .text-error { color: var(--color-error); }
       .text-success { color: var(--color-success); }
@@ -1795,7 +1796,7 @@
         const nonInteractions = entries.filter((e) => e.kind !== "interaction" || e.traceId);
 
         const tracesMap = new Map();
-        const orphans = [];
+        let orphans = [];
         nonInteractions.forEach((entry) => {
           if (entry.traceId) {
             if (!tracesMap.has(entry.traceId)) tracesMap.set(entry.traceId, []);
@@ -1804,6 +1805,29 @@
             orphans.push(entry);
           }
         });
+
+        // Find startup trace and merge bootstrap orphans into it
+        const startupTraceId = Array.from(tracesMap.keys()).find(id => id.startsWith("startup-"));
+        if (startupTraceId) {
+          const startupEntries = tracesMap.get(startupTraceId);
+          const startupMinTs = Math.min(...startupEntries.map(e => sortKey(e) || Infinity));
+
+          // Bootstrap orphans: state changes that occurred before or at startup start
+          const bootstrapOrphans = orphans.filter(e => {
+            const ts = sortKey(e);
+            // Include if: no timestamp (init events), or timestamp <= startup start + small buffer
+            return ts === 0 || ts <= startupMinTs + 100;
+          });
+
+          // Mark and add bootstrap events to startup trace
+          bootstrapOrphans.forEach(e => {
+            e._bootstrap = true;
+            startupEntries.push(e);
+          });
+
+          // Remove bootstrap orphans from orphans list
+          orphans = orphans.filter(e => !e._bootstrap);
+        }
 
         const processedTraces = [];
         for (const [traceId, traceEntries] of tracesMap.entries()) {
@@ -2296,7 +2320,8 @@
             const interactionType = e.interaction || "unknown";
             bodyHtml += `<div class="trace-event-header">interaction ${interactionType}${evt.label ? ` ${evt.label}` : ""}${metaInline}</div>`;
           } else {
-            bodyHtml += `<div class="trace-event-header">${evt.eventTitle}${evt.label ? ` ${evt.label}` : ""}${metaInline}</div>`;
+            const bootstrapBadge = e._bootstrap ? ` <span class="badge-bootstrap">bootstrap</span>` : "";
+            bodyHtml += `<div class="trace-event-header">${evt.eventTitle}${evt.label ? ` ${evt.label}` : ""}${bootstrapBadge}${metaInline}</div>`;
 
             // Show source range for non-DataSource events too
             if (evt.meta.hasSource) {
@@ -2692,7 +2717,8 @@
             return;
           }
 
-          lines.push(`    [${e.kind}]${e.eventName ? ` ${e.eventName}` : ""}${evt.label ? ` ${evt.label}` : ""}${metaParts.length ? ` (${metaParts.join(" | ")})` : ""}`);
+          const bootstrapTag = e._bootstrap ? " [bootstrap]" : "";
+          lines.push(`    [${e.kind}]${e.eventName ? ` ${e.eventName}` : ""}${evt.label ? ` ${evt.label}` : ""}${bootstrapTag}${metaParts.length ? ` (${metaParts.join(" | ")})` : ""}`);
 
           if (evt.meta.hasSource) lines.push(`        source ${evt.meta.sourceRange}`);
 
