@@ -2281,9 +2281,10 @@
 
         items.forEach((item) => {
           if (item.type === "trace") {
-            // Skip 0-diff traces (but keep startup traces)
+            // Skip traces with no meaningful content (but keep startup traces and traces with handlers)
             const isStartup = item.traceId && item.traceId.startsWith("startup-");
-            if (item.summary.changeCount === 0 && !item.summary.hasError && !isStartup) return;
+            const hasContent = item.summary.changeCount > 0 || item.summary.hasError || item.summary.startCount > 0;
+            if (!hasContent && !isStartup) return;
 
             if (!currentGroup) {
               currentGroup = { type: "trace-group", traces: [item] };
@@ -2343,7 +2344,8 @@
           } else if (item.type === "trace") {
             // Should not happen after grouping, but handle just in case
             const isStartup = item.traceId && item.traceId.startsWith("startup-");
-            if (item.summary.changeCount === 0 && !item.summary.hasError && !isStartup) return;
+            const hasContent = item.summary.changeCount > 0 || item.summary.hasError || item.summary.startCount > 0;
+            if (!hasContent && !isStartup) return;
             blocks.push(renderTraceGroupPretty(item));
           } else if (item.type === "interaction") {
             blocks.push(renderInteractionPretty(item));
@@ -2932,9 +2934,10 @@
         let traceIndex = 0;
         processed.timelineItems.forEach((item) => {
           if (item.type === "trace") {
-            // Skip 0-diff traces (mostly keydown noise), but keep startup traces
+            // Skip traces with no meaningful content (but keep startup traces and traces with handlers)
             const isStartup = item.traceId && item.traceId.startsWith("startup-");
-            if (item.summary.changeCount === 0 && !item.summary.hasError && !isStartup) return;
+            const hasContent = item.summary.changeCount > 0 || item.summary.hasError || item.summary.startCount > 0;
+            if (!hasContent && !isStartup) return;
             traceIndex++;
             lines.push(...renderTraceRaw(item, traceIndex));
             lines.push("");
