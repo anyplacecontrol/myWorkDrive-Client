@@ -20,6 +20,12 @@
           }}"
   />
 
+  <AppState
+    id="fileOps"
+    bucket="fileOperations"
+    initialValue="{fileOperationsInitial}"
+  />
+
   <Theme space-4="0px">
     <AppHeader padding="0" height="$space-11">
 

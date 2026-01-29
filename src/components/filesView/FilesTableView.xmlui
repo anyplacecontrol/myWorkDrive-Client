@@ -15,6 +15,7 @@
   <!-- We obtain the view mode and sorting state from the AppState -->
   <AppState id="appState" bucket="fileCatalogView" />
   <AppState id="selectionState" bucket="fileCatalogSelection" />
+  <AppState id="fileOps" bucket="fileOperations"/>
 
   <script>
     function navigateToItem(item) {
@@ -75,17 +76,10 @@
     }"
     onRowDoubleClick="(item)=>navigateToItem(item)"
     hideSelectionCheckboxes="true"
-    onSelectAllAction="(row, selectedItems, selectedIds) => {
-      console.log('SelectAllAction - row:', row, 'selectedItems:', selectedItems, 'selectedIds:', selectedIds);
-      toast.success('Select All: ' + selectedIds.length + ' items selected');
-    }"
-    onCutAction="(row, selectedItems, selectedIds) => {
-      console.log('CutAction - row:', row, 'selectedItems:', selectedItems, 'selectedIds:', selectedIds);
-     toast.success('Cut: ' + selectedIds.length + ' items');
-    }"
-    onCopyAction="(row, selectedItems, selectedIds) => {
-      console.log('CopyAction - row:', row, 'selectedItems:', selectedItems, 'selectedIds:', selectedIds);
-      toast.success('Copy: ' + selectedIds.length + ' items');
+    onCutAction="(row, selectedItems) => console.log('CutAction - row:', row, 'selectedItems:', selectedItems)"
+    onCopyAction="(row, selectedItems) => {
+       console.log(fileOps.value);
+       fileOps.value.copy(selectedItems)
     }"
     onPasteAction="(row, selectedItems, selectedIds) => {
       console.log('PasteAction - row:', row, 'selectedItems:', selectedItems, 'selectedIds:', selectedIds);
@@ -100,8 +94,7 @@
       header="Name"
       width="2*"
       bindTo="name"
-      canSort="true"
-      onContextMenu="ev => {reselectAndOpenMenu(ev, $item)}"
+      canSort="true"  onContextMenu="ev => {reselectAndOpenMenu(ev, $item)}"
     >
       <Link onContextMenu="ev => {reselectAndOpenMenu(ev, $item)}">
         <HStack
