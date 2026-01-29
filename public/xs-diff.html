@@ -575,6 +575,103 @@
         max-height: 200px;
         overflow: auto;
       }
+
+      /* =============================================================================
+         HELP ICON AND MODAL
+         ============================================================================= */
+      .help-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 14px;
+        height: 14px;
+        font-size: 10px;
+        font-weight: 600;
+        color: var(--color-text-subtle);
+        background: var(--color-bg-hover);
+        border: 1px solid var(--color-border);
+        border-radius: 50%;
+        cursor: pointer;
+        margin-left: 4px;
+        vertical-align: middle;
+        line-height: 1;
+      }
+      .help-icon:hover {
+        color: var(--color-info);
+        border-color: var(--color-info);
+        background: #eef2ff;
+      }
+
+      .help-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.3);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+      }
+      .help-modal.visible { display: flex; }
+
+      .help-modal-content {
+        background: var(--color-bg);
+        border-radius: var(--radius-lg);
+        padding: var(--space-5);
+        max-width: 450px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        position: relative;
+      }
+
+      .help-modal-close {
+        position: absolute;
+        top: 8px;
+        right: 12px;
+        font-size: 18px;
+        color: var(--color-text-muted);
+        cursor: pointer;
+        background: none;
+        border: none;
+        padding: 0;
+      }
+      .help-modal-close:hover { color: var(--color-text); }
+
+      .help-modal h3 {
+        margin: 0 0 var(--space-3) 0;
+        font-size: var(--font-lg);
+      }
+
+      .help-modal p {
+        margin: 0 0 var(--space-3) 0;
+        font-size: var(--font-base);
+        color: var(--color-text-muted);
+      }
+
+      .help-modal dl {
+        margin: 0;
+        font-size: var(--font-base);
+      }
+
+      .help-modal dt {
+        font-weight: 600;
+        color: var(--color-text);
+        margin-top: var(--space-2);
+      }
+      .help-modal dt:first-child { margin-top: 0; }
+
+      .help-modal dd {
+        margin: 2px 0 0 0;
+        color: var(--color-text-muted);
+      }
+
+      .help-modal code {
+        background: var(--color-bg-subtle);
+        padding: 1px 4px;
+        border-radius: 3px;
+        font-size: var(--font-sm);
+      }
     </style>
   </head>
   <body>
@@ -1948,24 +2045,11 @@
       let _requestIdCounter = 0;
 
       function processAllEntries(entries) {
-        // Pre-pass: build instanceId -> traceId map from api:start events
-        // This allows us to inherit traceId for orphaned api:complete events
-        const apiInstanceTraceMap = new Map();
-        entries.forEach((e) => {
-          if (e.kind === "api:start" && e.instanceId && e.traceId) {
-            apiInstanceTraceMap.set(e.instanceId, e.traceId);
-          }
-        });
-
-        // Inherit traceId for api:complete events that are missing it
-        entries.forEach((e) => {
-          if ((e.kind === "api:complete" || e.kind === "api:error") && e.instanceId && !e.traceId) {
-            const inheritedTraceId = apiInstanceTraceMap.get(e.instanceId);
-            if (inheritedTraceId) {
-              e.traceId = inheritedTraceId;
-            }
-          }
-        });
+        // NOTE: We intentionally do NOT pre-assign traceIds to orphaned api:complete events.
+        // The old approach used the LAST api:start's traceId for ALL orphans, which caused
+        // wrong matching when a DataSource makes multiple requests over time.
+        // Instead, we rely on timing-based matching below to find the correct api:start,
+        // then inherit its traceId.
 
         // Assign unique requestId to each API request lifecycle
         // This disambiguates multiple requests from the same DataSource (instanceId)
@@ -2022,10 +2106,9 @@
               if (bestMatchIdx !== -1) {
                 const matched = queue.splice(bestMatchIdx, 1)[0];
                 e._requestId = matched.requestId;
-                // Inherit traceId from api:start so response groups with request
-                if (matched.traceId && !e.traceId) {
-                  e.traceId = matched.traceId;
-                }
+                // Always use matched api:start's traceId (overrides any pre-pass inheritance)
+                // If matched has no traceId, clear any incorrect one from pre-pass
+                e.traceId = matched.traceId || undefined;
               } else {
                 // Fallback: take the most recent pending request with matching traceId (if any)
                 let fallbackIdx = -1;
@@ -2041,9 +2124,8 @@
                 if (fallbackIdx === -1) fallbackIdx = 0; // Last resort: first in queue
                 const matched = queue.splice(fallbackIdx, 1)[0];
                 e._requestId = matched.requestId;
-                if (matched.traceId && !e.traceId) {
-                  e.traceId = matched.traceId;
-                }
+                // Always use matched api:start's traceId (overrides any pre-pass inheritance)
+                e.traceId = matched.traceId || undefined;
               }
             }
           }
@@ -2084,6 +2166,60 @@
 
           // Remove bootstrap orphans from orphans list
           orphans = orphans.filter(e => !e._bootstrap);
+        }
+
+        // Merge orphaned API events into ChangeListener traces they triggered
+        // When a DataSource refetch (api:start/api:complete without traceId) triggers a ChangeListener,
+        // the ChangeListener gets a t- trace but the API events are orphaned. Merge them together.
+        const orphanedApiEvents = orphans.filter(e =>
+          (e.kind === "api:start" || e.kind === "api:complete" || e.kind === "api:error") &&
+          e.instanceId &&
+          typeof e.perfTs === "number"
+        );
+
+        if (orphanedApiEvents.length > 0) {
+          // Group orphaned API events by instanceId
+          const orphanedByInstance = new Map();
+          orphanedApiEvents.forEach(e => {
+            if (!orphanedByInstance.has(e.instanceId)) orphanedByInstance.set(e.instanceId, []);
+            orphanedByInstance.get(e.instanceId).push(e);
+          });
+
+          // For each t- trace with a ChangeListener, check if orphaned API events triggered it
+          for (const [traceId, traceEntries] of tracesMap.entries()) {
+            if (!traceId.startsWith("t-")) continue;
+
+            // Check if this trace has a ChangeListener handler
+            const hasChangeListener = traceEntries.some(e =>
+              e.kind === "handler:start" && e.componentType === "ChangeListener"
+            );
+            if (!hasChangeListener) continue;
+
+            // Find the earliest timestamp in this trace
+            const traceMinTs = Math.min(...traceEntries.filter(e => typeof e.perfTs === "number").map(e => e.perfTs));
+            if (!isFinite(traceMinTs)) continue;
+
+            // Look for orphaned api:complete events that happened within 100ms before the trace started
+            for (const [instanceId, apiEvents] of orphanedByInstance.entries()) {
+              const apiComplete = apiEvents.find(e => e.kind === "api:complete");
+              if (!apiComplete) continue;
+
+              // Check if api:complete happened shortly before this trace started (within 100ms)
+              const timeDiff = traceMinTs - apiComplete.perfTs;
+              if (timeDiff >= 0 && timeDiff <= 100) {
+                // Merge these API events into the trace
+                apiEvents.forEach(e => {
+                  e._mergedFromOrphan = true;
+                  traceEntries.push(e);
+                });
+                // Remove from orphans
+                orphanedByInstance.delete(instanceId);
+              }
+            }
+          }
+
+          // Remove merged orphans from the orphans list
+          orphans = orphans.filter(e => !e._mergedFromOrphan);
         }
 
         const processedTraces = [];
@@ -2647,7 +2783,7 @@
               <span class="trace-age">${age}</span>
             </div>
             <div class="trace-body">
-              <div class="trace-meta">trace: ${traceId}</div>
+              <div class="trace-meta">trace: ${traceId} <span class="help-icon" data-help="traceId">?</span></div>
               ${bodyHtml}
             </div>
           </div>
@@ -4029,17 +4165,92 @@
           assertEqual(processed.timelineItems.length, 2);
         });
 
-        test("Trace Processing", "processAllEntries inherits traceId for orphaned api:complete", () => {
+        test("Trace Processing", "api:complete without traceId matches api:start by timing and inherits traceId", () => {
+          // Scenario: api:start has traceId, api:complete does not
+          // The api:complete should match by timing and inherit api:start's traceId
           const events = TestFramework.scenarios.orphanedApiComplete();
           const processed = processAllEntries(events);
           // Should be one trace containing all events
           assertEqual(processed.timelineItems.length, 1);
           const trace = processed.timelineItems[0];
-          // Should have both api:start and api:complete
+          // Should have both api:start and api:complete (matched by timing)
           const hasApiStart = trace.events.some(e => e.entry.kind === "api:start");
           const hasApiComplete = trace.events.some(e => e.entry.kind === "api:complete");
           assertTrue(hasApiStart, "Trace should contain api:start");
-          assertTrue(hasApiComplete, "Trace should contain api:complete (via traceId inheritance)");
+          assertTrue(hasApiComplete, "Trace should contain api:complete (matched by timing, inherited traceId)");
+        });
+
+        test("Trace Processing", "api:complete should not inherit traceId from later api:start", () => {
+          // Scenario: api:start A (no traceId) -> api:complete A -> api:start B (has traceId)
+          // Bug was: api:complete A would get api:start B's traceId because pre-pass uses LAST
+          const instanceId = TestFramework.instanceId();
+          const traceIdB = TestFramework.traceId();
+          const baseTs = 1000;
+          const events = [
+            // First request - no traceId (orphaned)
+            { kind: "api:start", method: "GET", url: "/api/data", instanceId, perfTs: baseTs },
+            { kind: "api:complete", method: "GET", url: "/api/data", instanceId, perfTs: baseTs + 50 },
+            // Second request - has traceId (from later interaction)
+            { kind: "api:start", method: "GET", url: "/api/data", instanceId, traceId: traceIdB, perfTs: baseTs + 200 },
+            { kind: "api:complete", method: "GET", url: "/api/data", instanceId, traceId: traceIdB, perfTs: baseTs + 250 },
+          ];
+          processAllEntries(events);
+          // First api:complete should NOT have traceIdB (it happened before that trace existed)
+          const firstComplete = events[1];
+          assertTrue(firstComplete.traceId !== traceIdB, "First api:complete should not inherit traceId from later api:start");
+        });
+
+        test("Trace Processing", "orphaned API events merge into ChangeListener trace they triggered", () => {
+          // Scenario: api:start/complete without traceId triggers DataSource update,
+          // which triggers ChangeListener (with t- traceId). Should be merged.
+          const instanceId = TestFramework.instanceId();
+          const changeListenerTraceId = "t-test-changelistener";
+          const baseTs = 1000;
+          const events = [
+            // Orphaned API events (no traceId) - DataSource auto-refetch
+            { kind: "api:start", method: "GET", url: "/api/data", instanceId, perfTs: baseTs },
+            { kind: "api:complete", method: "GET", url: "/api/data", instanceId, perfTs: baseTs + 50 },
+            // ChangeListener trace starts shortly after (within 100ms of api:complete)
+            { kind: "handler:start", componentType: "ChangeListener", eventName: "didChange", traceId: changeListenerTraceId, perfTs: baseTs + 80 },
+            { kind: "handler:complete", componentType: "ChangeListener", eventName: "didChange", traceId: changeListenerTraceId, perfTs: baseTs + 100 },
+          ];
+          const processed = processAllEntries(events);
+          // Should have one trace (ChangeListener) with the API events merged in
+          assertEqual(processed.timelineItems.length, 1, "Should have one trace");
+          const trace = processed.timelineItems[0];
+          assertEqual(trace.type, "trace", "Should be a trace");
+          // The trace should contain api:start and api:complete (merged from orphans)
+          const hasApiStart = trace.events.some(e => e.entry.kind === "api:start");
+          const hasApiComplete = trace.events.some(e => e.entry.kind === "api:complete");
+          assertTrue(hasApiStart, "ChangeListener trace should contain merged api:start");
+          assertTrue(hasApiComplete, "ChangeListener trace should contain merged api:complete");
+          // Should have no orphans
+          assertEqual(processed.otherOrphans.length, 0, "Should have no orphaned events");
+        });
+
+        test("Trace Processing", "orphaned API events NOT merged if timing gap too large", () => {
+          // Scenario: api:complete happens > 100ms before ChangeListener - should NOT merge
+          const instanceId = TestFramework.instanceId();
+          const changeListenerTraceId = "t-test-changelistener";
+          const baseTs = 1000;
+          const events = [
+            // Orphaned API events (no traceId)
+            { kind: "api:start", method: "GET", url: "/api/data", instanceId, perfTs: baseTs },
+            { kind: "api:complete", method: "GET", url: "/api/data", instanceId, perfTs: baseTs + 50 },
+            // ChangeListener starts 200ms after api:complete (too far)
+            { kind: "handler:start", componentType: "ChangeListener", eventName: "didChange", traceId: changeListenerTraceId, perfTs: baseTs + 250 },
+            { kind: "handler:complete", componentType: "ChangeListener", eventName: "didChange", traceId: changeListenerTraceId, perfTs: baseTs + 270 },
+          ];
+          const processed = processAllEntries(events);
+          // Should have one trace (ChangeListener) WITHOUT the API events
+          assertEqual(processed.timelineItems.length, 1, "Should have one trace");
+          const trace = processed.timelineItems[0];
+          const hasApiStart = trace.events.some(e => e.entry.kind === "api:start");
+          const hasApiComplete = trace.events.some(e => e.entry.kind === "api:complete");
+          assertTrue(!hasApiStart, "ChangeListener trace should NOT contain api:start (timing gap too large)");
+          assertTrue(!hasApiComplete, "ChangeListener trace should NOT contain api:complete (timing gap too large)");
+          // Should have orphans
+          assertEqual(processed.otherOrphans.length, 2, "Should have 2 orphaned API events");
         });
 
         test("Trace Processing", "processAllEntries separates standalone interactions", () => {
@@ -4954,7 +5165,53 @@
         }
       }, 250);
 
+      // Help icon click handler
+      document.addEventListener("click", (e) => {
+        const helpIcon = e.target.closest(".help-icon");
+        if (helpIcon) {
+          e.stopPropagation();
+          const helpType = helpIcon.dataset.help;
+          const modal = document.getElementById("helpModal");
+          if (modal && helpType === "traceId") {
+            modal.classList.add("visible");
+          }
+        }
+      });
+
+      // Close modal on backdrop click or close button
+      document.getElementById("helpModal").addEventListener("click", (e) => {
+        if (e.target.classList.contains("help-modal") || e.target.classList.contains("help-modal-close")) {
+          e.target.closest(".help-modal").classList.remove("visible");
+        }
+      });
+
+      // Close modal on Escape key
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          document.getElementById("helpModal").classList.remove("visible");
+        }
+      });
+
       render();
     </script>
+
+    <!-- Help Modal for TraceId -->
+    <div id="helpModal" class="help-modal">
+      <div class="help-modal-content">
+        <button class="help-modal-close">&times;</button>
+        <h3>What is a Trace ID?</h3>
+        <p>A trace ID groups related events that happen as part of the same logical operation. The prefix indicates what triggered the trace:</p>
+        <dl>
+          <dt><code>i-</code> (interaction)</dt>
+          <dd>Triggered by a user interaction such as click, contextmenu, keydown, or other direct user action.</dd>
+
+          <dt><code>t-</code> (non-interaction)</dt>
+          <dd>Triggered by data changes, timers, or handlers that fire without direct user interaction (e.g., ChangeListener responding to state updates).</dd>
+
+          <dt><code>startup-</code> (bootstrap)</dt>
+          <dd>Events that occur during app initialization before any user interaction.</dd>
+        </dl>
+      </div>
+    </div>
   </body>
 </html>
