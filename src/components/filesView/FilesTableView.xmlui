@@ -76,15 +76,9 @@
     }"
     onRowDoubleClick="(item)=>navigateToItem(item)"
     hideSelectionCheckboxes="true"
-    onCutAction="(row, selectedItems) => console.log('CutAction - row:', row, 'selectedItems:', selectedItems)"
-    onCopyAction="(row, selectedItems) => {
-       console.log(fileOps.value);
-       fileOps.value.copy(selectedItems)
-    }"
-    onPasteAction="(row, selectedItems, selectedIds) => {
-      console.log('PasteAction - row:', row, 'selectedItems:', selectedItems, 'selectedIds:', selectedIds);
-      toast.success('Paste action triggered');
-    }"
+    onCutAction="(row, selectedItems) => fileOps.value.copyOrCut(selectedItems, 'cut')"
+    onCopyAction="(row, selectedItems) =>  fileOps.value.copyOrCut(selectedItems, 'copy')"
+    onPasteAction="(row, selectedItems) =>  fileOps.value.paste(selectedItems)"
     onDeleteAction="(row, selectedItems, selectedIds) => {
       console.log('DeleteAction - row:', row, 'selectedItems:', selectedItems, 'selectedIds:', selectedIds);
       toast.success('Delete: ' + selectedIds.length + ' items');

@@ -85,18 +85,18 @@
   <MenuSeparator />
 
   <!-- Clipboard group -->
-  <MenuItem icon="cmd_copy" onClick="fileOps.value.copy($props.selectedItems)">
+  <MenuItem icon="cmd_copy" onClick="fileOps.value.copyOrCut($props.selectedItems, 'copy')">
     Copy
   </MenuItem>
 
-  <MenuItem icon="cmd_cut" onClick="toast.success('Cut')">
+  <MenuItem icon="cmd_cut" onClick="fileOps.value.copyOrCut($props.selectedItems, 'cut')">
     Cut
   </MenuItem>
 
   <MenuItem
     icon="cmd_paste"
     when="{isSingleSelection && isAnyFolder}"
-    onClick="toast.success('Paste')"
+    onClick="fileOps.value.paste($props.selectedItems)"
   >
     Paste
   </MenuItem>
