@@ -72,6 +72,18 @@ export const MyWorkDriveTheme: ThemeDefinition = {
     "icon.xls": "resources/onedrive-regular-xls.svg",
     "icon.doc": "resources/onedrive-regular-doc.svg",
     "icon.ppt": "resources/onedrive-regular-ppt.svg",
+    // menu icons
+    "icon.cmd_add_zip": "resources/cmd-add-zip.svg",
+    "icon.cmd_copy": "resources/cmd-copy.svg",
+    "icon.cmd_cut": "resources/cmd-cut.svg",
+    "icon.cmd_delete": "resources/cmd-delete.svg",
+    "icon.cmd_download_zip": "resources/cmd-download-zip.svg",
+    "icon.cmd_paste": "resources/cmd-paste.svg",
+    "icon.cmd_properties": "resources/cmd-properties.svg",
+    "icon.cmd_rename": "resources/cmd-rename.svg",
+    "icon.cmd_share": "resources/cmd-share.svg",
+    "icon.cmd_upload_files": "resources/cmd-upload-files.svg",
+    "icon.cmd_upload_folder": "resources/cmd-upload-folder.svg",
   },
 };
 

@@ -44,8 +44,8 @@
     }
   </script>
 
-  <ContextMenu id="contextMenu" menuWidth="200px">
-    <FilesContextMenu selectedIds="{selectionState.value.selectedIds}"/>
+  <ContextMenu id="contextMenu" menuWidth="240px">
+    <FilesContextMenu selectedIds="{$context}"/>
   </ContextMenu>
 
   <Table
