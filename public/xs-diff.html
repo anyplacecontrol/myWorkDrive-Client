@@ -287,6 +287,35 @@
         color: var(--color-text);
       }
 
+      .api-pair-link {
+        font-size: var(--font-sm);
+        color: var(--color-link);
+        text-decoration: none;
+        margin-left: var(--space-2);
+        opacity: 0.8;
+      }
+      .api-pair-link:hover {
+        opacity: 1;
+        text-decoration: underline;
+      }
+
+      /* Anchor elements for API event linking */
+      .api-anchor {
+        display: block;
+        position: relative;
+        top: -60px; /* offset for sticky toolbar */
+        visibility: hidden;
+      }
+
+      /* Highlight target when jumping via link */
+      .trace-event.jump-target {
+        animation: highlight-flash 1.5s ease-out;
+      }
+      @keyframes highlight-flash {
+        0% { background-color: rgba(59, 130, 246, 0.3); }
+        100% { background-color: transparent; }
+      }
+
       .highlight-line {
         display: block;
         background: rgba(255, 200, 0, 0.2);
@@ -462,6 +491,89 @@
         white-space: pre-wrap;
         word-wrap: break-word;
       }
+
+      /* =============================================================================
+         TEST RESULTS STYLES
+         ============================================================================= */
+      .test-results {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: var(--font-sm);
+        padding: var(--space-4);
+      }
+      .test-results h2 {
+        font-size: var(--font-lg);
+        margin: 0 0 var(--space-4) 0;
+        padding-bottom: var(--space-2);
+        border-bottom: 1px solid var(--color-border);
+      }
+      .test-suite {
+        margin: var(--space-4) 0;
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-md);
+        overflow: hidden;
+      }
+      .test-suite-header {
+        background: var(--color-bg-subtle);
+        padding: var(--space-2) var(--space-3);
+        font-weight: 500;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+      }
+      .test-suite-header:hover { background: var(--color-bg-hover); }
+      .test-suite-body {
+        display: none;
+        padding: var(--space-2);
+        border-top: 1px solid var(--color-border);
+      }
+      .test-suite.expanded .test-suite-body { display: block; }
+      .test-case {
+        padding: var(--space-1) var(--space-2);
+        margin: var(--space-1) 0;
+        border-radius: var(--radius-sm);
+        display: flex;
+        align-items: flex-start;
+        gap: var(--space-2);
+      }
+      .test-case.pass { background: rgba(5, 150, 105, 0.1); }
+      .test-case.fail { background: rgba(220, 38, 38, 0.1); }
+      .test-icon { flex-shrink: 0; }
+      .test-icon.pass { color: var(--color-success); }
+      .test-icon.fail { color: var(--color-error); }
+      .test-name { flex: 1; }
+      .test-error {
+        margin-top: var(--space-1);
+        padding: var(--space-2);
+        background: rgba(220, 38, 38, 0.05);
+        border-radius: var(--radius-sm);
+        color: var(--color-error);
+        font-size: var(--font-xs);
+        white-space: pre-wrap;
+      }
+      .test-summary {
+        margin-top: var(--space-4);
+        padding: var(--space-3);
+        border-radius: var(--radius-md);
+        font-weight: 500;
+      }
+      .test-summary.all-pass {
+        background: rgba(5, 150, 105, 0.15);
+        color: var(--color-success);
+      }
+      .test-summary.has-failures {
+        background: rgba(220, 38, 38, 0.15);
+        color: var(--color-error);
+      }
+      .test-details {
+        margin-top: var(--space-2);
+        padding: var(--space-2);
+        background: var(--color-bg-subtle);
+        border-radius: var(--radius-sm);
+        font-size: var(--font-xs);
+        max-height: 200px;
+        overflow: auto;
+      }
     </style>
   </head>
   <body>
@@ -471,6 +583,7 @@
       <label><input type="radio" name="viewMode" id="viewRaw" /> raw</label>
       <span class="spacer"></span>
       <button id="clear">Clear</button>
+      <button id="test">Test</button>
       <span class="spacer"></span>
       <select id="exportFormat">
         <option value="">Export...</option>
@@ -1213,6 +1326,11 @@
         }
       }
 
+      // Strip HTML tags from a string (for raw text export)
+      function stripHtml(str) {
+        return str.replace(/<[^>]*>/g, "");
+      }
+
       // =============================================================================
       // COMMON DATA PROCESSING
       // =============================================================================
@@ -1221,6 +1339,9 @@
         const resolvedFile = resolveFileLabel(e.ownerFileId);
         const parts = [];
         if (e.perfTs !== undefined) parts.push(`perfTs ${e.perfTs.toFixed(1)}`);
+        if (e.kind === "handler:complete" && e.startPerfTs !== undefined) {
+          parts.push(`started ${e.startPerfTs.toFixed(1)}`);
+        }
         if (e.instanceId) parts.push(`instance ${e.instanceId}`);
         if (e.dataSourceUrl) parts.push(`url ${e.dataSourceUrl}`);
         if (e.ownerUid) parts.push(`uid ${e.ownerUid}`);
@@ -1238,16 +1359,25 @@
 
       function buildTraceSummary(traceEntries) {
         const starts = traceEntries.filter((e) => e.kind === "handler:start");
-        const start = starts[0];
         const error = traceEntries.find((e) => e.kind === "handler:error");
         const stateChanges = traceEntries.filter((e) => e.kind === "state:changes");
+        const traceId = traceEntries[0]?.traceId || "";
+
+        // Check if this is a startup trace
+        const isStartup = traceId.startsWith("startup-");
 
         let componentText = "";
-        if (start) {
-          const type = start.componentType || "";
-          const label = start.componentLabel || "";
-          const uid = start.uid || "";
-          const event = start.eventName || "";
+
+        // For startup traces, use "Startup" as the title
+        if (isStartup) {
+          componentText = "Startup";
+        } else if (starts.length > 0) {
+          // Prefer handlers that aren't ChangeListener (those are less informative)
+          const preferredStart = starts.find((s) => s.componentType !== "ChangeListener") || starts[0];
+          const type = preferredStart.componentType || "";
+          const label = preferredStart.componentLabel || "";
+          const uid = preferredStart.uid || "";
+          const event = preferredStart.eventName || "";
           const parts = [];
           if (type) parts.push(type);
           if (label) parts.push(`"${label}"`);
@@ -1265,8 +1395,6 @@
             componentText = action ? `${label}${contextText} ${action}` : label + contextText;
           }
         }
-
-        const traceId = traceEntries[0]?.traceId || "";
 
         // If still no componentText, try to derive from state changes (e.g. DataSource updates)
         if (!componentText && stateChanges.length > 0) {
@@ -1334,12 +1462,13 @@
           const traceStart = sorted[0].perfTs;
           const traceEnd = sorted[sorted.length - 1].perfTs;
 
-          // Build map of api:start events to calculate duration for api:complete
-          const apiStarts = new Map();
+          // Build queue of api:start events to calculate duration for api:complete (FIFO for same URLs)
+          const apiStartQueues = new Map(); // key -> array of perfTs values
           sorted.forEach(e => {
             if (e.kind === "api:start" && e.url) {
               const key = `${e.method || "GET"}:${e.url}`;
-              apiStarts.set(key, e.perfTs);
+              if (!apiStartQueues.has(key)) apiStartQueues.set(key, []);
+              apiStartQueues.get(key).push(e.perfTs);
             }
           });
 
@@ -1387,11 +1516,14 @@
             if (e.kind === "api:complete") {
               const method = e.method || "GET";
               const key = `${method}:${e.url}`;
-              // Calculate duration from api:start if not already present
+              // Calculate duration from api:start if not already present (FIFO matching)
               let duration = e.duration;
-              if (typeof duration !== "number" && apiStarts.has(key)) {
-                duration = e.perfTs - apiStarts.get(key);
-                apiStarts.delete(key); // Remove so we don't match again
+              if (typeof duration !== "number") {
+                const queue = apiStartQueues.get(key);
+                if (queue && queue.length > 0) {
+                  const startTs = queue.shift(); // FIFO - take earliest unmatched start
+                  duration = e.perfTs - startTs;
+                }
               }
               if (typeof duration === "number" && duration > 10) {
                 const urlPath = e.url ? new URL(e.url, "http://x").pathname.split("/").pop() : "";
@@ -1416,8 +1548,9 @@
         }
 
         // Get file info from first handler:start
-        const sourceFile = start ? resolveFileLabel(start.ownerFileId) : null;
-        const handlerCode = start?.handlerCode || null;
+        const firstStart = starts[0];
+        const sourceFile = firstStart ? resolveFileLabel(firstStart.ownerFileId) : null;
+        const handlerCode = firstStart?.handlerCode || null;
 
         return {
           componentText: componentText || "Unknown trace",
@@ -1427,7 +1560,7 @@
           handlerNames,
           handlerDurations,
           startCount: starts.length,
-          timestamp: start?.ts || traceEntries[0]?.ts,
+          timestamp: firstStart?.ts || traceEntries[0]?.ts,
           traceId,
           totalDuration,
           expensiveParts: topExpensive,
@@ -1586,7 +1719,78 @@
         return result;
       }
 
+      // Counter for generating unique request IDs
+      let _requestIdCounter = 0;
+
       function processAllEntries(entries) {
+        // Pre-pass: build instanceId -> traceId map from api:start events
+        // This allows us to inherit traceId for orphaned api:complete events
+        const apiInstanceTraceMap = new Map();
+        entries.forEach((e) => {
+          if (e.kind === "api:start" && e.instanceId && e.traceId) {
+            apiInstanceTraceMap.set(e.instanceId, e.traceId);
+          }
+        });
+
+        // Inherit traceId for api:complete events that are missing it
+        entries.forEach((e) => {
+          if ((e.kind === "api:complete" || e.kind === "api:error") && e.instanceId && !e.traceId) {
+            const inheritedTraceId = apiInstanceTraceMap.get(e.instanceId);
+            if (inheritedTraceId) {
+              e.traceId = inheritedTraceId;
+            }
+          }
+        });
+
+        // Assign unique requestId to each API request lifecycle
+        // This disambiguates multiple requests from the same DataSource (instanceId)
+        // Also store traceId so we can correctly group api:complete with its api:start
+        const pendingRequests = new Map(); // instanceId -> queue of {requestId, perfTs, method, url, traceId}
+        entries.forEach((e) => {
+          if (e.kind === "api:start") {
+            const requestId = `req-${++_requestIdCounter}`;
+            e._requestId = requestId;
+            const key = e.instanceId || "unknown";
+            if (!pendingRequests.has(key)) pendingRequests.set(key, []);
+            pendingRequests.get(key).push({
+              requestId,
+              perfTs: e.perfTs,
+              method: e.method || "GET",
+              url: e.url,
+              traceId: e.traceId, // Store traceId for inheritance
+            });
+          }
+        });
+
+        // Match api:complete and api:error to pending requests (FIFO within same instanceId)
+        // Also inherit the correct traceId from the matched api:start
+        entries.forEach((e) => {
+          if ((e.kind === "api:complete" || e.kind === "api:error") && !e._requestId) {
+            const key = e.instanceId || "unknown";
+            const queue = pendingRequests.get(key);
+            if (queue && queue.length > 0) {
+              // Find matching request by method+url (FIFO)
+              const method = e.method || "GET";
+              const matchIdx = queue.findIndex(r => r.method === method && r.url === e.url);
+              if (matchIdx !== -1) {
+                const matched = queue.splice(matchIdx, 1)[0];
+                e._requestId = matched.requestId;
+                // Inherit traceId from api:start so response groups with request
+                if (matched.traceId) {
+                  e.traceId = matched.traceId;
+                }
+              } else {
+                // Fallback: just take the first one (FIFO)
+                const matched = queue.shift();
+                e._requestId = matched.requestId;
+                if (matched.traceId) {
+                  e.traceId = matched.traceId;
+                }
+              }
+            }
+          }
+        });
+
         const interactions = entries.filter((e) => e.kind === "interaction" && !e.traceId);
         const nonInteractions = entries.filter((e) => e.kind !== "interaction" || e.traceId);
 
@@ -1656,8 +1860,9 @@
 
         items.forEach((item) => {
           if (item.type === "trace") {
-            // Skip 0-diff traces
-            if (item.summary.changeCount === 0 && !item.summary.hasError) return;
+            // Skip 0-diff traces (but keep startup traces)
+            const isStartup = item.traceId && item.traceId.startsWith("startup-");
+            if (item.summary.changeCount === 0 && !item.summary.hasError && !isStartup) return;
 
             if (!currentGroup) {
               currentGroup = { type: "trace-group", traces: [item] };
@@ -1716,7 +1921,8 @@
             }
           } else if (item.type === "trace") {
             // Should not happen after grouping, but handle just in case
-            if (item.summary.changeCount === 0 && !item.summary.hasError) return;
+            const isStartup = item.traceId && item.traceId.startsWith("startup-");
+            if (item.summary.changeCount === 0 && !item.summary.hasError && !isStartup) return;
             blocks.push(renderTraceGroupPretty(item));
           } else if (item.type === "interaction") {
             blocks.push(renderInteractionPretty(item));
@@ -1799,20 +2005,59 @@
           bodyHtml += `<table class="timeline-table"><thead><tr><th>phase</th><th class="text-right">duration</th></tr></thead><tbody>${tableRows}</tbody></table>`;
         }
 
-        events.forEach((evt) => {
+        // Build map of API event pairs by requestId for linking (supports multiple requests per instanceId)
+        const apiPairs = new Map(); // requestId -> { startIdx, completeIdx, errorIdx }
+        events.forEach((evt, idx) => {
+          const e = evt.entry;
+          if ((e.kind === "api:start" || e.kind === "api:complete" || e.kind === "api:error") && e._requestId) {
+            if (!apiPairs.has(e._requestId)) apiPairs.set(e._requestId, {});
+            if (e.kind === "api:start") apiPairs.get(e._requestId).startIdx = idx;
+            if (e.kind === "api:complete") apiPairs.get(e._requestId).completeIdx = idx;
+            if (e.kind === "api:error") apiPairs.get(e._requestId).errorIdx = idx;
+          }
+        });
+
+        events.forEach((evt, idx) => {
           const e = evt.entry;
           const metaInline = evt.meta.parts.length ? `<span class="meta-inline">(${evt.meta.parts.join(" | ")})</span>` : "";
 
+          // Add anchor above the event for API events to enable linking (anchor above for better scroll position)
+          // Use _requestId if available for precise linking, fall back to instanceId
+          const anchorKey = e._requestId || e.instanceId;
+          const anchorId = (e.kind === "api:start" || e.kind === "api:complete" || e.kind === "api:error") && anchorKey
+            ? `api-${e.kind.replace(':', '-')}-${anchorKey}`
+            : "";
+          if (anchorId) {
+            bodyHtml += `<a id="${anchorId}" class="api-anchor"></a>`;
+          }
           bodyHtml += `<div class="trace-event">`;
 
           if (e.kind === "api:start" || e.kind === "api:complete" || e.kind === "api:error") {
             const method = e.method || "GET";
             const url = e.url || "";
             const errorClass = e.kind === "api:error" ? "text-error" : "";
-            const errorInfo = e.kind === "api:error" && e.error ? ` <span class="text-error">- ${e.error}</span>` : "";
+            const errorInfo = e.kind === "api:error" && e.error ? ` <span class="text-error">- ${e.error.message || e.error}</span>` : "";
             const durationInfo = e.kind === "api:complete" && typeof e._apiDuration === "number" ? ` (${e._apiDuration.toFixed(1)}ms)` : "";
             const statusInfo = e.kind === "api:complete" && e.status ? ` <span class="badge-success">${e.status}</span>` : "";
-            bodyHtml += `<div class="trace-event-header ${errorClass}">[${e.kind}]${statusInfo}${durationInfo} <strong>${method}</strong> ${url}${errorInfo}${metaInline}</div>`;
+            // Show short requestId to disambiguate multiple requests from same DataSource
+            const requestIdInfo = e._requestId ? ` <span class="badge-muted">${e._requestId}</span>` : "";
+
+            // Build link to paired event using requestId
+            let pairLink = "";
+            if (e._requestId && apiPairs.has(e._requestId)) {
+              const pair = apiPairs.get(e._requestId);
+              if (e.kind === "api:start") {
+                if (pair.completeIdx !== undefined) {
+                  pairLink = ` <a href="#api-api-complete-${e._requestId}" class="api-pair-link">→ response</a>`;
+                } else if (pair.errorIdx !== undefined) {
+                  pairLink = ` <a href="#api-api-error-${e._requestId}" class="api-pair-link">→ error</a>`;
+                }
+              } else if ((e.kind === "api:complete" || e.kind === "api:error") && pair.startIdx !== undefined) {
+                pairLink = ` <a href="#api-api-start-${e._requestId}" class="api-pair-link">← request</a>`;
+              }
+            }
+
+            bodyHtml += `<div class="trace-event-header ${errorClass}">[${e.kind}]${statusInfo}${durationInfo} <strong>${method}</strong> ${url}${errorInfo}${requestIdInfo}${pairLink}${metaInline}</div>`;
             // Show request body if present (for api:start)
             if (e.body && e.kind === "api:start") {
               const bodyStr = typeof e.body === "string" ? e.body : JSON.stringify(e.body, null, 2);
@@ -2046,6 +2291,10 @@
               bodyHtml += `</details>`;
               bodyHtml += `</div>`;
             }
+          } else if (e.kind === "interaction") {
+            // Interaction events - show the interaction type (click, contextmenu, etc.)
+            const interactionType = e.interaction || "unknown";
+            bodyHtml += `<div class="trace-event-header">interaction ${interactionType}${evt.label ? ` ${evt.label}` : ""}${metaInline}</div>`;
           } else {
             bodyHtml += `<div class="trace-event-header">${evt.eventTitle}${evt.label ? ` ${evt.label}` : ""}${metaInline}</div>`;
 
@@ -2092,18 +2341,13 @@
           bodyHtml += `<div class="trace-event text-warning">Deduped ${dedupedCount} repeated state change${dedupedCount > 1 ? "s" : ""}.</div>`;
         }
 
-        // Build file link for header if available
-        const fileLink = summary.sourceFile
-          ? ` <span class="file-link" data-file="${summary.sourceFile}"${summary.handlerCode ? ` data-highlight="${summary.handlerCode.replace(/"/g, '&quot;')}"` : ""}>${summary.sourceFile}</span>`
-          : "";
-
         return `
           <div class="trace-group" data-trace-id="${traceId}">
             <div class="trace-header" onclick="this.parentElement.classList.toggle('expanded'); this.classList.toggle('expanded');">
               <span class="arrow">▶</span>
               <div class="trace-summary">
                 <span class="component">${summary.componentText}</span>
-                ${changesHtml}${durationHtml}${fileLink}
+                ${changesHtml}${durationHtml}
               </div>
               <span class="trace-age">${age}</span>
             </div>
@@ -2253,8 +2497,9 @@
         let traceIndex = 0;
         processed.timelineItems.forEach((item) => {
           if (item.type === "trace") {
-            // Skip 0-diff traces (mostly keydown noise)
-            if (item.summary.changeCount === 0 && !item.summary.hasError) return;
+            // Skip 0-diff traces (mostly keydown noise), but keep startup traces
+            const isStartup = item.traceId && item.traceId.startsWith("startup-");
+            if (item.summary.changeCount === 0 && !item.summary.hasError && !isStartup) return;
             traceIndex++;
             lines.push(...renderTraceRaw(item, traceIndex));
             lines.push("");
@@ -2287,6 +2532,27 @@
                     lines.push(`            ${d.path}: initialized with ${d.after.length} items`);
                   } else if (Array.isArray(d.before) && d.after === undefined && isKeyedArray(d.before)) {
                     lines.push(`            ${d.path}: ${d.before.length} items → cleared`);
+                  } else if (d.before && d.after && typeof d.before === "object" && typeof d.after === "object" && !Array.isArray(d.before) && !Array.isArray(d.after)) {
+                    // Object diff - show which fields changed
+                    const allKeys = new Set([...Object.keys(d.before), ...Object.keys(d.after)]);
+                    const changedKeys = [];
+                    allKeys.forEach((key) => {
+                      const bv = JSON.stringify(d.before[key]);
+                      const av = JSON.stringify(d.after[key]);
+                      if (bv !== av) changedKeys.push(key);
+                    });
+                    if (changedKeys.length === 0) {
+                      lines.push(`            ${d.path}: (no visible change)`);
+                    } else {
+                      lines.push(`            ${d.path}:`);
+                      changedKeys.forEach((key) => {
+                        const bv = d.before[key];
+                        const av = d.after[key];
+                        const bvStr = bv === undefined ? "undefined" : JSON.stringify(bv)?.slice(0, 60) || "null";
+                        const avStr = av === undefined ? "undefined" : JSON.stringify(av)?.slice(0, 60) || "null";
+                        lines.push(`                ${key}: ${bvStr} → ${avStr}`);
+                      });
+                    }
                   } else {
                     lines.push(`            ${d.path}: ${JSON.stringify(d.before)?.slice(0, 80) || "undefined"} → ${JSON.stringify(d.after)?.slice(0, 80) || "undefined"}`);
                   }
@@ -2346,15 +2612,17 @@
 
         events.forEach((evt) => {
           const e = evt.entry;
-          const metaParts = evt.meta.parts;
+          // Strip HTML tags from meta parts for raw text output
+          const metaParts = evt.meta.parts.map(stripHtml);
 
           if (e.kind === "api:start" || e.kind === "api:complete" || e.kind === "api:error") {
             const method = e.method || "GET";
             const url = e.url || "";
-            const errorSuffix = e.kind === "api:error" && e.error ? ` - ${e.error}` : "";
+            const errorSuffix = e.kind === "api:error" && e.error ? ` - ${e.error.message || e.error}` : "";
             const statusSuffix = e.kind === "api:complete" && e.status ? ` [${e.status}]` : "";
             const durationSuffix = e.kind === "api:complete" && typeof e._apiDuration === "number" ? ` (${e._apiDuration.toFixed(1)}ms)` : "";
-            lines.push(`    [${e.kind}]${statusSuffix}${durationSuffix} ${method} ${url}${errorSuffix}${metaParts.length ? ` (${metaParts.join(" | ")})` : ""}`);
+            const requestIdSuffix = e._requestId ? ` [${e._requestId}]` : "";
+            lines.push(`    [${e.kind}]${statusSuffix}${durationSuffix} ${method} ${url}${errorSuffix}${requestIdSuffix}${metaParts.length ? ` (${metaParts.join(" | ")})` : ""}`);
             // Show request body for api:start
             if (e.body && e.kind === "api:start") {
               const bodyStr = typeof e.body === "string" ? e.body : JSON.stringify(e.body, null, 2);
@@ -2478,6 +2746,27 @@
                 if (d.after.length > 5) lines.push(`            … and ${d.after.length - 5} more`);
               } else if (Array.isArray(d.before) && d.after === undefined && isKeyedArray(d.before)) {
                 lines.push(`        ${d.path}: ${d.before.length} items → cleared`);
+              } else if (d.before && d.after && typeof d.before === "object" && typeof d.after === "object" && !Array.isArray(d.before) && !Array.isArray(d.after)) {
+                // Object diff - show which fields changed
+                const allKeys = new Set([...Object.keys(d.before), ...Object.keys(d.after)]);
+                const changedKeys = [];
+                allKeys.forEach((key) => {
+                  const bv = JSON.stringify(d.before[key]);
+                  const av = JSON.stringify(d.after[key]);
+                  if (bv !== av) changedKeys.push(key);
+                });
+                if (changedKeys.length === 0) {
+                  lines.push(`        ${d.path}: (no visible change)`);
+                } else {
+                  lines.push(`        ${d.path}:`);
+                  changedKeys.forEach((key) => {
+                    const bv = d.before[key];
+                    const av = d.after[key];
+                    const bvStr = bv === undefined ? "undefined" : JSON.stringify(bv)?.slice(0, 60) || "null";
+                    const avStr = av === undefined ? "undefined" : JSON.stringify(av)?.slice(0, 60) || "null";
+                    lines.push(`            ${key}: ${bvStr} → ${avStr}`);
+                  });
+                }
               } else {
                 lines.push(`        ${d.path}: ${JSON.stringify(d.before)?.slice(0, 80) || "undefined"} → ${JSON.stringify(d.after)?.slice(0, 80) || "undefined"}`);
               }
@@ -2494,7 +2783,11 @@
       // MAIN RENDER FUNCTION
       // =============================================================================
 
+      // Track when test view is active to prevent auto-refresh from overwriting it
+      let testViewActive = false;
+
       function render() {
+        testViewActive = false; // Reset test mode when normal render is triggered
         const showRaw = document.getElementById("viewRaw").checked;
         const container = document.getElementById("diff");
         container.innerHTML = "";
@@ -2580,6 +2873,1227 @@
       document.getElementById("clear").addEventListener("click", () => {
         if (window.parent && window.parent._xsLogs) window.parent._xsLogs.length = 0;
         render();
+      });
+
+      // =============================================================================
+      // TEST FRAMEWORK
+      // =============================================================================
+
+      const TestFramework = {
+        // Generate unique IDs for test data
+        _counter: 0,
+        uid() { return `test-${++this._counter}-${Date.now().toString(36)}`; },
+        traceId() { return `t-${this.uid()}`; },
+        interactionTraceId() { return `i-${this.uid()}`; },
+        instanceId() { return `ds-${this.uid()}`; },
+
+        // Base timestamp for test events
+        baseTs: Date.now(),
+        basePerfTs: 10000,
+
+        // Generate timestamps
+        ts(offset = 0) { return this.baseTs + offset; },
+        perfTs(offset = 0) { return this.basePerfTs + offset; },
+
+        // Event generators
+        events: {
+          interaction(type, label, opts = {}) {
+            return {
+              kind: "interaction",
+              interaction: type,
+              componentLabel: label,
+              uid: opts.uid || label,
+              ts: opts.ts || TestFramework.ts(),
+              perfTs: opts.perfTs || TestFramework.perfTs(),
+              traceId: opts.traceId,
+              detail: opts.detail || { text: label },
+            };
+          },
+
+          handlerStart(eventName, opts = {}) {
+            return {
+              kind: "handler:start",
+              eventName,
+              componentType: opts.componentType || "Button",
+              componentLabel: opts.componentLabel || "TestComponent",
+              uid: opts.uid || "test-uid",
+              traceId: opts.traceId || TestFramework.traceId(),
+              ts: opts.ts || TestFramework.ts(),
+              perfTs: opts.perfTs || TestFramework.perfTs(),
+              ownerFileId: opts.fileId,
+              handlerCode: opts.handlerCode,
+            };
+          },
+
+          handlerComplete(eventName, opts = {}) {
+            return {
+              kind: "handler:complete",
+              eventName,
+              componentType: opts.componentType || "Button",
+              componentLabel: opts.componentLabel || "TestComponent",
+              uid: opts.uid || "test-uid",
+              traceId: opts.traceId || TestFramework.traceId(),
+              ts: opts.ts || TestFramework.ts(),
+              perfTs: opts.perfTs || TestFramework.perfTs(),
+              duration: opts.duration,
+              startPerfTs: opts.startPerfTs,
+              ownerFileId: opts.fileId,
+            };
+          },
+
+          handlerError(eventName, error, opts = {}) {
+            return {
+              kind: "handler:error",
+              eventName,
+              error: error || new Error("Test error"),
+              componentType: opts.componentType || "Button",
+              componentLabel: opts.componentLabel || "TestComponent",
+              traceId: opts.traceId || TestFramework.traceId(),
+              ts: opts.ts || TestFramework.ts(),
+              perfTs: opts.perfTs || TestFramework.perfTs(),
+            };
+          },
+
+          apiStart(method, url, opts = {}) {
+            return {
+              kind: "api:start",
+              method,
+              url,
+              instanceId: opts.instanceId || TestFramework.instanceId(),
+              traceId: opts.traceId,
+              ts: opts.ts || TestFramework.ts(),
+              perfTs: opts.perfTs || TestFramework.perfTs(),
+              body: opts.body,
+            };
+          },
+
+          apiComplete(method, url, opts = {}) {
+            return {
+              kind: "api:complete",
+              method,
+              url,
+              status: opts.status || 200,
+              instanceId: opts.instanceId,
+              traceId: opts.traceId,
+              ts: opts.ts || TestFramework.ts(),
+              perfTs: opts.perfTs || TestFramework.perfTs(),
+              duration: opts.duration,
+              body: opts.response,
+              _apiDuration: opts.duration,
+            };
+          },
+
+          apiError(method, url, error, opts = {}) {
+            return {
+              kind: "api:error",
+              method,
+              url,
+              error: error || "Network error",
+              instanceId: opts.instanceId,
+              traceId: opts.traceId,
+              ts: opts.ts || TestFramework.ts(),
+              perfTs: opts.perfTs || TestFramework.perfTs(),
+            };
+          },
+
+          stateChange(eventName, diffs, opts = {}) {
+            return {
+              kind: "state:changes",
+              eventName,
+              componentType: opts.componentType,
+              componentLabel: opts.componentLabel,
+              uid: opts.uid,
+              instanceId: opts.instanceId,
+              traceId: opts.traceId,
+              ts: opts.ts || TestFramework.ts(),
+              perfTs: opts.perfTs || TestFramework.perfTs(),
+              diffJson: diffs,
+              ownerFileId: opts.fileId,
+              dataSourceUrl: opts.dataSourceUrl,
+              ownerUid: opts.ownerUid,
+            };
+          },
+
+          navigate(from, to, opts = {}) {
+            return {
+              kind: "navigate",
+              from,
+              to,
+              traceId: opts.traceId,
+              ts: opts.ts || TestFramework.ts(),
+              perfTs: opts.perfTs || TestFramework.perfTs(),
+            };
+          },
+
+          componentVarsChange(varNames, componentLabel, opts = {}) {
+            return {
+              kind: "component:vars:change",
+              varNames,
+              componentLabel,
+              componentType: opts.componentType || "Component",
+              traceId: opts.traceId,
+              ts: opts.ts || TestFramework.ts(),
+              perfTs: opts.perfTs || TestFramework.perfTs(),
+              ownerFileId: opts.fileId,
+              diffJson: opts.diffs,
+            };
+          },
+
+          componentVarsInit(varNames, componentLabel, opts = {}) {
+            return {
+              kind: "component:vars:init",
+              varNames,
+              componentLabel,
+              componentType: opts.componentType || "Component",
+              traceId: opts.traceId,
+              ts: opts.ts || TestFramework.ts(),
+              perfTs: opts.perfTs || TestFramework.perfTs(),
+              ownerFileId: opts.fileId,
+              diffJson: opts.diffs,
+            };
+          },
+        },
+
+        // Scenario generators based on real trace patterns
+        scenarios: {
+          // Simple button click with state change
+          buttonClick() {
+            const traceId = TestFramework.interactionTraceId();
+            const baseTs = TestFramework.ts();
+            const basePerfTs = TestFramework.perfTs();
+            return [
+              TestFramework.events.interaction("click", "Submit Button", { traceId, ts: baseTs, perfTs: basePerfTs }),
+              TestFramework.events.handlerStart("click", { traceId, componentLabel: "Submit Button", ts: baseTs + 1, perfTs: basePerfTs + 1 }),
+              TestFramework.events.stateChange("click Submit Button", [
+                { path: "formState.isSubmitting", before: false, after: true }
+              ], { traceId, ts: baseTs + 5, perfTs: basePerfTs + 5 }),
+              TestFramework.events.handlerComplete("click", { traceId, componentLabel: "Submit Button", duration: 15, ts: baseTs + 16, perfTs: basePerfTs + 16 }),
+            ];
+          },
+
+          // API request flow (start -> complete)
+          apiRequest(method = "GET", url = "/api/data") {
+            const traceId = TestFramework.traceId();
+            const instanceId = TestFramework.instanceId();
+            const baseTs = TestFramework.ts();
+            const basePerfTs = TestFramework.perfTs();
+            return [
+              TestFramework.events.handlerStart("fetchData", { traceId, ts: baseTs, perfTs: basePerfTs }),
+              TestFramework.events.apiStart(method, url, { traceId, instanceId, ts: baseTs + 5, perfTs: basePerfTs + 5 }),
+              TestFramework.events.apiComplete(method, url, { traceId, instanceId, duration: 150, ts: baseTs + 155, perfTs: basePerfTs + 155, response: { data: [1, 2, 3] } }),
+              TestFramework.events.stateChange("DataSource:testData", [
+                { path: "value", before: null, after: [{ id: 1 }, { id: 2 }, { id: 3 }] }
+              ], { traceId, componentType: "DataSource", instanceId, ts: baseTs + 160, perfTs: basePerfTs + 160 }),
+              TestFramework.events.handlerComplete("fetchData", { traceId, duration: 165, ts: baseTs + 165, perfTs: basePerfTs + 165 }),
+            ];
+          },
+
+          // API error scenario
+          apiError(method = "POST", url = "/api/submit") {
+            const traceId = TestFramework.traceId();
+            const instanceId = TestFramework.instanceId();
+            const baseTs = TestFramework.ts();
+            const basePerfTs = TestFramework.perfTs();
+            return [
+              TestFramework.events.handlerStart("submitForm", { traceId, ts: baseTs, perfTs: basePerfTs }),
+              TestFramework.events.apiStart(method, url, { traceId, instanceId, ts: baseTs + 5, perfTs: basePerfTs + 5, body: { name: "test" } }),
+              TestFramework.events.apiError(method, url, "500 Internal Server Error", { traceId, instanceId, ts: baseTs + 100, perfTs: basePerfTs + 100 }),
+              TestFramework.events.handlerComplete("submitForm", { traceId, duration: 105, ts: baseTs + 105, perfTs: basePerfTs + 105 }),
+            ];
+          },
+
+          // Navigation flow
+          navigation(from = "/home", to = "/details?id=123") {
+            const traceId = TestFramework.traceId();
+            const baseTs = TestFramework.ts();
+            const basePerfTs = TestFramework.perfTs();
+            return [
+              TestFramework.events.handlerStart("selectionDidChange", { traceId, componentType: "Tree", componentLabel: "tree", ts: baseTs, perfTs: basePerfTs }),
+              TestFramework.events.navigate(from, to, { traceId, ts: baseTs + 10, perfTs: basePerfTs + 10 }),
+              TestFramework.events.handlerComplete("selectionDidChange", { traceId, componentType: "Tree", componentLabel: "tree", duration: 57, ts: baseTs + 57, perfTs: basePerfTs + 57 }),
+            ];
+          },
+
+          // Context menu interaction
+          contextMenu(itemLabel = "file.txt") {
+            const traceId = TestFramework.interactionTraceId();
+            const baseTs = TestFramework.ts();
+            const basePerfTs = TestFramework.perfTs();
+            return [
+              TestFramework.events.interaction("contextmenu", itemLabel, { traceId, ts: baseTs, perfTs: basePerfTs }),
+              TestFramework.events.handlerStart("contextMenu", { traceId, componentLabel: "HStack", ts: baseTs + 1, perfTs: basePerfTs + 1, handlerCode: "ev => {reselectAndOpenMenu(ev, $item)}" }),
+              TestFramework.events.stateChange("AppState:selection", [
+                { path: "selectedIds", before: [], after: [":sh:Documents:/file.txt"] }
+              ], { traceId, ts: baseTs + 3, perfTs: basePerfTs + 3 }),
+              TestFramework.events.handlerComplete("contextMenu", { traceId, componentLabel: "HStack", duration: 66, ts: baseTs + 66, perfTs: basePerfTs + 66 }),
+            ];
+          },
+
+          // TextArea didChange with keystroke
+          textInput(prevValue = "hello", newValue = "hello world") {
+            const traceId = TestFramework.interactionTraceId();
+            const baseTs = TestFramework.ts();
+            const basePerfTs = TestFramework.perfTs();
+            return [
+              TestFramework.events.interaction("keydown", newValue, { traceId, ts: baseTs, perfTs: basePerfTs }),
+              TestFramework.events.handlerStart("didChange", { traceId, componentType: "TextArea", componentLabel: "inputField", ts: baseTs + 1, perfTs: basePerfTs + 1 }),
+              TestFramework.events.stateChange("didChange inputField", [
+                { path: "inputValue", before: prevValue, after: newValue }
+              ], { traceId, ts: baseTs + 10, perfTs: basePerfTs + 10 }),
+              TestFramework.events.handlerComplete("didChange", { traceId, componentType: "TextArea", componentLabel: "inputField", duration: 22, ts: baseTs + 22, perfTs: basePerfTs + 22 }),
+            ];
+          },
+
+          // Startup trace pattern
+          startup() {
+            const traceId = `startup-${TestFramework.uid()}`;
+            const baseTs = TestFramework.ts();
+            const basePerfTs = TestFramework.perfTs();
+            const instanceId = TestFramework.instanceId();
+            return [
+              TestFramework.events.stateChange("AppState:config", [
+                { path: "AppState:config", before: undefined, after: { theme: "light", language: "en" } }
+              ], { traceId, ts: baseTs, perfTs: basePerfTs }),
+              TestFramework.events.componentVarsInit(["rootPath", "treeData"], "FoldersTree", { traceId, ts: baseTs + 50, perfTs: basePerfTs + 50, diffs: [
+                { path: "rootPath", before: undefined, after: "/root" },
+                { path: "treeData", before: undefined, after: [{ name: "Root" }] }
+              ]}),
+              TestFramework.events.apiStart("GET", "/api/init", { traceId, instanceId, ts: baseTs + 100, perfTs: basePerfTs + 100 }),
+              TestFramework.events.apiComplete("GET", "/api/init", { traceId, instanceId, duration: 200, ts: baseTs + 300, perfTs: basePerfTs + 300, response: { ready: true } }),
+              TestFramework.events.stateChange("DataSource:initData", [
+                { path: "DataSource:initData", before: undefined, after: { ready: true } }
+              ], { traceId, componentType: "DataSource", instanceId, ts: baseTs + 310, perfTs: basePerfTs + 310 }),
+              TestFramework.events.handlerStart("didChange", { traceId, ts: baseTs + 320, perfTs: basePerfTs + 320 }),
+              TestFramework.events.handlerComplete("didChange", { traceId, duration: 20, ts: baseTs + 340, perfTs: basePerfTs + 340 }),
+            ];
+          },
+
+          // Array diff scenario (items added/removed)
+          arrayDiff() {
+            const traceId = TestFramework.traceId();
+            const baseTs = TestFramework.ts();
+            const basePerfTs = TestFramework.perfTs();
+            const instanceId = TestFramework.instanceId();
+            return [
+              TestFramework.events.handlerStart("loadChildren", { traceId, componentType: "Tree", componentLabel: "tree", ts: baseTs, perfTs: basePerfTs }),
+              TestFramework.events.stateChange("DataSource:files", [
+                { path: "value", before: [
+                  { id: "1", name: "file1.txt", size: 1024 },
+                  { id: "2", name: "file2.txt", size: 2048 },
+                  { id: "3", name: "old-file.txt", size: 512 },
+                ], after: [
+                  { id: "1", name: "file1.txt", size: 1024 },
+                  { id: "4", name: "new-file.txt", size: 4096 },
+                  { id: "5", name: "another-new.txt", size: 8192 },
+                ]}
+              ], { traceId, componentType: "DataSource", instanceId, ts: baseTs + 50, perfTs: basePerfTs + 50 }),
+              TestFramework.events.handlerComplete("loadChildren", { traceId, componentType: "Tree", componentLabel: "tree", duration: 54, ts: baseTs + 54, perfTs: basePerfTs + 54 }),
+            ];
+          },
+
+          // Overlapping API requests (tests FIFO matching)
+          overlappingApiRequests() {
+            const traceId = TestFramework.traceId();
+            const instanceId1 = TestFramework.instanceId();
+            const instanceId2 = TestFramework.instanceId();
+            const baseTs = TestFramework.ts();
+            const basePerfTs = TestFramework.perfTs();
+            return [
+              TestFramework.events.handlerStart("refresh", { traceId, ts: baseTs, perfTs: basePerfTs }),
+              // First request starts
+              TestFramework.events.apiStart("GET", "/api/data", { traceId, instanceId: instanceId1, ts: baseTs + 5, perfTs: basePerfTs + 5 }),
+              // Second request starts before first completes
+              TestFramework.events.apiStart("GET", "/api/data", { traceId, instanceId: instanceId2, ts: baseTs + 10, perfTs: basePerfTs + 10 }),
+              // First request completes
+              TestFramework.events.apiComplete("GET", "/api/data", { traceId, instanceId: instanceId1, duration: 100, ts: baseTs + 105, perfTs: basePerfTs + 105 }),
+              // Second request completes
+              TestFramework.events.apiComplete("GET", "/api/data", { traceId, instanceId: instanceId2, duration: 150, ts: baseTs + 160, perfTs: basePerfTs + 160 }),
+              TestFramework.events.handlerComplete("refresh", { traceId, duration: 165, ts: baseTs + 165, perfTs: basePerfTs + 165 }),
+            ];
+          },
+
+          // Orphaned API complete (tests traceId inheritance)
+          orphanedApiComplete() {
+            const traceId = TestFramework.traceId();
+            const instanceId = TestFramework.instanceId();
+            const baseTs = TestFramework.ts();
+            const basePerfTs = TestFramework.perfTs();
+            // api:start has traceId, api:complete does not (simulating real scenario)
+            return [
+              TestFramework.events.handlerStart("fetch", { traceId, ts: baseTs, perfTs: basePerfTs }),
+              { ...TestFramework.events.apiStart("GET", "/api/orphan-test", { instanceId, ts: baseTs + 5, perfTs: basePerfTs + 5 }), traceId },
+              // This api:complete is missing traceId but has same instanceId
+              TestFramework.events.apiComplete("GET", "/api/orphan-test", { instanceId, duration: 80, ts: baseTs + 85, perfTs: basePerfTs + 85 }),
+              TestFramework.events.handlerComplete("fetch", { traceId, duration: 90, ts: baseTs + 90, perfTs: basePerfTs + 90 }),
+            ];
+          },
+
+          // Duplicate state changes (tests deduplication)
+          duplicateStateChanges() {
+            const traceId = TestFramework.traceId();
+            const baseTs = TestFramework.ts();
+            const basePerfTs = TestFramework.perfTs();
+            return [
+              TestFramework.events.handlerStart("update", { traceId, ts: baseTs, perfTs: basePerfTs }),
+              TestFramework.events.stateChange("AppState:counter", [
+                { path: "counter", before: 0, after: 1 }
+              ], { traceId, ts: baseTs + 5, perfTs: basePerfTs + 5 }),
+              // Duplicate state change (same fingerprint)
+              TestFramework.events.stateChange("AppState:counter", [
+                { path: "counter", before: 0, after: 1 }
+              ], { traceId, ts: baseTs + 6, perfTs: basePerfTs + 6 }),
+              // Another duplicate
+              TestFramework.events.stateChange("AppState:counter", [
+                { path: "counter", before: 0, after: 1 }
+              ], { traceId, ts: baseTs + 7, perfTs: basePerfTs + 7 }),
+              TestFramework.events.handlerComplete("update", { traceId, duration: 10, ts: baseTs + 10, perfTs: basePerfTs + 10 }),
+            ];
+          },
+
+          // Handler error scenario
+          handlerError() {
+            const traceId = TestFramework.traceId();
+            const baseTs = TestFramework.ts();
+            const basePerfTs = TestFramework.perfTs();
+            return [
+              TestFramework.events.handlerStart("processData", { traceId, ts: baseTs, perfTs: basePerfTs }),
+              TestFramework.events.handlerError("processData", new Error("Cannot read property 'foo' of undefined"), { traceId, ts: baseTs + 20, perfTs: basePerfTs + 20 }),
+            ];
+          },
+
+          // Complex publish post scenario (based on Mastodon trace)
+          publishPost() {
+            const traceId = TestFramework.interactionTraceId();
+            const instanceId = TestFramework.instanceId();
+            const baseTs = TestFramework.ts();
+            const basePerfTs = TestFramework.perfTs();
+            return [
+              TestFramework.events.interaction("click", "Publish Post", { traceId, ts: baseTs, perfTs: basePerfTs }),
+              TestFramework.events.handlerStart("click", { traceId, componentType: "Button", componentLabel: "Publish Post", ts: baseTs + 1, perfTs: basePerfTs + 1 }),
+              TestFramework.events.stateChange("click Publish Post", [
+                { path: "postContent", before: "@user test", after: "@user test6" }
+              ], { traceId, ts: baseTs + 2, perfTs: basePerfTs + 2 }),
+              TestFramework.events.handlerStart("beforeRequest", { traceId, componentType: "API", componentLabel: "publishPostAPI", ts: baseTs + 20, perfTs: basePerfTs + 20, handlerCode: "isPublishing = true" }),
+              TestFramework.events.stateChange("beforeRequest publishPostAPI", [
+                { path: "isPublishing", before: false, after: true }
+              ], { traceId, ts: baseTs + 21, perfTs: basePerfTs + 21 }),
+              TestFramework.events.handlerComplete("beforeRequest", { traceId, componentLabel: "publishPostAPI", duration: 24, ts: baseTs + 44, perfTs: basePerfTs + 44 }),
+              TestFramework.events.apiStart("POST", "https://social.coop/api/v1/statuses", { traceId, instanceId, ts: baseTs + 45, perfTs: basePerfTs + 45, body: { status: "@user test6", visibility: "direct" } }),
+              TestFramework.events.apiComplete("POST", "https://social.coop/api/v1/statuses", { traceId, instanceId, duration: 1414, ts: baseTs + 1459, perfTs: basePerfTs + 1459, response: { id: "115974768151239388", created_at: "2026-01-28T21:08:43.793Z" } }),
+              TestFramework.events.handlerStart("success", { traceId, componentLabel: "publishPostAPI", ts: baseTs + 1460, perfTs: basePerfTs + 1460 }),
+              TestFramework.events.stateChange("success publishPostAPI", [
+                { path: "isPublishing", before: true, after: false }
+              ], { traceId, ts: baseTs + 1461, perfTs: basePerfTs + 1461 }),
+              TestFramework.events.stateChange("success publishPostAPI", [
+                { path: "publishStatus", before: "", after: "Post published successfully!" }
+              ], { traceId, ts: baseTs + 1475, perfTs: basePerfTs + 1475 }),
+              TestFramework.events.stateChange("success publishPostAPI", [
+                { path: "postContent", before: "@user test6", after: "" }
+              ], { traceId, ts: baseTs + 1508, perfTs: basePerfTs + 1508 }),
+              TestFramework.events.handlerComplete("success", { traceId, componentLabel: "publishPostAPI", duration: 72, ts: baseTs + 1532, perfTs: basePerfTs + 1532 }),
+              TestFramework.events.handlerComplete("click", { traceId, componentType: "Button", componentLabel: "Publish Post", duration: 2689, ts: baseTs + 2690, perfTs: basePerfTs + 2690 }),
+            ];
+          },
+
+          // Typeahead search with cancelled requests (AbortController pattern)
+          // Based on Mastodon trace: rapid keystrokes trigger searches, earlier ones get aborted
+          typeaheadSearch() {
+            const instanceId = TestFramework.instanceId(); // Same DataSource instance reused
+            const baseTs = TestFramework.ts();
+            const basePerfTs = TestFramework.perfTs();
+            const events = [];
+
+            // First keystroke: "w" - this request will complete
+            const traceId1 = TestFramework.interactionTraceId();
+            events.push(
+              TestFramework.events.interaction("keydown", "TextBox", { traceId: traceId1, ts: baseTs, perfTs: basePerfTs }),
+              TestFramework.events.handlerStart("didChange", { traceId: traceId1, componentType: "TextBox", componentLabel: "Enter search term...", ts: baseTs + 1, perfTs: basePerfTs + 1 }),
+              TestFramework.events.stateChange("didChange Enter search term...", [
+                { path: "query", before: "", after: "w" }
+              ], { traceId: traceId1, ts: baseTs + 2, perfTs: basePerfTs + 2 }),
+              TestFramework.events.apiStart("POST", "/api/query", { traceId: traceId1, instanceId, ts: baseTs + 5, perfTs: basePerfTs + 5, body: { sql: "SELECT * FROM search WHERE term MATCH ?" } }),
+            );
+
+            // Second keystroke: "wa" - previous request gets aborted
+            const traceId2 = TestFramework.interactionTraceId();
+            events.push(
+              TestFramework.events.interaction("keydown", "TextBox", { traceId: traceId2, ts: baseTs + 150, perfTs: basePerfTs + 150 }),
+              TestFramework.events.handlerStart("didChange", { traceId: traceId2, componentType: "TextBox", componentLabel: "Enter search term...", ts: baseTs + 151, perfTs: basePerfTs + 151 }),
+              TestFramework.events.stateChange("didChange Enter search term...", [
+                { path: "query", before: "w", after: "wa" }
+              ], { traceId: traceId2, ts: baseTs + 152, perfTs: basePerfTs + 152 }),
+              TestFramework.events.apiStart("POST", "/api/query", { traceId: traceId2, instanceId, ts: baseTs + 155, perfTs: basePerfTs + 155 }),
+              // First request aborted
+              TestFramework.events.apiError("POST", "/api/query", "signal is aborted without reason", { traceId: traceId1, instanceId, ts: baseTs + 156, perfTs: basePerfTs + 156 }),
+            );
+
+            // Third keystroke: "wal" - second request gets aborted
+            const traceId3 = TestFramework.interactionTraceId();
+            events.push(
+              TestFramework.events.interaction("keydown", "TextBox", { traceId: traceId3, ts: baseTs + 300, perfTs: basePerfTs + 300 }),
+              TestFramework.events.handlerStart("didChange", { traceId: traceId3, componentType: "TextBox", componentLabel: "Enter search term...", ts: baseTs + 301, perfTs: basePerfTs + 301 }),
+              TestFramework.events.stateChange("didChange Enter search term...", [
+                { path: "query", before: "wa", after: "wal" }
+              ], { traceId: traceId3, ts: baseTs + 302, perfTs: basePerfTs + 302 }),
+              TestFramework.events.apiStart("POST", "/api/query", { traceId: traceId3, instanceId, ts: baseTs + 305, perfTs: basePerfTs + 305 }),
+              // Second request aborted
+              TestFramework.events.apiError("POST", "/api/query", "signal is aborted without reason", { traceId: traceId2, instanceId, ts: baseTs + 306, perfTs: basePerfTs + 306 }),
+            );
+
+            // Final request completes successfully
+            events.push(
+              TestFramework.events.apiComplete("POST", "/api/query", { traceId: traceId3, instanceId, duration: 48, ts: baseTs + 353, perfTs: basePerfTs + 353, response: [{ id: 1, text: "result" }] }),
+              TestFramework.events.stateChange("DataSource:searchResults", [
+                { path: "value", before: [], after: [{ id: 1, text: "result" }] }
+              ], { traceId: traceId3, componentType: "DataSource", instanceId, ts: baseTs + 355, perfTs: basePerfTs + 355 }),
+              // All handlers complete (long-spanning)
+              TestFramework.events.handlerComplete("didChange", { traceId: traceId1, componentType: "TextBox", componentLabel: "Enter search term...", duration: 360, startPerfTs: basePerfTs + 1, ts: baseTs + 360, perfTs: basePerfTs + 360 }),
+              TestFramework.events.handlerComplete("didChange", { traceId: traceId2, componentType: "TextBox", componentLabel: "Enter search term...", duration: 210, startPerfTs: basePerfTs + 151, ts: baseTs + 360, perfTs: basePerfTs + 360 }),
+              TestFramework.events.handlerComplete("didChange", { traceId: traceId3, componentType: "TextBox", componentLabel: "Enter search term...", duration: 60, startPerfTs: basePerfTs + 301, ts: baseTs + 360, perfTs: basePerfTs + 360 }),
+            );
+
+            return events;
+          },
+
+          // Parallel API burst - multiple simultaneous requests (like post-publish refresh)
+          parallelApiBurst() {
+            const traceId = TestFramework.interactionTraceId();
+            const baseTs = TestFramework.ts();
+            const basePerfTs = TestFramework.perfTs();
+            const instanceIds = Array.from({ length: 6 }, () => TestFramework.instanceId());
+
+            return [
+              TestFramework.events.interaction("click", "Refresh All", { traceId, ts: baseTs, perfTs: basePerfTs }),
+              TestFramework.events.handlerStart("click", { traceId, componentType: "Button", componentLabel: "Refresh All", ts: baseTs + 1, perfTs: basePerfTs + 1 }),
+              // Six parallel API calls
+              TestFramework.events.apiStart("POST", "/api/query", { traceId, instanceId: instanceIds[0], ts: baseTs + 5, perfTs: basePerfTs + 5, body: { sql: "SELECT * FROM config" } }),
+              TestFramework.events.apiStart("POST", "/api/query", { traceId, instanceId: instanceIds[1], ts: baseTs + 6, perfTs: basePerfTs + 6, body: { sql: "CREATE TABLE IF NOT EXISTS cache" } }),
+              TestFramework.events.apiStart("POST", "/api/query", { traceId, instanceId: instanceIds[2], ts: baseTs + 7, perfTs: basePerfTs + 7, body: { sql: "INSERT INTO cache SELECT * FROM source" } }),
+              TestFramework.events.apiStart("POST", "/api/query", { traceId, instanceId: instanceIds[3], ts: baseTs + 8, perfTs: basePerfTs + 8, body: { sql: "CREATE TABLE IF NOT EXISTS index" } }),
+              TestFramework.events.apiStart("POST", "/api/query", { traceId, instanceId: instanceIds[4], ts: baseTs + 9, perfTs: basePerfTs + 9, body: { sql: "INSERT INTO index SELECT * FROM data" } }),
+              TestFramework.events.apiStart("GET", "/api/user/me", { traceId, instanceId: instanceIds[5], ts: baseTs + 10, perfTs: basePerfTs + 10 }),
+              // Completions come back in different order
+              TestFramework.events.apiComplete("POST", "/api/query", { traceId, instanceId: instanceIds[0], duration: 35, ts: baseTs + 40, perfTs: basePerfTs + 40 }),
+              TestFramework.events.apiComplete("POST", "/api/query", { traceId, instanceId: instanceIds[1], duration: 34, ts: baseTs + 40, perfTs: basePerfTs + 40 }),
+              TestFramework.events.apiComplete("POST", "/api/query", { traceId, instanceId: instanceIds[3], duration: 34, ts: baseTs + 42, perfTs: basePerfTs + 42 }),
+              TestFramework.events.apiComplete("GET", "/api/user/me", { traceId, instanceId: instanceIds[5], duration: 280, ts: baseTs + 290, perfTs: basePerfTs + 290, response: { id: "user123", name: "Test User" } }),
+              TestFramework.events.apiComplete("POST", "/api/query", { traceId, instanceId: instanceIds[2], duration: 295, ts: baseTs + 302, perfTs: basePerfTs + 302 }),
+              TestFramework.events.apiComplete("POST", "/api/query", { traceId, instanceId: instanceIds[4], duration: 307, ts: baseTs + 316, perfTs: basePerfTs + 316 }),
+              TestFramework.events.handlerComplete("click", { traceId, componentType: "Button", componentLabel: "Refresh All", duration: 320, ts: baseTs + 321, perfTs: basePerfTs + 321 }),
+            ];
+          },
+
+          // Component vars init with many variables (like Compose panel)
+          componentVarsInitComplex() {
+            const traceId = TestFramework.interactionTraceId();
+            const baseTs = TestFramework.ts();
+            const basePerfTs = TestFramework.perfTs();
+            return [
+              TestFramework.events.interaction("click", "Compose", { traceId, ts: baseTs, perfTs: basePerfTs }),
+              TestFramework.events.stateChange("DataSource:previousData", [
+                { path: "value", before: [{ id: 1 }, { id: 2 }], after: [] }
+              ], { traceId, componentType: "DataSource", ts: baseTs + 50, perfTs: basePerfTs + 50 }),
+              TestFramework.events.componentVarsInit(
+                ["postContent", "isPublishing", "publishStatus", "currentLength", "visibility", "visibilityOptions"],
+                "Compose",
+                {
+                  traceId,
+                  ts: baseTs + 97,
+                  perfTs: basePerfTs + 97,
+                  fileId: "http://localhost:8080/components/Compose.xmlui",
+                  diffs: [
+                    { path: "postContent", before: undefined, after: "" },
+                    { path: "isPublishing", before: undefined, after: false },
+                    { path: "publishStatus", before: undefined, after: "" },
+                    { path: "currentLength", before: undefined, after: 0 },
+                    { path: "visibility", before: undefined, after: "direct" },
+                    { path: "visibilityOptions", before: undefined, after: [
+                      { value: "public", label: "Public", description: "all", icon: "globe", enabled: true },
+                      { value: "unlisted", label: "Unlisted", description: "all", icon: "unlock", enabled: true },
+                      { value: "private", label: "Followers only", description: "followers", icon: "lock", enabled: true },
+                      { value: "direct", label: "Direct", description: "mentioned", icon: "mail", enabled: true },
+                    ]},
+                  ],
+                }
+              ),
+            ];
+          },
+
+          // Large array diff with many items added/removed (like search results changing)
+          largeArrayDiff() {
+            const traceId = TestFramework.traceId();
+            const instanceId = TestFramework.instanceId();
+            const baseTs = TestFramework.ts();
+            const basePerfTs = TestFramework.perfTs();
+            // Generate 30 IDs for before, 3 for after (simulating search refinement)
+            const beforeIds = Array.from({ length: 30 }, (_, i) => `id-${1000 + i}`);
+            const afterIds = ["id-1005", "id-1012", "id-1025"]; // 3 that remain
+            return [
+              TestFramework.events.handlerStart("didChange", { traceId, componentType: "TextBox", componentLabel: "Enter search term...", ts: baseTs, perfTs: basePerfTs }),
+              TestFramework.events.stateChange("DataSource:searchResults", [
+                {
+                  path: "value",
+                  before: beforeIds.map(id => ({ id, name: `Item ${id}` })),
+                  after: afterIds.map(id => ({ id, name: `Item ${id}` })),
+                }
+              ], { traceId, componentType: "DataSource", instanceId, uid: "searchResults", ts: baseTs + 50, perfTs: basePerfTs + 50 }),
+              TestFramework.events.handlerComplete("didChange", { traceId, componentType: "TextBox", componentLabel: "Enter search term...", duration: 55, ts: baseTs + 55, perfTs: basePerfTs + 55 }),
+            ];
+          },
+
+          // Query execution with SQL and results (like Run Query button)
+          sqlQueryExecution() {
+            const traceId = TestFramework.interactionTraceId();
+            const instanceId = TestFramework.instanceId();
+            const baseTs = TestFramework.ts();
+            const basePerfTs = TestFramework.perfTs();
+            return [
+              TestFramework.events.interaction("click", "Run Query", { traceId, ts: baseTs, perfTs: basePerfTs }),
+              TestFramework.events.handlerStart("click", { traceId, componentType: "Button", componentLabel: "Run Query", ts: baseTs + 1, perfTs: basePerfTs + 1, fileId: "http://localhost:8080/components/Query.xmlui" }),
+              TestFramework.events.stateChange("AppState:queryState", [
+                { path: "loading", before: false, after: true },
+                { path: "runSql", before: "", after: "SELECT count(*) as count FROM notifications" },
+                { path: "nonce", before: 0, after: 1 },
+              ], { traceId, ts: baseTs + 2, perfTs: basePerfTs + 2 }),
+              TestFramework.events.apiStart("POST", "/api/query", { traceId, instanceId, ts: baseTs + 20, perfTs: basePerfTs + 20, body: { sql: "-- 1\nSELECT count(*) as count FROM notifications" } }),
+              TestFramework.events.handlerComplete("click", { traceId, componentType: "Button", componentLabel: "Run Query", duration: 24, startPerfTs: basePerfTs + 1, ts: baseTs + 25, perfTs: basePerfTs + 25 }),
+              TestFramework.events.apiComplete("POST", "/api/query", { traceId, instanceId, duration: 9, ts: baseTs + 29, perfTs: basePerfTs + 29, response: [{ count: 2351 }] }),
+              TestFramework.events.stateChange("DataSource:queryResults", [
+                { path: "DataSource:queryResults", before: undefined, after: [{ count: 2351 }] }
+              ], { traceId, componentType: "DataSource", instanceId, uid: "queryResults", ts: baseTs + 30, perfTs: basePerfTs + 30 }),
+              TestFramework.events.handlerStart("loaded", { traceId, componentLabel: "queryResults", ts: baseTs + 35, perfTs: basePerfTs + 35 }),
+              TestFramework.events.stateChange("AppState:queryState", [
+                { path: "loading", before: true, after: false },
+                { path: "results", before: [], after: [{ count: 2351 }] },
+              ], { traceId, ts: baseTs + 36, perfTs: basePerfTs + 36 }),
+              TestFramework.events.handlerComplete("loaded", { traceId, componentLabel: "queryResults", duration: 1, startPerfTs: basePerfTs + 35, ts: baseTs + 36, perfTs: basePerfTs + 36 }),
+            ];
+          },
+
+          // Tab/panel navigation clearing previous DataSource
+          panelNavigation(fromPanel = "Home", toPanel = "Search") {
+            const traceId = TestFramework.interactionTraceId();
+            const baseTs = TestFramework.ts();
+            const basePerfTs = TestFramework.perfTs();
+            return [
+              TestFramework.events.interaction("click", toPanel, { traceId, ts: baseTs, perfTs: basePerfTs }),
+              // Previous panel's DataSource gets cleared
+              TestFramework.events.stateChange("DataSource:homeData", [
+                { path: "value", before: Array.from({ length: 50 }, (_, i) => ({ id: i })), after: [] }
+              ], { traceId, componentType: "DataSource", uid: "homeData", ts: baseTs + 15, perfTs: basePerfTs + 15 }),
+              // New panel initializes its variables
+              TestFramework.events.componentVarsInit(
+                ["query"],
+                toPanel,
+                {
+                  traceId,
+                  ts: baseTs + 30,
+                  perfTs: basePerfTs + 30,
+                  fileId: `http://localhost:8080/components/${toPanel}.xmlui`,
+                  diffs: [{ path: "query", before: undefined, after: "" }],
+                }
+              ),
+            ];
+          },
+        },
+      };
+
+      // Test runner
+      async function runTests() {
+        const container = document.getElementById("diff");
+        container.innerHTML = '<div class="test-results"><h2>Running Tests...</h2></div>';
+
+        const results = { suites: [], passed: 0, failed: 0 };
+
+        // Helper to add test results
+        function test(suiteName, testName, fn) {
+          let suite = results.suites.find(s => s.name === suiteName);
+          if (!suite) {
+            suite = { name: suiteName, tests: [], passed: 0, failed: 0 };
+            results.suites.push(suite);
+          }
+          try {
+            fn();
+            suite.tests.push({ name: testName, passed: true });
+            suite.passed++;
+            results.passed++;
+          } catch (e) {
+            suite.tests.push({ name: testName, passed: false, error: e.message });
+            suite.failed++;
+            results.failed++;
+          }
+        }
+
+        function assertEqual(actual, expected, msg = "") {
+          const actualStr = JSON.stringify(actual);
+          const expectedStr = JSON.stringify(expected);
+          if (actualStr !== expectedStr) {
+            throw new Error(`${msg}\nExpected: ${expectedStr}\nActual: ${actualStr}`);
+          }
+        }
+
+        function assertTrue(value, msg = "Expected true") {
+          if (!value) throw new Error(msg);
+        }
+
+        function assertContains(str, substring, msg = "") {
+          if (!str.includes(substring)) {
+            throw new Error(`${msg}\nExpected "${str}" to contain "${substring}"`);
+          }
+        }
+
+        function assertGreaterThan(actual, expected, msg = "") {
+          if (!(actual > expected)) {
+            throw new Error(`${msg}\nExpected ${actual} > ${expected}`);
+          }
+        }
+
+        // =========================================================================
+        // TEST SUITE: Event Generation
+        // =========================================================================
+        test("Event Generation", "generates valid interaction event", () => {
+          const evt = TestFramework.events.interaction("click", "TestButton");
+          assertEqual(evt.kind, "interaction");
+          assertEqual(evt.interaction, "click");
+          assertEqual(evt.componentLabel, "TestButton");
+          assertTrue(evt.ts > 0, "Should have timestamp");
+          assertTrue(evt.perfTs > 0, "Should have perfTs");
+        });
+
+        test("Event Generation", "generates valid handler:start event", () => {
+          const evt = TestFramework.events.handlerStart("onClick", { componentLabel: "MyButton" });
+          assertEqual(evt.kind, "handler:start");
+          assertEqual(evt.eventName, "onClick");
+          assertEqual(evt.componentLabel, "MyButton");
+          assertTrue(evt.traceId.startsWith("t-"), "Should have trace ID");
+        });
+
+        test("Event Generation", "generates valid api:start event", () => {
+          const evt = TestFramework.events.apiStart("POST", "/api/test", { body: { foo: "bar" } });
+          assertEqual(evt.kind, "api:start");
+          assertEqual(evt.method, "POST");
+          assertEqual(evt.url, "/api/test");
+          assertTrue(evt.instanceId.startsWith("ds-"), "Should have instance ID");
+        });
+
+        test("Event Generation", "generates valid state:changes event", () => {
+          const evt = TestFramework.events.stateChange("AppState:test", [
+            { path: "value", before: 1, after: 2 }
+          ]);
+          assertEqual(evt.kind, "state:changes");
+          assertEqual(evt.diffJson.length, 1);
+          assertEqual(evt.diffJson[0].before, 1);
+          assertEqual(evt.diffJson[0].after, 2);
+        });
+
+        // =========================================================================
+        // TEST SUITE: Scenario Generation
+        // =========================================================================
+        test("Scenario Generation", "buttonClick generates correct event sequence", () => {
+          const events = TestFramework.scenarios.buttonClick();
+          assertEqual(events.length, 4);
+          assertEqual(events[0].kind, "interaction");
+          assertEqual(events[1].kind, "handler:start");
+          assertEqual(events[2].kind, "state:changes");
+          assertEqual(events[3].kind, "handler:complete");
+          // All should share same traceId
+          const traceId = events[0].traceId;
+          assertTrue(events.every(e => e.traceId === traceId), "All events should share traceId");
+        });
+
+        test("Scenario Generation", "apiRequest generates API flow with matching instanceIds", () => {
+          const events = TestFramework.scenarios.apiRequest("GET", "/api/users");
+          const apiStart = events.find(e => e.kind === "api:start");
+          const apiComplete = events.find(e => e.kind === "api:complete");
+          assertTrue(apiStart, "Should have api:start");
+          assertTrue(apiComplete, "Should have api:complete");
+          assertEqual(apiStart.instanceId, apiComplete.instanceId);
+          assertEqual(apiStart.url, "/api/users");
+        });
+
+        test("Scenario Generation", "startup generates startup trace pattern", () => {
+          const events = TestFramework.scenarios.startup();
+          assertTrue(events[0].traceId.startsWith("startup-"), "Should have startup- prefix");
+          const hasVarsInit = events.some(e => e.kind === "component:vars:init");
+          assertTrue(hasVarsInit, "Should have component:vars:init");
+        });
+
+        test("Scenario Generation", "overlappingApiRequests generates two API pairs", () => {
+          const events = TestFramework.scenarios.overlappingApiRequests();
+          const apiStarts = events.filter(e => e.kind === "api:start");
+          const apiCompletes = events.filter(e => e.kind === "api:complete");
+          assertEqual(apiStarts.length, 2);
+          assertEqual(apiCompletes.length, 2);
+          // Instance IDs should be different
+          assertTrue(apiStarts[0].instanceId !== apiStarts[1].instanceId, "Instance IDs should differ");
+        });
+
+        // =========================================================================
+        // TEST SUITE: Entry Processing
+        // =========================================================================
+        test("Entry Processing", "normalizeEntry handles string input", () => {
+          const result = normalizeEntry("test message");
+          assertEqual(result.kind, "log");
+          assertEqual(result.text, "test message");
+        });
+
+        test("Entry Processing", "normalizeEntry preserves object entries", () => {
+          const input = { kind: "test", eventName: "foo", ts: 123 };
+          const result = normalizeEntry(input);
+          assertEqual(result.kind, "test");
+          assertEqual(result.eventName, "foo");
+        });
+
+        test("Entry Processing", "entryMatches filters Inspector events", () => {
+          const inspectorEvt = { kind: "test", componentLabel: "Inspector" };
+          assertTrue(!entryMatches(inspectorEvt, ""), "Should filter Inspector");
+        });
+
+        test("Entry Processing", "entryMatches filters vite-error-overlay", () => {
+          const viteEvt = { kind: "test", componentType: "vite-error-overlay" };
+          assertTrue(!entryMatches(viteEvt, ""), "Should filter vite events");
+        });
+
+        // =========================================================================
+        // TEST SUITE: Trace Processing
+        // =========================================================================
+        test("Trace Processing", "processAllEntries groups events by traceId", () => {
+          const events = TestFramework.scenarios.buttonClick();
+          const processed = processAllEntries(events);
+          assertEqual(processed.timelineItems.length, 1);
+          assertEqual(processed.timelineItems[0].type, "trace");
+        });
+
+        test("Trace Processing", "processAllEntries handles multiple traces", () => {
+          const events1 = TestFramework.scenarios.buttonClick();
+          const events2 = TestFramework.scenarios.navigation();
+          const allEvents = [...events1, ...events2];
+          const processed = processAllEntries(allEvents);
+          assertEqual(processed.timelineItems.length, 2);
+        });
+
+        test("Trace Processing", "processAllEntries inherits traceId for orphaned api:complete", () => {
+          const events = TestFramework.scenarios.orphanedApiComplete();
+          const processed = processAllEntries(events);
+          // Should be one trace containing all events
+          assertEqual(processed.timelineItems.length, 1);
+          const trace = processed.timelineItems[0];
+          // Should have both api:start and api:complete
+          const hasApiStart = trace.events.some(e => e.entry.kind === "api:start");
+          const hasApiComplete = trace.events.some(e => e.entry.kind === "api:complete");
+          assertTrue(hasApiStart, "Trace should contain api:start");
+          assertTrue(hasApiComplete, "Trace should contain api:complete (via traceId inheritance)");
+        });
+
+        test("Trace Processing", "processAllEntries separates standalone interactions", () => {
+          const standaloneInteraction = TestFramework.events.interaction("click", "Orphan");
+          delete standaloneInteraction.traceId;
+          const processed = processAllEntries([standaloneInteraction]);
+          const interactions = processed.timelineItems.filter(i => i.type === "interaction");
+          assertEqual(interactions.length, 1);
+        });
+
+        test("Trace Processing", "processAllEntries assigns unique requestIds to API events", () => {
+          const events = TestFramework.scenarios.typeaheadSearch();
+          processAllEntries(events); // This mutates events to add _requestId
+          const apiStarts = events.filter(e => e.kind === "api:start");
+          const apiErrors = events.filter(e => e.kind === "api:error");
+          const apiCompletes = events.filter(e => e.kind === "api:complete");
+          // All api:start events should have unique requestIds
+          const startRequestIds = apiStarts.map(e => e._requestId);
+          assertTrue(startRequestIds.every(id => id), "All api:start should have _requestId");
+          assertEqual(new Set(startRequestIds).size, apiStarts.length, "All requestIds should be unique");
+          // Errors and completes should have matching requestIds
+          apiErrors.forEach(e => assertTrue(e._requestId, "api:error should have _requestId"));
+          apiCompletes.forEach(e => assertTrue(e._requestId, "api:complete should have _requestId"));
+        });
+
+        test("Trace Processing", "requestIds link api:start to api:complete/error correctly", () => {
+          const events = TestFramework.scenarios.typeaheadSearch();
+          processAllEntries(events);
+          // Find api:start and its corresponding api:error for first aborted request
+          const firstStart = events.find(e => e.kind === "api:start");
+          const matchingError = events.find(e => e.kind === "api:error" && e._requestId === firstStart._requestId);
+          assertTrue(matchingError, "First api:start should have matching api:error with same requestId");
+          assertTrue(matchingError.error.includes("signal is aborted"), "Matched error should be abort error");
+        });
+
+        // =========================================================================
+        // TEST SUITE: Timeline Calculation
+        // =========================================================================
+        test("Timeline Calculation", "buildTraceSummary calculates total duration", () => {
+          const events = TestFramework.scenarios.buttonClick();
+          const summary = buildTraceSummary(events);
+          assertTrue(summary.totalDuration !== null, "Should calculate duration");
+          assertGreaterThan(summary.totalDuration, 0, "Duration should be positive");
+        });
+
+        test("Timeline Calculation", "buildTraceSummary detects startup traces", () => {
+          const events = TestFramework.scenarios.startup();
+          const summary = buildTraceSummary(events);
+          assertEqual(summary.componentText, "Startup");
+        });
+
+        test("Timeline Calculation", "buildTraceSummary builds timeline breakdown", () => {
+          const events = TestFramework.scenarios.publishPost();
+          const summary = buildTraceSummary(events);
+          assertTrue(summary.timelineBreakdown.length > 0, "Should have timeline breakdown");
+        });
+
+        // =========================================================================
+        // TEST SUITE: State Change Formatting
+        // =========================================================================
+        test("State Change Formatting", "analyzeArrayDiff detects added items", () => {
+          const before = [{ id: "1", name: "a" }];
+          const after = [{ id: "1", name: "a" }, { id: "2", name: "b" }];
+          const analysis = analyzeArrayDiff(before, after);
+          assertEqual(analysis.added.length, 1);
+          assertEqual(analysis.removed.length, 0);
+          assertEqual(analysis.beforeCount, 1);
+          assertEqual(analysis.afterCount, 2);
+        });
+
+        test("State Change Formatting", "analyzeArrayDiff detects removed items", () => {
+          const before = [{ id: "1", name: "a" }, { id: "2", name: "b" }];
+          const after = [{ id: "1", name: "a" }];
+          const analysis = analyzeArrayDiff(before, after);
+          assertEqual(analysis.added.length, 0);
+          assertEqual(analysis.removed.length, 1);
+        });
+
+        test("State Change Formatting", "analyzeArrayDiff detects modified items", () => {
+          const before = [{ id: "1", name: "old" }];
+          const after = [{ id: "1", name: "new" }];
+          const analysis = analyzeArrayDiff(before, after);
+          assertEqual(analysis.changed.length, 1);
+        });
+
+        test("State Change Formatting", "formatFileSize formats bytes correctly", () => {
+          assertEqual(formatFileSize(0), "0 B");
+          assertEqual(formatFileSize(1024), "1 KB");
+          assertEqual(formatFileSize(1048576), "1 MB");
+          assertEqual(formatFileSize(5242880), "5 MB");
+        });
+
+        test("State Change Formatting", "getItemLabel extracts name with size", () => {
+          const item = { name: "test.txt", size: 1024 };
+          const label = getItemLabel(item);
+          assertContains(label, "test.txt");
+          assertContains(label, "1 KB");
+        });
+
+        // =========================================================================
+        // TEST SUITE: Deduplication
+        // =========================================================================
+        test("Deduplication", "fingerprintStateChange creates unique fingerprint", () => {
+          const evt = TestFramework.events.stateChange("test", [
+            { path: "x", before: 1, after: 2 }
+          ]);
+          const fp = fingerprintStateChange(evt);
+          assertTrue(fp.length > 0, "Should create fingerprint");
+        });
+
+        test("Deduplication", "identical state changes have same fingerprint", () => {
+          const evt1 = TestFramework.events.stateChange("test", [{ path: "x", before: 1, after: 2 }]);
+          const evt2 = TestFramework.events.stateChange("test", [{ path: "x", before: 1, after: 2 }]);
+          assertEqual(fingerprintStateChange(evt1), fingerprintStateChange(evt2));
+        });
+
+        test("Deduplication", "isNoopStateChange detects no-op", () => {
+          const noop = { diffJson: [{ before: { a: 1 }, after: { a: 1 } }] };
+          assertTrue(isNoopStateChange(noop), "Should detect no-op");
+          const real = { diffJson: [{ before: { a: 1 }, after: { a: 2 } }] };
+          assertTrue(!isNoopStateChange(real), "Should not detect real change as no-op");
+        });
+
+        test("Deduplication", "processTraceEvents deduplicates repeated state changes", () => {
+          const events = TestFramework.scenarios.duplicateStateChanges();
+          const { events: processedEvents, dedupedCount } = processTraceEvents(events);
+          assertTrue(dedupedCount > 0, "Should have deduped some events");
+          assertGreaterThan(events.length, processedEvents.length, "Processed should be shorter");
+        });
+
+        // =========================================================================
+        // TEST SUITE: Rendering
+        // =========================================================================
+        test("Rendering", "renderPrettyView generates HTML", () => {
+          const events = TestFramework.scenarios.buttonClick();
+          const processed = processAllEntries(events);
+          const html = renderPrettyView(processed);
+          assertTrue(html.length > 0, "Should generate HTML");
+          assertContains(html, "trace-group", "Should have trace-group class");
+        });
+
+        test("Rendering", "renderPrettyView shows interaction traces", () => {
+          const events = TestFramework.scenarios.contextMenu("test.txt");
+          const processed = processAllEntries(events);
+          const html = renderPrettyView(processed);
+          assertContains(html, "contextmenu", "Should show contextmenu");
+        });
+
+        test("Rendering", "renderRawView generates markdown", () => {
+          const events = TestFramework.scenarios.buttonClick();
+          const processed = processAllEntries(events);
+          const markdown = renderRawView(processed);
+          assertTrue(markdown.length > 0, "Should generate markdown");
+          assertContains(markdown, "Trace", "Should have Trace header");
+        });
+
+        test("Rendering", "renderRawView includes timeline breakdown", () => {
+          const events = TestFramework.scenarios.publishPost();
+          const processed = processAllEntries(events);
+          const markdown = renderRawView(processed);
+          assertContains(markdown, "timeline:", "Should have timeline section");
+        });
+
+        // =========================================================================
+        // TEST SUITE: Export
+        // =========================================================================
+        test("Export", "generateMarkdownExport produces valid markdown", () => {
+          const events = TestFramework.scenarios.apiRequest();
+          const processed = processAllEntries(events);
+          const md = generateMarkdownExport(processed);
+          assertContains(md, "# XMLUI Inspector Export", "Should have title");
+          assertContains(md, "Total events:", "Should have event count");
+        });
+
+        test("Export", "generateMarkdownExport includes API events", () => {
+          const events = TestFramework.scenarios.apiRequest("POST", "/api/submit");
+          const processed = processAllEntries(events);
+          const md = generateMarkdownExport(processed);
+          assertContains(md, "POST", "Should include method");
+          assertContains(md, "/api/submit", "Should include URL");
+        });
+
+        // =========================================================================
+        // TEST SUITE: Complex Scenarios
+        // =========================================================================
+        test("Complex Scenarios", "handles full publish post flow", () => {
+          const events = TestFramework.scenarios.publishPost();
+          const processed = processAllEntries(events);
+          assertEqual(processed.timelineItems.length, 1);
+          const trace = processed.timelineItems[0];
+          assertTrue(trace.summary.totalDuration > 2000, "Should capture full duration");
+        });
+
+        test("Complex Scenarios", "handles navigation with API calls", () => {
+          // Combine navigation and API scenarios
+          const navEvents = TestFramework.scenarios.navigation();
+          const apiEvents = TestFramework.scenarios.apiRequest();
+          const processed = processAllEntries([...navEvents, ...apiEvents]);
+          assertEqual(processed.timelineItems.length, 2);
+        });
+
+        test("Complex Scenarios", "handles error scenarios", () => {
+          const events = TestFramework.scenarios.apiError();
+          const processed = processAllEntries(events);
+          const trace = processed.timelineItems[0];
+          const hasApiError = trace.events.some(e => e.entry.kind === "api:error");
+          assertTrue(hasApiError, "Should include api:error");
+        });
+
+        test("Complex Scenarios", "handles array diff scenario", () => {
+          const events = TestFramework.scenarios.arrayDiff();
+          const processed = processAllEntries(events);
+          const trace = processed.timelineItems[0];
+          const stateChange = trace.events.find(e => e.entry.kind === "state:changes");
+          assertTrue(stateChange, "Should have state change");
+          const diff = stateChange.entry.diffJson[0];
+          assertTrue(Array.isArray(diff.before), "Before should be array");
+          assertTrue(Array.isArray(diff.after), "After should be array");
+        });
+
+        // =========================================================================
+        // TEST SUITE: Typeahead & Cancellation (Mastodon-inspired)
+        // =========================================================================
+        test("Typeahead & Cancellation", "typeaheadSearch generates multiple traces", () => {
+          const events = TestFramework.scenarios.typeaheadSearch();
+          const processed = processAllEntries(events);
+          // Should have 3 traces (one per keystroke)
+          assertEqual(processed.timelineItems.length, 3);
+        });
+
+        test("Typeahead & Cancellation", "typeaheadSearch includes api:error for aborted requests", () => {
+          const events = TestFramework.scenarios.typeaheadSearch();
+          const apiErrors = events.filter(e => e.kind === "api:error");
+          assertEqual(apiErrors.length, 2, "Should have 2 aborted requests");
+          assertTrue(apiErrors[0].error.includes("signal is aborted"), "Should be AbortController error");
+        });
+
+        test("Typeahead & Cancellation", "typeaheadSearch reuses same instanceId", () => {
+          const events = TestFramework.scenarios.typeaheadSearch();
+          const apiStarts = events.filter(e => e.kind === "api:start");
+          const instanceIds = new Set(apiStarts.map(e => e.instanceId));
+          assertEqual(instanceIds.size, 1, "All requests should use same DataSource instanceId");
+        });
+
+        test("Typeahead & Cancellation", "typeaheadSearch has long-spanning handlers", () => {
+          const events = TestFramework.scenarios.typeaheadSearch();
+          const completes = events.filter(e => e.kind === "handler:complete");
+          const longHandler = completes.find(e => e.duration > 200);
+          assertTrue(longHandler, "Should have long-spanning handler");
+          assertTrue(longHandler.startPerfTs !== undefined, "Should have startPerfTs");
+        });
+
+        // =========================================================================
+        // TEST SUITE: Parallel API Requests
+        // =========================================================================
+        test("Parallel API Requests", "parallelApiBurst generates 6 API starts", () => {
+          const events = TestFramework.scenarios.parallelApiBurst();
+          const apiStarts = events.filter(e => e.kind === "api:start");
+          assertEqual(apiStarts.length, 6);
+        });
+
+        test("Parallel API Requests", "parallelApiBurst has unique instanceIds", () => {
+          const events = TestFramework.scenarios.parallelApiBurst();
+          const apiStarts = events.filter(e => e.kind === "api:start");
+          const instanceIds = new Set(apiStarts.map(e => e.instanceId));
+          assertEqual(instanceIds.size, 6, "Each request should have unique instanceId");
+        });
+
+        test("Parallel API Requests", "parallelApiBurst completions arrive out of order", () => {
+          const events = TestFramework.scenarios.parallelApiBurst();
+          const apiCompletes = events.filter(e => e.kind === "api:complete");
+          // Check that the /api/user/me (last to start) completes before the INSERT queries
+          const userComplete = apiCompletes.find(e => e.url === "/api/user/me");
+          const insertCompletes = apiCompletes.filter(e => e.body?.sql?.includes("INSERT") || e.duration > 290);
+          assertTrue(userComplete, "Should have user API complete");
+          // userComplete should be before some INSERT completes in the event order
+          const userIdx = events.indexOf(userComplete);
+          const lastInsertIdx = Math.max(...insertCompletes.map(e => events.indexOf(e)));
+          assertTrue(userIdx < lastInsertIdx, "User API should complete before some INSERT queries");
+        });
+
+        // =========================================================================
+        // TEST SUITE: Component Initialization
+        // =========================================================================
+        test("Component Initialization", "componentVarsInitComplex has 6 variables", () => {
+          const events = TestFramework.scenarios.componentVarsInitComplex();
+          const varsInit = events.find(e => e.kind === "component:vars:init");
+          assertTrue(varsInit, "Should have component:vars:init");
+          assertEqual(varsInit.varNames.length, 6);
+          assertContains(varsInit.varNames.join(","), "postContent");
+          assertContains(varsInit.varNames.join(","), "visibilityOptions");
+        });
+
+        test("Component Initialization", "componentVarsInitComplex includes complex object in diffs", () => {
+          const events = TestFramework.scenarios.componentVarsInitComplex();
+          const varsInit = events.find(e => e.kind === "component:vars:init");
+          const visibilityDiff = varsInit.diffJson.find(d => d.path === "visibilityOptions");
+          assertTrue(visibilityDiff, "Should have visibilityOptions diff");
+          assertTrue(Array.isArray(visibilityDiff.after), "visibilityOptions should be array");
+          assertEqual(visibilityDiff.after.length, 4, "Should have 4 visibility options");
+        });
+
+        test("Component Initialization", "panelNavigation clears previous DataSource", () => {
+          const events = TestFramework.scenarios.panelNavigation("Home", "Search");
+          const stateChange = events.find(e => e.kind === "state:changes");
+          assertTrue(stateChange, "Should have state change for cleared DataSource");
+          const diff = stateChange.diffJson[0];
+          assertEqual(diff.after.length, 0, "DataSource should be cleared");
+          assertGreaterThan(diff.before.length, 0, "DataSource should have had items before");
+        });
+
+        // =========================================================================
+        // TEST SUITE: Large Array Diffs
+        // =========================================================================
+        test("Large Array Diffs", "largeArrayDiff has 30 items before, 3 after", () => {
+          const events = TestFramework.scenarios.largeArrayDiff();
+          const stateChange = events.find(e => e.kind === "state:changes");
+          const diff = stateChange.diffJson[0];
+          assertEqual(diff.before.length, 30);
+          assertEqual(diff.after.length, 3);
+        });
+
+        test("Large Array Diffs", "analyzeArrayDiff handles large removals", () => {
+          const events = TestFramework.scenarios.largeArrayDiff();
+          const stateChange = events.find(e => e.kind === "state:changes");
+          const diff = stateChange.diffJson[0];
+          const analysis = analyzeArrayDiff(diff.before, diff.after);
+          assertEqual(analysis.removed.length, 27, "Should have 27 removed items");
+          assertEqual(analysis.added.length, 0, "Should have 0 added items");
+          // unchanged = afterCount - added (items that were already there)
+          assertEqual(analysis.afterCount - analysis.added.length, 3, "Should have 3 unchanged items");
+        });
+
+        // =========================================================================
+        // TEST SUITE: SQL Query Execution
+        // =========================================================================
+        test("SQL Query Execution", "sqlQueryExecution has correct event sequence", () => {
+          const events = TestFramework.scenarios.sqlQueryExecution();
+          const kinds = events.map(e => e.kind);
+          assertTrue(kinds.includes("interaction"), "Should have interaction");
+          assertTrue(kinds.includes("api:start"), "Should have api:start");
+          assertTrue(kinds.includes("api:complete"), "Should have api:complete");
+          // Handler complete should come before api:complete (async pattern)
+          const handlerCompleteIdx = kinds.indexOf("handler:complete");
+          const apiStartIdx = kinds.indexOf("api:start");
+          assertTrue(handlerCompleteIdx > apiStartIdx, "Handler complete after API start");
+        });
+
+        test("SQL Query Execution", "sqlQueryExecution captures SQL in request body", () => {
+          const events = TestFramework.scenarios.sqlQueryExecution();
+          const apiStart = events.find(e => e.kind === "api:start");
+          assertTrue(apiStart.body, "Should have request body");
+          assertContains(apiStart.body.sql, "SELECT count(*)", "Should have SQL in body");
+        });
+
+        test("SQL Query Execution", "sqlQueryExecution shows loading state transition", () => {
+          const events = TestFramework.scenarios.sqlQueryExecution();
+          const stateChanges = events.filter(e => e.kind === "state:changes" && e.eventName === "AppState:queryState");
+          assertEqual(stateChanges.length, 2, "Should have 2 AppState changes");
+          // First sets loading: true, second sets loading: false
+          const firstDiffs = stateChanges[0].diffJson;
+          const loadingDiff = firstDiffs.find(d => d.path === "loading");
+          assertEqual(loadingDiff.after, true, "First change should set loading: true");
+        });
+
+        // =========================================================================
+        // Render Results
+        // =========================================================================
+        let html = '<div class="test-results">';
+        html += `<h2>Test Results</h2>`;
+
+        results.suites.forEach(suite => {
+          const suiteStatus = suite.failed === 0 ? "pass" : "fail";
+          html += `<div class="test-suite expanded">`;
+          html += `<div class="test-suite-header" onclick="this.parentElement.classList.toggle('expanded')">`;
+          html += `<span class="test-icon ${suiteStatus}">${suite.failed === 0 ? "✓" : "✗"}</span>`;
+          html += `<span>${suite.name}</span>`;
+          html += `<span class="text-muted">(${suite.passed}/${suite.tests.length})</span>`;
+          html += `</div>`;
+          html += `<div class="test-suite-body">`;
+
+          suite.tests.forEach(t => {
+            const status = t.passed ? "pass" : "fail";
+            html += `<div class="test-case ${status}">`;
+            html += `<span class="test-icon ${status}">${t.passed ? "✓" : "✗"}</span>`;
+            html += `<div class="test-name">${t.name}`;
+            if (t.error) {
+              html += `<div class="test-error">${t.error.replace(/</g, "&lt;")}</div>`;
+            }
+            html += `</div></div>`;
+          });
+
+          html += `</div></div>`;
+        });
+
+        const summaryClass = results.failed === 0 ? "all-pass" : "has-failures";
+        html += `<div class="test-summary ${summaryClass}">`;
+        html += `${results.passed} passed, ${results.failed} failed`;
+        html += `</div>`;
+
+        html += '</div>';
+        container.innerHTML = html;
+      }
+
+      document.getElementById("test").addEventListener("click", () => {
+        // Clear logs
+        if (window.parent && window.parent._xsLogs) window.parent._xsLogs.length = 0;
+        // Mark test view as active to prevent auto-refresh
+        testViewActive = true;
+        // Run tests
+        runTests();
       });
 
       // =============================================================================
@@ -2716,11 +4230,14 @@
 
             events.forEach((evt) => {
               const e = evt.entry;
-              const meta = evt.meta.parts.length ? ` _(${evt.meta.parts.join(" | ")})_` : "";
+              // Strip HTML tags from meta parts for markdown export
+              const metaParts = evt.meta.parts.map(stripHtml);
+              const meta = metaParts.length ? ` _(${metaParts.join(" | ")})_` : "";
 
               if (e.kind === "api:start" || e.kind === "api:complete" || e.kind === "api:error") {
                 const durationSuffix = e.kind === "api:complete" && typeof e._apiDuration === "number" ? ` (${e._apiDuration.toFixed(1)}ms)` : "";
-                lines.push(`- \`[${e.kind}]\`${durationSuffix} **${e.method || "GET"}** ${e.url || ""}${meta}`);
+                const requestIdSuffix = e._requestId ? ` \`[${e._requestId}]\`` : "";
+                lines.push(`- \`[${e.kind}]\`${durationSuffix} **${e.method || "GET"}** ${e.url || ""}${requestIdSuffix}${meta}`);
                 if (e.body) {
                   const bodyStr = typeof e.body === "string" ? e.body : JSON.stringify(e.body);
                   const truncatedBody = bodyStr.length > 100 ? bodyStr.substring(0, 100) + "..." : bodyStr;
@@ -2735,7 +4252,24 @@
                 lines.push(`- \`[${e.kind}]\` ${e.eventName || ""}${meta}`);
                 if (e.diffJson) {
                   e.diffJson.forEach((d) => {
-                    lines.push(`  - \`${d.path}\`: ${JSON.stringify(d.before)} → ${JSON.stringify(d.after)}`);
+                    if (d.before && d.after && typeof d.before === "object" && typeof d.after === "object" && !Array.isArray(d.before) && !Array.isArray(d.after)) {
+                      // Object diff
+                      const allKeys = new Set([...Object.keys(d.before), ...Object.keys(d.after)]);
+                      const changedKeys = [];
+                      allKeys.forEach((key) => {
+                        if (JSON.stringify(d.before[key]) !== JSON.stringify(d.after[key])) changedKeys.push(key);
+                      });
+                      if (changedKeys.length === 0) {
+                        lines.push(`  - \`${d.path}\`: (no visible change)`);
+                      } else {
+                        lines.push(`  - \`${d.path}\`:`);
+                        changedKeys.forEach((key) => {
+                          lines.push(`    - \`${key}\`: ${JSON.stringify(d.before[key])?.slice(0, 60) || "undefined"} → ${JSON.stringify(d.after[key])?.slice(0, 60) || "undefined"}`);
+                        });
+                      }
+                    } else {
+                      lines.push(`  - \`${d.path}\`: ${JSON.stringify(d.before)?.slice(0, 80) || "undefined"} → ${JSON.stringify(d.after)?.slice(0, 80) || "undefined"}`);
+                    }
                   });
                 }
               } else {
@@ -2815,8 +4349,60 @@
         }
       });
 
+      // Handle hash navigation - expand parent trace-group and highlight target
+      function handleHashNavigation() {
+        const hash = window.location.hash;
+        if (!hash) return;
+
+        const targetId = hash.slice(1);
+        const anchor = document.getElementById(targetId);
+        if (!anchor) return;
+
+        // Find the trace-event sibling (the div right after the anchor)
+        const traceEvent = anchor.nextElementSibling;
+        if (!traceEvent || !traceEvent.classList.contains("trace-event")) return;
+
+        // Find and expand the parent trace-group
+        const traceGroup = traceEvent.closest(".trace-group");
+        if (traceGroup && !traceGroup.classList.contains("expanded")) {
+          traceGroup.classList.add("expanded");
+          const header = traceGroup.querySelector(".trace-header");
+          if (header) header.classList.add("expanded");
+        }
+
+        // Auto-expand the Request/Response details within the trace event
+        const details = traceEvent.querySelectorAll("details");
+        details.forEach(d => d.setAttribute("open", ""));
+
+        // Apply highlight animation
+        traceEvent.classList.remove("jump-target");
+        void traceEvent.offsetWidth; // Force reflow
+        traceEvent.classList.add("jump-target");
+
+        // Scroll into view
+        anchor.scrollIntoView({ block: "start", behavior: "smooth" });
+      }
+
+      window.addEventListener("hashchange", handleHashNavigation);
+      // Also handle initial page load with hash
+      window.addEventListener("load", () => {
+        if (window.location.hash) {
+          setTimeout(handleHashNavigation, 100);
+        }
+      });
+
+      // Handle clicks on API pair links - ensures expand happens even when hash doesn't change
+      document.addEventListener("click", (e) => {
+        const pairLink = e.target.closest(".api-pair-link");
+        if (pairLink) {
+          // Let the browser update the hash, then handle navigation
+          setTimeout(handleHashNavigation, 0);
+        }
+      });
+
       let lastLogCount = -1;
       setInterval(() => {
+        if (testViewActive) return; // Don't auto-refresh when test results are displayed
         const logs = (window.parent && window.parent._xsLogs) || [];
         if (logs.length !== lastLogCount) {
           lastLogCount = logs.length;
