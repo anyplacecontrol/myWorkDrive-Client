@@ -15,7 +15,7 @@
   <!-- We obtain the view mode and sorting state from the AppState -->
   <AppState id="appState" bucket="fileCatalogView" />
   <AppState id="selectionState" bucket="fileCatalogSelection" />
-  <AppState id="fileOpsState" bucket="fileOperations"/>
+  <AppState id="fileOpsState" bucket="fileOperations" />
 
   <script>
     function navigateToItem(item) {
@@ -49,7 +49,7 @@
   </script>
 
   <ContextMenu id="contextMenu" menuWidth="240px">
-    <FilesContextMenu selectedItems="{$context}"/>
+    <FilesContextMenu selectedItems="{$context}" />
   </ContextMenu>
 
   <Table
@@ -79,17 +79,14 @@
     onCutAction="(row, selectedItems) => fileOpsState.value.copyOrCut(selectedItems, 'cut')"
     onCopyAction="(row, selectedItems) =>  fileOpsState.value.copyOrCut(selectedItems, 'copy')"
     onPasteAction="(row, selectedItems) =>  fileOpsState.value.paste(selectedItems)"
-    onDeleteAction="(row, selectedItems, selectedIds) => {
-      console.log('DeleteAction - row:', row, 'selectedItems:', selectedItems, 'selectedIds:', selectedIds);
-      toast.success('Delete: ' + selectedIds.length + ' items');
-    }"
-     canSort="true"  onContextMenu="ev => {reselectAndOpenMenu(ev, $item)}"
+    onDeleteAction="(row, selectedItems, selectedIds) => fileOpsState.value.remove(selectedItems)"
+    canSort="true"
+    onContextMenu="ev => {reselectAndOpenMenu(ev, $item)}"
   >
     <Column
       header="Name"
       width="2*"
       bindTo="name"
-
     >
       <Link onContextMenu="ev => {reselectAndOpenMenu(ev, $item)}">
         <HStack

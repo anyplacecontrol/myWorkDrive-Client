@@ -111,7 +111,7 @@
   >
     Rename
   </MenuItem>
-  <MenuItem icon="cmd_delete" onClick="toast.success('Delete')">
+  <MenuItem icon="cmd_delete" onClick="fileOpsState.value.remove($props.selectedItems)">
     Delete
   </MenuItem>
 

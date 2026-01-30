@@ -23,7 +23,7 @@
   <AppState
     id="fileOpsState"
     bucket="fileOperations"
-    initialValue="{fileOperationsInitial}"
+    initialValue="{getFileOperationsInitial()}"
   />
 
   <Theme space-4="0px">
@@ -37,7 +37,7 @@
         <Stack padding="1rem">
           <DropdownMenu>
             <template name="triggerTemplate">
-              <Avatar size="xs" name="{loggedInUser.displayName}" />
+              <Avatar size="xs" name="A" />
             </template>
             <MenuItem label="Log out" />
           </DropdownMenu>
