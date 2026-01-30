@@ -13,7 +13,7 @@
   var.isSingleFile="{$props.selectedItems.length === 1 && !$props.selectedItems[0].isFolder}"
 >
   <AppState id="selectionState" bucket="fileCatalogSelection" />
-  <AppState id="fileOps" bucket="fileOperations"/>
+  <AppState id="fileOpsState" bucket="fileOperations"/>
 
   <!-- Upload group -->
   <MenuItem
@@ -85,18 +85,18 @@
   <MenuSeparator />
 
   <!-- Clipboard group -->
-  <MenuItem icon="cmd_copy" onClick="fileOps.value.copyOrCut($props.selectedItems, 'copy')">
+  <MenuItem icon="cmd_copy" onClick="fileOpsState.value.copyOrCut($props.selectedItems, 'copy')">
     Copy
   </MenuItem>
 
-  <MenuItem icon="cmd_cut" onClick="fileOps.value.copyOrCut($props.selectedItems, 'cut')">
+  <MenuItem icon="cmd_cut" onClick="fileOpsState.value.copyOrCut($props.selectedItems, 'cut')">
     Cut
   </MenuItem>
 
   <MenuItem
     icon="cmd_paste"
     when="{isSingleSelection && isAnyFolder}"
-    onClick="fileOps.value.paste($props.selectedItems)"
+    onClick="fileOpsState.value.paste($props.selectedItems)"
   >
     Paste
   </MenuItem>

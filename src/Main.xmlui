@@ -1,10 +1,10 @@
 <!-- The current app works with a wired-id user only. It uses a single drive. -->
 <App
   layout="vertical-full-header"
-  loggedInUser="{{ id: 'user_1234', displayName: 'Tim Test'}}"
+  loggedInUser="{null}"
   scrollWholePage="false"
   paddingVertical="0"
-  var.currentDrive=":sh:Documents:"
+  var.currentDrive="{window.AppConfig.currentDrive}"
 >
 
   <!-- Let's keep the sorting and view state here -->
@@ -21,7 +21,7 @@
   />
 
   <AppState
-    id="fileOps"
+    id="fileOpsState"
     bucket="fileOperations"
     initialValue="{fileOperationsInitial}"
   />

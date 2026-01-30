@@ -9,7 +9,6 @@
 
 <Component name="FoldersTree">
 
-
   <!-- Context menu for tree nodes -->
   <ContextMenu id="contextMenu" menuWidth="220px">
     <FoldersContextMenu selectedNode="{$context}" />
@@ -28,22 +27,31 @@
     <Text color="$textColor--disabled" paddingLeft="$space-1">
       My Folders
     </Text>
-    <!-- Tree container: fills remaining space and scrolls independently -->
+    <!-- Tree container: fills remaining space and scrolls independently
+    onNodeDidCollapse="onNodeCollapse"
+    -->
     <Tree
       id="tree"
+      spinnerDelay="250"
+      autoLoadAfter="1000"
       testId="tree"
       dataFormat="hierarchy"
       itemClickExpands
       overflowX="hidden"
       iconSize="$space-6"
-      data="{treeData}"
+      data="{ [{
+              id: $props.drive + '/',
+              name: `Root`,
+              icon: `folder`,
+              dynamic: true,
+            }]}"
       onLoadChildren="loadChildren"
-      onNodeDidCollapse="onNodeCollapse"
       onSelectionDidChange="onTreeSelectionDidChange"
       onContextMenu="ev => {delay(300); contextMenu.openAt(ev, $item)}"
+      dynamic="true"
     >
       <template name="itemTemplate">
-        <HStack verticalAlignment="center" gap="$space-2" height="$space-10" >
+        <HStack verticalAlignment="center" gap="$space-2" height="$space-10">
           <Icon when="{$item.icon}" name="{$item.icon}" height="$space-5" />
           <Text value="{$item.name}" />
         </HStack>

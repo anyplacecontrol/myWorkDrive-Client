@@ -1,4 +1,5 @@
 import { startApp } from "xmlui";
+import './src/appConfig.js';
 
 export const runtime = import.meta.glob(`/src/**`, { eager: true });
 startApp(runtime, []);
