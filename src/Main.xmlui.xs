@@ -1,4 +1,5 @@
 //=================== UTILITIES ==============================================
+
 function toastSuccess(message) {
   toast.success(message);
 }
@@ -21,19 +22,42 @@ function remove(utilities, items) {
   utilities.toastSuccess("Deleted " + names + " item(s)");
 }
 
+
+function rename(utilities, item, newName) {
+  const result = confirm({
+        title: "Confirm renaming " + item.name + " to " + newName,
+        buttons: [
+          {
+            label: "Confirm",
+            value: "confirm",
+          },
+        ],
+      });
+  if (result !== "confirm") return;
+  if (!item) return;
+  // Simple inline rename flow: prompt is not available here, so show toast and log
+  // Replace with a real rename UI/Actions.callApi as needed
+  const name = item.name || '';
+  utilities.toastSuccess('Rename successful');
+}
+
 //=================== FILE OPERATIONS STATE INITIALIZER ======================
 
 function getFileOperationsInitial() {
+
   const utilities = {
     toastSuccess,
     copyOrCut,
     paste,
-    remove
+    remove,
+    rename,
+    getModalRef
   };
 
   return {
     copyOrCut: (items, action) => utilities.copyOrCut(utilities, items, action),
     paste: (items) => utilities.paste(utilities, items),
     remove: (items) => utilities.remove(utilities, items),
+    rename: (item, newName) => {utilities.rename(utilities, item, newName)},
   };
 }

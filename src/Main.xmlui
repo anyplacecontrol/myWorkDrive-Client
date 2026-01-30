@@ -7,6 +7,18 @@
   var.currentDrive="{window.AppConfig.currentDrive}"
 >
 
+  <AppState
+    id="fileOpsState"
+    bucket="fileOperations"
+    initialValue="{getFileOperationsInitial()}"
+  />
+
+  <AppState
+    id="modalsState"
+    bucket="modals"
+    initialValue="{{renameModalRef: null}}"
+  />
+
   <!-- Let's keep the sorting and view state here -->
   <AppState
     id="appState"
@@ -20,15 +32,8 @@
           }}"
   />
 
-  <AppState
-    id="fileOpsState"
-    bucket="fileOperations"
-    initialValue="{getFileOperationsInitial()}"
-  />
-
   <Theme space-4="0px">
     <AppHeader padding="0" height="$space-11">
-
       <Toolbar
         drive="{defaultTo($queryParams.drive, currentDrive)}"
         folder="{defaultTo($queryParams.folder, '/')}"
@@ -50,25 +55,38 @@
 
     <!-- We have a single main page for browsing files -->
     <Page url="/my-files" padding="0">
-        <HSplitter initialPrimarySize="260px">
-          <property name="splitterTemplate">
-            <Stack
-              height="100%"
-              borderLeft="1px solid $borderColor"
-            />
-          </property>
-          <FoldersTree
-            drive="{defaultTo($queryParams.drive, currentDrive)}"
-            when="{appState.value.isFoldersVisible}"
+      <HSplitter initialPrimarySize="260px">
+
+        <!-- Global rename modal component (opened via its component method) -->
+
+        <property name="splitterTemplate">
+          <Stack
+            height="100%"
+            borderLeft="1px solid $borderColor"
           />
-          <FilesContainer
-            drive="{defaultTo($queryParams.drive, currentDrive)}"
-            folder="{defaultTo($queryParams.folder, '/')}"
-          />
-        </HSplitter>
+        </property>
+        <FoldersTree
+          drive="{defaultTo($queryParams.drive, currentDrive)}"
+          when="{appState.value.isFoldersVisible}"
+        />
+        <FilesContainer
+          drive="{defaultTo($queryParams.drive, currentDrive)}"
+          folder="{defaultTo($queryParams.folder, '/')}"
+        />
+      </HSplitter>
 
     </Page>
   </Pages>
 
-</App>
+  <RenameItemModal id="renameModal" />
 
+  <!--Save all modals to AppState after a delay to ensure they are initialized-->
+  <Timer
+    id="modalAttachTimer"
+    initialDelay="1000"
+    once="true"
+    enabled="true"
+    onTick="modalsState.update({ renameModalRef: renameModal })"
+  />
+
+</App>

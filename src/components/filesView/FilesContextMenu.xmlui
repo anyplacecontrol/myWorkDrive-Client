@@ -14,6 +14,8 @@
 >
   <AppState id="selectionState" bucket="fileCatalogSelection" />
   <AppState id="fileOpsState" bucket="fileOperations"/>
+  <AppState id="modalsState"  bucket="modals"/>
+
 
   <!-- Upload group -->
   <MenuItem
@@ -107,7 +109,7 @@
   <MenuItem
     icon="cmd_rename"
     when="{isSingleSelection}"
-    onClick="toast.success('Rename')"
+    onClick="modalsState.value.renameModalRef.open($props.selectedItems[0])"
   >
     Rename
   </MenuItem>
