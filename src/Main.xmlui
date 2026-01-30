@@ -13,12 +13,6 @@
     initialValue="{getFileOperationsInitial()}"
   />
 
-  <AppState
-    id="modalsState"
-    bucket="modals"
-    initialValue="{{renameModalRef: null}}"
-  />
-
   <!-- Let's keep the sorting and view state here -->
   <AppState
     id="appState"
@@ -78,15 +72,6 @@
     </Page>
   </Pages>
 
-  <RenameItemModal id="renameModal" />
-
-  <!--Save all modals to AppState after a delay to ensure they are initialized-->
-  <Timer
-    id="modalAttachTimer"
-    initialDelay="1000"
-    once="true"
-    enabled="true"
-    onTick="modalsState.update({ renameModalRef: renameModal })"
-  />
+  <ModalsAggregator />
 
 </App>
