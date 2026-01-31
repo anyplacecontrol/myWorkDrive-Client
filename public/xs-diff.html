@@ -1398,6 +1398,62 @@
         });
       }
 
+      // Load file and search for Action component definition
+      function setupActionSourceLoader(detailsEl, filePath, actionId) {
+        let loaded = false;
+        detailsEl.addEventListener("toggle", async () => {
+          if (detailsEl.open && !loaded) {
+            loaded = true;
+            const codeEl = detailsEl.querySelector(".source-code");
+            if (codeEl) {
+              codeEl.textContent = "Loading...";
+              try {
+                // First try the .xmlui file
+                const xmluiSource = await fetchSourceRange(filePath, 0, 999999);
+                if (xmluiSource) {
+                  const result = findActionInSource(xmluiSource, actionId, filePath.split("/").pop());
+                  if (result) {
+                    const lines = result.source.split("\n");
+                    const formatted = lines.map((line, i) => {
+                      const lineNum = String(result.startLine + i).padStart(4, " ");
+                      return `${lineNum}: ${line}`;
+                    }).join("\n");
+                    const typeLabel = result.componentType || "component";
+                    codeEl.textContent = `// ${typeLabel} "${actionId}" (from ${result.location})\n${formatted}`;
+                    return;
+                  }
+
+                  // Only try .xs code-behind file if the .xmlui has codeBehind= attribute
+                  if (xmluiSource.includes('codeBehind=')) {
+                    const xsFilePath = filePath + ".xs";
+                    const xsSource = await fetchSourceRange(xsFilePath, 0, 999999);
+                    if (xsSource) {
+                      const result = findActionInSource(xsSource, actionId, xsFilePath.split("/").pop());
+                      if (result) {
+                        const lines = result.source.split("\n");
+                        const formatted = lines.map((line, i) => {
+                          const lineNum = String(result.startLine + i).padStart(4, " ");
+                          return `${lineNum}: ${line}`;
+                        }).join("\n");
+                        const typeLabel = result.componentType || "component";
+                        codeEl.textContent = `// ${typeLabel} "${actionId}" (from ${result.location})\n${formatted}`;
+                        return;
+                      }
+                    }
+                  }
+                }
+
+                // Not found
+                codeEl.textContent = `// Component "${actionId}" not found in:\n` +
+                  `//   - ${filePath || "(no source file)"}`;
+              } catch (err) {
+                codeEl.textContent = "Error loading source: " + err.message;
+              }
+            }
+          }
+        });
+      }
+
       // Wrap diff HTML in expander - open if small, closed if large (or force closed)
       function wrapDiffInExpander(diffHtml, summaryText = "Diff", forceCollapsed = false) {
         if (forceCollapsed) {
@@ -1522,6 +1578,27 @@
       }
 
       /**
+       * Extract Action references from code.
+       * Looks for patterns like: actionId.execute() or actionId.execute(args)
+       * Returns array of action IDs
+       */
+      function extractActionReferences(code) {
+        if (!code) return [];
+        const actions = [];
+        // Match identifier.execute( pattern - captures the identifier before .execute
+        const actionPattern = /([a-zA-Z_$][a-zA-Z0-9_$]*)\.execute\s*\(/g;
+        let match;
+        while ((match = actionPattern.exec(code)) !== null) {
+          const actionId = match[1];
+          // Exclude common non-action patterns
+          if (!actions.includes(actionId) && actionId !== 'this' && actionId !== 'self') {
+            actions.push(actionId);
+          }
+        }
+        return actions;
+      }
+
+      /**
        * Try to look up a function source.
        * Checks: 1) _xsFunctions registry, 2) window global, 3) source files
        * Returns { source: string, location: string } or null
@@ -1604,6 +1681,81 @@
           }
         }
         return null;
+      }
+
+      /**
+       * Find a component definition by id in XMLUI source.
+       * Searches for any component with id="actionId" (Action, APICall, etc.)
+       * Handles multi-line component definitions where id may be on a different line than the tag.
+       * Returns { source: string, location: string, startLine: number } or null
+       */
+      function findActionInSource(source, actionId, fileName) {
+        if (!source || !actionId) return null;
+
+        // First, find the id attribute in the source (handles multi-line tags)
+        // Match id="actionId" or id='actionId' or id={"actionId"}
+        const idPatterns = [
+          new RegExp(`id\\s*=\\s*["']${actionId}["']`),
+          new RegExp(`id\\s*=\\s*\\{["']${actionId}["']\\}`),
+        ];
+
+        const lines = source.split("\n");
+        let idLineNum = -1;
+
+        // Find the line containing the id attribute
+        for (let i = 0; i < lines.length; i++) {
+          for (const pattern of idPatterns) {
+            if (pattern.test(lines[i])) {
+              idLineNum = i;
+              break;
+            }
+          }
+          if (idLineNum >= 0) break;
+        }
+
+        if (idLineNum < 0) return null;
+
+        // Now search backwards to find the opening tag (< followed by ComponentName)
+        let startLine = idLineNum;
+        let componentType = null;
+
+        for (let i = idLineNum; i >= 0 && i >= idLineNum - 10; i--) {
+          // Match opening tag - allow for line ending right after tag name
+          const openTagMatch = lines[i].match(/<(\w+)(?:\s|>|$)/);
+          if (openTagMatch) {
+            startLine = i;
+            componentType = openTagMatch[1];
+            break;
+          }
+        }
+
+        if (!componentType) return null;
+
+        // Now find the end of this component (self-closing or closing tag)
+        let endLine = startLine;
+
+        // Check if self-closing - look for /> from startLine onwards
+        for (let j = startLine; j < lines.length && j < startLine + 20; j++) {
+          if (lines[j].includes("/>")) {
+            endLine = j;
+            break;
+          }
+          // Check for closing tag
+          const closeTagPattern = new RegExp(`</${componentType}>`);
+          if (closeTagPattern.test(lines[j])) {
+            endLine = j;
+            break;
+          }
+          endLine = j;
+        }
+
+        const componentLines = lines.slice(startLine, endLine + 1);
+        return {
+          source: componentLines.join("\n"),
+          location: `${fileName}:${startLine + 1}`,
+          startLine: startLine + 1,
+          componentType
+        };
       }
 
       function entryMatches(entry, textFilter) {
@@ -2731,6 +2883,19 @@
                   bodyHtml += `</details>`;
                 });
               }
+
+              // Extract and show Action source lookups for .execute() calls
+              const actionRefs = extractActionReferences(code);
+              if (actionRefs.length > 0) {
+                const sourceFile = evt.meta.resolvedFile || "";
+                actionRefs.forEach(actionId => {
+                  // Add a lazy-loaded Action source expander
+                  bodyHtml += `<details class="action-source-loader" data-action-id="${actionId}" data-source-file="${sourceFile}">`;
+                  bodyHtml += `<summary>↳ <code>&lt;Action id="${actionId}"&gt;</code> source</summary>`;
+                  bodyHtml += `<pre class="source-code">Click to load...</pre>`;
+                  bodyHtml += `</details>`;
+                });
+              }
             }
 
             // Add XMLUI source expander only when we don't already have handlerCode shown
@@ -3381,6 +3546,26 @@
                 pre.textContent = `// Error looking up ${funcName}: ${err.message}`;
               }
             });
+          });
+
+          // Wire up Action source loaders (for .execute() calls)
+          container.querySelectorAll("details.action-source-loader").forEach((details) => {
+            const actionId = details.dataset.actionId;
+            const sourceFile = details.dataset.sourceFile;
+            if (!actionId) return;
+
+            if (sourceFile) {
+              setupActionSourceLoader(details, sourceFile, actionId);
+            } else {
+              // No source file - show message on toggle
+              let loaded = false;
+              details.addEventListener("toggle", () => {
+                if (!details.open || loaded) return;
+                loaded = true;
+                const pre = details.querySelector("pre");
+                pre.textContent = `// Action "${actionId}" - no source file available to search`;
+              });
+            }
           });
         }
       }
@@ -4541,6 +4726,63 @@
           const funcs = extractFunctionCalls(code);
           assertEqual(funcs.length, 1);
           assertEqual(funcs[0], "onTreeSelectionDidChange");
+        });
+
+        test("Action Source Lookup", "extractActionReferences finds .execute() calls", () => {
+          const code = "updateFollowersBackground.execute()";
+          const actions = extractActionReferences(code);
+          assertEqual(actions.length, 1);
+          assertEqual(actions[0], "updateFollowersBackground");
+        });
+
+        test("Action Source Lookup", "extractActionReferences finds .execute() with args", () => {
+          const code = "myAction.execute({ foo: 'bar' })";
+          const actions = extractActionReferences(code);
+          assertEqual(actions.length, 1);
+          assertEqual(actions[0], "myAction");
+        });
+
+        test("Action Source Lookup", "extractActionReferences finds multiple actions", () => {
+          const code = "actionA.execute(); doSomething(); actionB.execute()";
+          const actions = extractActionReferences(code);
+          assertEqual(actions.length, 2);
+          assertTrue(actions.includes("actionA"));
+          assertTrue(actions.includes("actionB"));
+        });
+
+        test("Action Source Lookup", "extractActionReferences excludes this.execute", () => {
+          const code = "this.execute()";
+          const actions = extractActionReferences(code);
+          assertEqual(actions.length, 0);
+        });
+
+        test("Action Source Lookup", "findActionInSource finds Action component", () => {
+          const source = `
+            <App>
+              <Action id="myAction" onExecute="doSomething()" />
+              <Button onClick="myAction.execute()">Run</Button>
+            </App>
+          `;
+          const result = findActionInSource(source, "myAction", "test.xmlui");
+          assertTrue(result !== null, "Should find the Action");
+          assertContains(result.source, '<Action id="myAction"');
+          assertContains(result.source, 'onExecute="doSomething()"');
+        });
+
+        test("Action Source Lookup", "findActionInSource finds multi-line Action", () => {
+          const source = `
+            <App>
+              <Action
+                id="updateFollowers"
+                onExecute="fetchFollowers()"
+              />
+              <Timer onTick="updateFollowers.execute()" />
+            </App>
+          `;
+          const result = findActionInSource(source, "updateFollowers", "test.xmlui");
+          assertTrue(result !== null, "Should find the multi-line Action");
+          assertContains(result.source, 'id="updateFollowers"');
+          assertContains(result.source, 'onExecute="fetchFollowers()"');
         });
 
         test("Function Source Lookup", "findFunctionInSource finds function declaration", () => {
