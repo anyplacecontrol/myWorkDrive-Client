@@ -103,6 +103,36 @@
       button:hover { background: var(--color-bg-subtle); }
 
       /* =============================================================================
+         SEARCH
+         ============================================================================= */
+      span.search-highlight {
+        background-color: #fef3c7 !important;
+        color: #92400e !important;
+        border-radius: 2px;
+        padding: 1px 3px;
+        box-shadow: 0 0 0 1px #f59e0b;
+        display: inline;
+        position: relative;
+        z-index: 1;
+      }
+      span.search-highlight-current {
+        background-color: #f59e0b !important;
+        color: white !important;
+        box-shadow: 0 0 0 2px #d97706;
+      }
+      /* Ensure highlights show in pre/code blocks */
+      pre span.search-highlight,
+      code span.search-highlight {
+        background-color: #fef3c7 !important;
+        color: #92400e !important;
+      }
+      pre span.search-highlight-current,
+      code span.search-highlight-current {
+        background-color: #f59e0b !important;
+        color: white !important;
+      }
+
+      /* =============================================================================
          CONTENT AREA
          ============================================================================= */
       #diff { padding: var(--space-4); }
@@ -694,6 +724,11 @@
       <label><input type="radio" name="viewMode" id="viewPretty" checked /> pretty</label>
       <label><input type="radio" name="viewMode" id="viewRaw" /> raw</label>
       <span class="spacer"></span>
+      <input type="text" id="searchInput" placeholder="Search..." style="width: 200px;" />
+      <button id="searchPrev" title="Previous match">▲</button>
+      <button id="searchNext" title="Next match">▼</button>
+      <span id="searchCount" style="font-size: var(--font-sm); color: var(--color-text-muted); min-width: 60px;"></span>
+      <span class="spacer"></span>
       <button id="clear">Clear</button>
       <button id="test">Test</button>
       <span class="spacer"></span>
@@ -870,10 +905,15 @@
         }
       }
 
-      // Strip functions from objects (jsondiffpatch can't handle them)
+      // Convert functions to their source code for display (jsondiffpatch can't handle function objects)
+      // Multi-line functions are wrapped with markers for later conversion to <details> dropdowns
       function stripFunctions(obj, seen = new WeakSet()) {
         if (obj === null || typeof obj !== "object") return obj;
-        if (typeof obj === "function") return "[function]";
+        if (typeof obj === "function") {
+          const src = obj.toString();
+          // Wrap multi-line functions with markers for dropdown display
+          return src.includes("\n") ? `__FN__${src}__/FN__` : src;
+        }
         if (seen.has(obj)) return "[circular]";
         seen.add(obj);
         if (Array.isArray(obj)) {
@@ -883,7 +923,9 @@
         for (const key of Object.keys(obj)) {
           const val = obj[key];
           if (typeof val === "function") {
-            result[key] = "[function]";
+            const src = val.toString();
+            // Wrap multi-line functions with markers for dropdown display
+            result[key] = src.includes("\n") ? `__FN__${src}__/FN__` : src;
           } else {
             result[key] = stripFunctions(val, seen);
           }
@@ -1454,15 +1496,35 @@
         });
       }
 
+      // Convert __FN__...__/FN__ markers to collapsible <details> for multi-line function sources
+      function wrapFunctionSources(html) {
+        // Match the markers in the HTML - they may be HTML-escaped or plain text
+        return html.replace(/__FN__([\s\S]*?)__\/FN__/g, (match, source) => {
+          // Extract function name for summary (handle regular and arrow functions)
+          let funcName = "function";
+          const namedMatch = source.match(/^function\s+(\w+)/);
+          const arrowMatch = source.match(/^(?:const|let|var)\s+(\w+)\s*=/);
+          if (namedMatch) funcName = namedMatch[1];
+          else if (arrowMatch) funcName = arrowMatch[1];
+
+          // Escape HTML entities in the source
+          const escapedSource = source.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+          return `<details class="function-source"><summary><code>${funcName}()</code></summary><pre class="source-code">${escapedSource}</pre></details>`;
+        });
+      }
+
       // Wrap diff HTML in expander - open if small, closed if large (or force closed)
       function wrapDiffInExpander(diffHtml, summaryText = "Diff", forceCollapsed = false) {
+        // First, convert function source markers to dropdowns
+        const processedHtml = wrapFunctionSources(diffHtml);
+
         if (forceCollapsed) {
-          return `<details><summary>${summaryText}</summary><div>${diffHtml}</div></details>`;
+          return `<details><summary>${summaryText}</summary><div>${processedHtml}</div></details>`;
         }
-        const lineCount = (diffHtml.match(/\n/g) || []).length + 1;
+        const lineCount = (processedHtml.match(/\n/g) || []).length + 1;
         const isLarge = lineCount > 20;
         const openAttr = isLarge ? "" : " open";
-        return `<details${openAttr}><summary>${summaryText}</summary><div>${diffHtml}</div></details>`;
+        return `<details${openAttr}><summary>${summaryText}</summary><div>${processedHtml}</div></details>`;
       }
 
       function sortKey(entry) {
@@ -2760,6 +2822,16 @@
             }
 
             bodyHtml += `</div>`;
+          } else if (e.kind === "state:changes" && e.eventName && e.eventName.startsWith("AppState:")) {
+            // AppState change - add link to find initialValue source
+            const bucketName = e.eventName.replace("AppState:", "");
+            bodyHtml += `<div class="trace-event-header">[state:changes] <strong>AppState:${bucketName}</strong>${metaInline}</div>`;
+
+            // Add "View initialValue Source" expander
+            bodyHtml += `<details class="appstate-source-loader" data-bucket="${bucketName}">`;
+            bodyHtml += `<summary>View initialValue Source</summary>`;
+            bodyHtml += `<pre class="source-code">Click to load...</pre>`;
+            bodyHtml += `</details>`;
           } else if (e.kind === "component:vars:init" || e.kind === "component:vars:change") {
             // Component variable initialization/change - show var names and file
             const varNames = e.eventName || "unknown";
@@ -2896,6 +2968,23 @@
                   bodyHtml += `</details>`;
                 });
               }
+
+              // Extract and show AppState method lookups for stateId.value.methodName() calls
+              const appStateMethodPattern = /(\w+)\.value\.(\w+)\s*\(/g;
+              let appStateMatch;
+              const seenAppStateMethods = new Set();
+              while ((appStateMatch = appStateMethodPattern.exec(code)) !== null) {
+                const stateId = appStateMatch[1];
+                const methodName = appStateMatch[2];
+                const key = `${stateId}.${methodName}`;
+                if (!seenAppStateMethods.has(key)) {
+                  seenAppStateMethods.add(key);
+                  bodyHtml += `<details class="appstate-method-loader" data-state-id="${stateId}" data-method-name="${methodName}">`;
+                  bodyHtml += `<summary>↳ <code>${stateId}.value.${methodName}</code> source</summary>`;
+                  bodyHtml += `<pre class="source-code">Click to load...</pre>`;
+                  bodyHtml += `</details>`;
+                }
+              }
             }
 
             // Add XMLUI source expander only when we don't already have handlerCode shown
@@ -2925,7 +3014,9 @@
             }
           }
 
-          if (Array.isArray(e.diffJson) && e.diffJson.length && e.kind !== "component:vars:init" && e.kind !== "component:vars:change") {
+          // Skip diff for component:vars (handled separately) and AppState (AST not useful, source shown instead)
+          const isAppState = e.kind === "state:changes" && e.eventName && e.eventName.startsWith("AppState:");
+          if (Array.isArray(e.diffJson) && e.diffJson.length && e.kind !== "component:vars:init" && e.kind !== "component:vars:change" && !isAppState) {
             let usedArraySummary = false;
             if (e.diffJson.length === 1) {
               const only = e.diffJson[0];
@@ -3567,6 +3658,189 @@
               });
             }
           });
+
+          // Wire up AppState initialValue source loaders
+          container.querySelectorAll("details.appstate-source-loader").forEach((details) => {
+            const bucketName = details.dataset.bucket;
+            if (!bucketName) return;
+
+            let loaded = false;
+            details.addEventListener("toggle", async () => {
+              if (!details.open || loaded) return;
+              loaded = true;
+              const pre = details.querySelector("pre");
+              pre.textContent = "Searching for AppState definition...";
+
+              try {
+                // Search all source files for bucket="bucketName"
+                const sourceFiles = getSourceFileList();
+                let foundFunc = null;
+                let foundFile = null;
+
+                for (const file of sourceFiles) {
+                  const source = await fetchSourceRange(file, 0, 999999);
+                  if (!source) continue;
+
+                  // Look for bucket="bucketName" with initialValue
+                  const bucketPattern = new RegExp(`bucket\\s*=\\s*["']${bucketName}["'][^>]*initialValue\\s*=\\s*["']\\{\\s*(\\w+)\\s*\\(`, 'i');
+                  const match = source.match(bucketPattern);
+                  if (match) {
+                    foundFunc = match[1];
+                    foundFile = file;
+                    break;
+                  }
+                  // Also try reverse order: initialValue before bucket
+                  const reversePattern = new RegExp(`initialValue\\s*=\\s*["']\\{\\s*(\\w+)\\s*\\([^>]*bucket\\s*=\\s*["']${bucketName}["']`, 'i');
+                  const reverseMatch = source.match(reversePattern);
+                  if (reverseMatch) {
+                    foundFunc = reverseMatch[1];
+                    foundFile = file;
+                    break;
+                  }
+                }
+
+                if (foundFunc && foundFile) {
+                  // Now find the function source in .xmlui or .xmlui.xs file
+                  let funcSource = null;
+
+                  // Try .xmlui file first
+                  const xmluiSource = await fetchSourceRange(foundFile, 0, 999999);
+                  if (xmluiSource) {
+                    funcSource = findFunctionInSource(xmluiSource, foundFunc, foundFile.split("/").pop());
+                  }
+
+                  // Try .xmlui.xs code-behind file
+                  if (!funcSource) {
+                    const xsFile = foundFile + ".xs";
+                    const xsSource = await fetchSourceRange(xsFile, 0, 999999);
+                    if (xsSource) {
+                      funcSource = findFunctionInSource(xsSource, foundFunc, xsFile.split("/").pop());
+                    }
+                  }
+
+                  if (funcSource) {
+                    const formatted = funcSource.source.split("\n").map((line, i) =>
+                      `${String(funcSource.startLine + i).padStart(4)}  ${line}`
+                    ).join("\n");
+                    pre.textContent = `// ${foundFunc}() from ${funcSource.location}\n// AppState bucket="${bucketName}" in ${foundFile}\n\n${formatted}`;
+                  } else {
+                    pre.textContent = `// Found bucket="${bucketName}" in ${foundFile}\n// initialValue calls ${foundFunc}()\n// But could not locate function source`;
+                  }
+                } else {
+                  pre.textContent = `// Could not find AppState with bucket="${bucketName}"\n// Searched ${sourceFiles.length} source files`;
+                }
+              } catch (err) {
+                pre.textContent = `// Error searching for AppState source: ${err.message}`;
+              }
+            });
+          });
+
+          // Wire up AppState method source loaders (for stateId.value.methodName() calls)
+          container.querySelectorAll("details.appstate-method-loader").forEach((details) => {
+            const stateId = details.dataset.stateId;
+            const methodName = details.dataset.methodName;
+            if (!stateId || !methodName) return;
+
+            let loaded = false;
+            details.addEventListener("toggle", async () => {
+              if (!details.open || loaded) return;
+              loaded = true;
+              const pre = details.querySelector("pre");
+              pre.textContent = "Searching for AppState definition...";
+
+              try {
+                const sourceFiles = getSourceFileList();
+                let bucketName = null;
+                let foundFile = null;
+                let foundFunc = null;
+
+                // Step 1: Find <AppState id="stateId" to get the bucket name
+                for (const file of sourceFiles) {
+                  const source = await fetchSourceRange(file, 0, 999999);
+                  if (!source) continue;
+
+                  // Look for <AppState id="stateId" ... bucket="bucketName"
+                  const idPattern = new RegExp(`<AppState[^>]*\\bid\\s*=\\s*["']${stateId}["'][^>]*bucket\\s*=\\s*["'](\\w+)["']`, 'i');
+                  const match = source.match(idPattern);
+                  if (match) {
+                    bucketName = match[1];
+                    foundFile = file;
+                    break;
+                  }
+                  // Try reverse order
+                  const reversePattern = new RegExp(`<AppState[^>]*bucket\\s*=\\s*["'](\\w+)["'][^>]*\\bid\\s*=\\s*["']${stateId}["']`, 'i');
+                  const reverseMatch = source.match(reversePattern);
+                  if (reverseMatch) {
+                    bucketName = reverseMatch[1];
+                    foundFile = file;
+                    break;
+                  }
+                }
+
+                if (!bucketName) {
+                  pre.textContent = `// Could not find <AppState id="${stateId}" ...>\n// Searched ${sourceFiles.length} source files`;
+                  return;
+                }
+
+                // Step 2: Find the initialValue function for this bucket
+                for (const file of sourceFiles) {
+                  const source = await fetchSourceRange(file, 0, 999999);
+                  if (!source) continue;
+
+                  const bucketPattern = new RegExp(`bucket\\s*=\\s*["']${bucketName}["'][^>]*initialValue\\s*=\\s*["']\\{\\s*(\\w+)\\s*\\(`, 'i');
+                  const match = source.match(bucketPattern);
+                  if (match) {
+                    foundFunc = match[1];
+                    foundFile = file;
+                    break;
+                  }
+                  const reversePattern = new RegExp(`initialValue\\s*=\\s*["']\\{\\s*(\\w+)\\s*\\([^>]*bucket\\s*=\\s*["']${bucketName}["']`, 'i');
+                  const reverseMatch = source.match(reversePattern);
+                  if (reverseMatch) {
+                    foundFunc = reverseMatch[1];
+                    foundFile = file;
+                    break;
+                  }
+                }
+
+                if (foundFunc && foundFile) {
+                  // Step 3: Find the function source
+                  let funcSource = null;
+                  const xmluiSource = await fetchSourceRange(foundFile, 0, 999999);
+                  if (xmluiSource) {
+                    funcSource = findFunctionInSource(xmluiSource, foundFunc, foundFile.split("/").pop());
+                  }
+                  if (!funcSource) {
+                    const xsFile = foundFile + ".xs";
+                    const xsSource = await fetchSourceRange(xsFile, 0, 999999);
+                    if (xsSource) {
+                      funcSource = findFunctionInSource(xsSource, foundFunc, xsFile.split("/").pop());
+                    }
+                  }
+
+                  if (funcSource) {
+                    // Highlight the method name in the source
+                    const lines = funcSource.source.split("\n");
+                    const formatted = lines.map((line, i) => {
+                      const lineNum = String(funcSource.startLine + i).padStart(4);
+                      // Highlight lines containing the method name
+                      if (line.includes(`${methodName}:`) || line.includes(`${methodName} :`)) {
+                        return `${lineNum}► ${line}`;
+                      }
+                      return `${lineNum}  ${line}`;
+                    }).join("\n");
+                    pre.textContent = `// ${stateId}.value.${methodName}()\n// from ${foundFunc}() in ${funcSource.location}\n// AppState id="${stateId}" bucket="${bucketName}"\n\n${formatted}`;
+                  } else {
+                    pre.textContent = `// Found bucket="${bucketName}" for ${stateId}\n// initialValue calls ${foundFunc}()\n// But could not locate function source`;
+                  }
+                } else {
+                  pre.textContent = `// Found <AppState id="${stateId}" bucket="${bucketName}">\n// But could not find initialValue function`;
+                }
+              } catch (err) {
+                pre.textContent = `// Error: ${err.message}`;
+              }
+            });
+          });
         }
       }
 
@@ -3582,6 +3856,201 @@
         _requestIdCounter = 0; // Reset counter for fresh numbering
         render();
       });
+
+      // =============================================================================
+      // SEARCH FUNCTIONALITY
+      // =============================================================================
+
+      const searchState = {
+        query: "",
+        matches: [],
+        currentIndex: -1
+      };
+
+      function clearSearchHighlights() {
+        // Remove highlight spans and restore original text
+        document.querySelectorAll(".search-highlight").forEach(el => {
+          const parent = el.parentNode;
+          parent.replaceChild(document.createTextNode(el.textContent), el);
+          parent.normalize();
+        });
+        // Remove container outlines
+        document.querySelectorAll(".search-match-container").forEach(el => {
+          el.classList.remove("search-match-container");
+        });
+        searchState.matches = [];
+        searchState.currentIndex = -1;
+        updateSearchCount();
+      }
+
+      function updateSearchCount() {
+        const countEl = document.getElementById("searchCount");
+        if (searchState.matches.length === 0) {
+          countEl.textContent = searchState.query ? "0 matches" : "";
+        } else {
+          countEl.textContent = `${searchState.currentIndex + 1}/${searchState.matches.length}`;
+        }
+      }
+
+      function expandParentDetails(element) {
+        // Walk up the DOM and expand any collapsed ancestors
+        let parent = element.parentElement;
+        while (parent) {
+          // Handle <details> elements
+          if (parent.tagName === "DETAILS" && !parent.open) {
+            parent.open = true;
+          }
+          // Handle trace-group elements (custom expand/collapse)
+          if (parent.classList && parent.classList.contains("trace-group") && !parent.classList.contains("expanded")) {
+            parent.classList.add("expanded");
+            // Also rotate the arrow
+            const arrow = parent.querySelector(".trace-header .arrow");
+            if (arrow) arrow.style.transform = "rotate(90deg)";
+          }
+          // Handle trace-body that might be hidden
+          if (parent.classList && parent.classList.contains("trace-body")) {
+            parent.style.display = "block";
+          }
+          parent = parent.parentElement;
+        }
+      }
+
+      function highlightTextInNode(node, regex) {
+        const matches = [];
+        const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT, null, false);
+        const textNodes = [];
+
+        while (walker.nextNode()) {
+          // Skip text nodes inside script, style, input elements
+          const parent = walker.currentNode.parentElement;
+          if (parent && (parent.tagName === "SCRIPT" || parent.tagName === "STYLE" || parent.tagName === "INPUT")) {
+            continue;
+          }
+          textNodes.push(walker.currentNode);
+        }
+
+        textNodes.forEach(textNode => {
+          const text = textNode.textContent;
+          if (!regex.test(text)) return;
+
+          // Reset regex lastIndex
+          regex.lastIndex = 0;
+
+          const fragment = document.createDocumentFragment();
+          let lastIndex = 0;
+          let match;
+
+          while ((match = regex.exec(text)) !== null) {
+            // Add text before match
+            if (match.index > lastIndex) {
+              fragment.appendChild(document.createTextNode(text.slice(lastIndex, match.index)));
+            }
+
+            // Create highlight span
+            const span = document.createElement("span");
+            span.className = "search-highlight";
+            span.textContent = match[0];
+            fragment.appendChild(span);
+            matches.push(span);
+
+            lastIndex = regex.lastIndex;
+          }
+
+          // Add remaining text
+          if (lastIndex < text.length) {
+            fragment.appendChild(document.createTextNode(text.slice(lastIndex)));
+          }
+
+          textNode.parentNode.replaceChild(fragment, textNode);
+        });
+
+        return matches;
+      }
+
+      function performSearch(query) {
+        clearSearchHighlights();
+        searchState.query = query;
+
+        if (!query || query.length < 2) {
+          updateSearchCount();
+          return;
+        }
+
+        const diffEl = document.getElementById("diff");
+        const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        const regex = new RegExp(escapedQuery, "gi");
+
+        searchState.matches = highlightTextInNode(diffEl, regex);
+        searchState.currentIndex = searchState.matches.length > 0 ? 0 : -1;
+
+        if (searchState.matches.length > 0) {
+          navigateToMatch(0);
+        }
+
+        updateSearchCount();
+      }
+
+      function navigateToMatch(index) {
+        if (searchState.matches.length === 0) return;
+
+        // Remove current highlight
+        searchState.matches.forEach(m => m.classList.remove("search-highlight-current"));
+
+        // Wrap index
+        if (index < 0) index = searchState.matches.length - 1;
+        if (index >= searchState.matches.length) index = 0;
+
+        searchState.currentIndex = index;
+        const match = searchState.matches[index];
+
+        // Add current highlight
+        match.classList.add("search-highlight-current");
+
+        // Expand any collapsed parent details
+        expandParentDetails(match);
+
+        // Scroll into view
+        match.scrollIntoView({ behavior: "smooth", block: "center" });
+
+        updateSearchCount();
+      }
+
+      // Debounce search input
+      let searchTimeout = null;
+      document.getElementById("searchInput").addEventListener("input", (e) => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => performSearch(e.target.value), 200);
+      });
+
+      document.getElementById("searchInput").addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          if (e.shiftKey) {
+            navigateToMatch(searchState.currentIndex - 1);
+          } else {
+            navigateToMatch(searchState.currentIndex + 1);
+          }
+        } else if (e.key === "Escape") {
+          e.target.value = "";
+          clearSearchHighlights();
+        }
+      });
+
+      document.getElementById("searchPrev").addEventListener("click", () => {
+        navigateToMatch(searchState.currentIndex - 1);
+      });
+
+      document.getElementById("searchNext").addEventListener("click", () => {
+        navigateToMatch(searchState.currentIndex + 1);
+      });
+
+      // Clear search when view changes or data refreshes
+      const originalRender = render;
+      render = function() {
+        clearSearchHighlights();
+        document.getElementById("searchInput").value = "";
+        originalRender.apply(this, arguments);
+      };
 
       // =============================================================================
       // TEST FRAMEWORK
@@ -5100,6 +5569,158 @@
           const firstDiffs = stateChanges[0].diffJson;
           const loadingDiff = firstDiffs.find(d => d.path === "loading");
           assertEqual(loadingDiff.after, true, "First change should set loading: true");
+        });
+
+        // =========================================================================
+        // TEST SUITE: Search Functionality
+        // =========================================================================
+        test("Search", "expandParentDetails expands trace-group ancestors", () => {
+          // Create a mock DOM structure
+          const container = document.createElement("div");
+          container.innerHTML = `
+            <div class="trace-group">
+              <div class="trace-header"><span class="arrow">▶</span></div>
+              <div class="trace-body">
+                <span id="target">test content</span>
+              </div>
+            </div>
+          `;
+          document.body.appendChild(container);
+          const target = container.querySelector("#target");
+          expandParentDetails(target);
+          const traceGroup = container.querySelector(".trace-group");
+          assertTrue(traceGroup.classList.contains("expanded"), "Should expand trace-group");
+          document.body.removeChild(container);
+        });
+
+        test("Search", "expandParentDetails expands details elements", () => {
+          const container = document.createElement("div");
+          container.innerHTML = `
+            <details>
+              <summary>Click to expand</summary>
+              <div><span id="target">nested content</span></div>
+            </details>
+          `;
+          document.body.appendChild(container);
+          const target = container.querySelector("#target");
+          const details = container.querySelector("details");
+          assertTrue(!details.open, "Details should start closed");
+          expandParentDetails(target);
+          assertTrue(details.open, "Details should be open after expandParentDetails");
+          document.body.removeChild(container);
+        });
+
+        test("Search", "highlightTextInNode creates highlight spans", () => {
+          const container = document.createElement("div");
+          container.innerHTML = `<p>The quick brown fox jumps over the lazy dog</p>`;
+          document.body.appendChild(container);
+          const regex = /fox/gi;
+          const matches = highlightTextInNode(container, regex);
+          assertEqual(matches.length, 1, "Should find 1 match");
+          assertTrue(matches[0].classList.contains("search-highlight"), "Should have highlight class");
+          assertEqual(matches[0].textContent, "fox", "Should contain matched text");
+          document.body.removeChild(container);
+        });
+
+        test("Search", "highlightTextInNode finds multiple matches", () => {
+          const container = document.createElement("div");
+          container.innerHTML = `<p>foo bar foo baz foo</p>`;
+          document.body.appendChild(container);
+          const regex = /foo/gi;
+          const matches = highlightTextInNode(container, regex);
+          assertEqual(matches.length, 3, "Should find 3 matches");
+          document.body.removeChild(container);
+        });
+
+        // =========================================================================
+        // TEST SUITE: AppState Source Detection
+        // =========================================================================
+        test("AppState Source Detection", "detects AppState events by eventName prefix", () => {
+          const appStateEvent = { kind: "state:changes", eventName: "AppState:fileOperations" };
+          const dataSourceEvent = { kind: "state:changes", eventName: "DataSource:fileCatalog" };
+          const otherEvent = { kind: "state:changes", eventName: "someOther" };
+
+          const isAppState = (e) => e.kind === "state:changes" && e.eventName && e.eventName.startsWith("AppState:");
+          assertTrue(isAppState(appStateEvent), "Should detect AppState event");
+          assertTrue(!isAppState(dataSourceEvent), "Should not detect DataSource as AppState");
+          assertTrue(!isAppState(otherEvent), "Should not detect other events as AppState");
+        });
+
+        test("AppState Source Detection", "extracts bucket name from eventName", () => {
+          const eventName = "AppState:fileOperations";
+          const bucketName = eventName.replace("AppState:", "");
+          assertEqual(bucketName, "fileOperations");
+        });
+
+        // =========================================================================
+        // TEST SUITE: AppState Method Pattern Detection
+        // =========================================================================
+        test("AppState Method Pattern", "detects stateId.value.methodName pattern", () => {
+          const code = "fileOpsState.value.copyOrCut($props.selectedItems, 'copy')";
+          const pattern = /(\w+)\.value\.(\w+)\s*\(/g;
+          const match = pattern.exec(code);
+          assertTrue(match !== null, "Should match pattern");
+          assertEqual(match[1], "fileOpsState", "Should extract state ID");
+          assertEqual(match[2], "copyOrCut", "Should extract method name");
+        });
+
+        test("AppState Method Pattern", "finds multiple method calls", () => {
+          const code = "selectionState.value.clear(); fileOpsState.value.copyOrCut(items, 'cut')";
+          const pattern = /(\w+)\.value\.(\w+)\s*\(/g;
+          const matches = [];
+          let match;
+          while ((match = pattern.exec(code)) !== null) {
+            matches.push({ stateId: match[1], method: match[2] });
+          }
+          assertEqual(matches.length, 2, "Should find 2 method calls");
+          assertEqual(matches[0].stateId, "selectionState");
+          assertEqual(matches[0].method, "clear");
+          assertEqual(matches[1].stateId, "fileOpsState");
+          assertEqual(matches[1].method, "copyOrCut");
+        });
+
+        test("AppState Method Pattern", "does not match non-value property access", () => {
+          const code = "someObj.other.method()";
+          const pattern = /(\w+)\.value\.(\w+)\s*\(/g;
+          const match = pattern.exec(code);
+          assertEqual(match, null, "Should not match non-.value. access");
+        });
+
+        test("AppState Method Pattern", "handles whitespace variations", () => {
+          const code1 = "state.value.method()";
+          const code2 = "state.value.method ()";
+          const code3 = "state.value.method( )";
+          const pattern = /(\w+)\.value\.(\w+)\s*\(/g;
+
+          assertTrue(pattern.exec(code1) !== null, "Should match no space");
+          pattern.lastIndex = 0;
+          assertTrue(pattern.exec(code2) !== null, "Should match space before paren");
+          pattern.lastIndex = 0;
+          assertTrue(pattern.exec(code3) !== null, "Should match space in paren");
+        });
+
+        // =========================================================================
+        // TEST SUITE: AppState Rendering
+        // =========================================================================
+        test("AppState Rendering", "isAppState condition correctly identifies AppState events", () => {
+          const appStateEvent = { kind: "state:changes", eventName: "AppState:fileOperations", diffJson: [] };
+          const dataSourceEvent = { kind: "state:changes", eventName: "DataSource:catalog", diffJson: [] };
+          const varsEvent = { kind: "component:vars:init", eventName: "myVar", diffJson: [] };
+
+          // This is the exact condition used in the rendering code
+          const isAppState = (e) => e.kind === "state:changes" && e.eventName && e.eventName.startsWith("AppState:");
+
+          assertTrue(isAppState(appStateEvent), "Should identify AppState event");
+          assertTrue(!isAppState(dataSourceEvent), "Should not identify DataSource as AppState");
+          assertTrue(!isAppState(varsEvent), "Should not identify component:vars as AppState");
+        });
+
+        test("AppState Rendering", "AppState events included in startup trace", () => {
+          const events = TestFramework.scenarios.startup();
+          // startup scenario includes AppState:config
+          const appStateEvent = events.find(e => e.eventName && e.eventName.startsWith("AppState:"));
+          assertTrue(appStateEvent !== undefined, "Startup should include AppState event");
+          assertEqual(appStateEvent.eventName, "AppState:config");
         });
 
         // =========================================================================
