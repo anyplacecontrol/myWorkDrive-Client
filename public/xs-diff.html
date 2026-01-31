@@ -3676,12 +3676,13 @@
                 const sourceFiles = getSourceFileList();
                 let foundFunc = null;
                 let foundFile = null;
+                let foundInlineValue = null;
 
                 for (const file of sourceFiles) {
                   const source = await fetchSourceRange(file, 0, 999999);
                   if (!source) continue;
 
-                  // Look for bucket="bucketName" with initialValue
+                  // Look for bucket="bucketName" with initialValue function call
                   const bucketPattern = new RegExp(`bucket\\s*=\\s*["']${bucketName}["'][^>]*initialValue\\s*=\\s*["']\\{\\s*(\\w+)\\s*\\(`, 'i');
                   const match = source.match(bucketPattern);
                   if (match) {
@@ -3696,6 +3697,36 @@
                     foundFunc = reverseMatch[1];
                     foundFile = file;
                     break;
+                  }
+
+                  // Look for inline object literal: initialValue="{{...}}"
+                  const inlinePattern = new RegExp(`bucket\\s*=\\s*["']${bucketName}["']`, 'i');
+                  if (inlinePattern.test(source)) {
+                    // Find the AppState element and extract initialValue
+                    const lines = source.split('\n');
+                    for (let i = 0; i < lines.length; i++) {
+                      if (lines[i].includes(`bucket="${bucketName}"`) || lines[i].includes(`bucket='${bucketName}'`)) {
+                        // Look backwards and forwards for the full AppState element
+                        let startLine = i;
+                        let endLine = i;
+                        // Find start of AppState
+                        while (startLine > 0 && !lines[startLine].includes('<AppState')) startLine--;
+                        // Find end (closing > or />)
+                        while (endLine < lines.length && !lines[endLine].includes('/>') && !lines[endLine].includes('</AppState>')) endLine++;
+
+                        const appStateBlock = lines.slice(startLine, endLine + 1).join('\n');
+                        // Extract initialValue content
+                        const inlineMatch = appStateBlock.match(/initialValue\s*=\s*["']\{\{([\s\S]*?)\}\}["']/);
+                        if (inlineMatch) {
+                          foundInlineValue = inlineMatch[1].trim();
+                          foundFile = file;
+                          // Store line number for display
+                          foundInlineValue = { content: foundInlineValue, startLine: startLine + 1, file };
+                        }
+                        break;
+                      }
+                    }
+                    if (foundInlineValue) break;
                   }
                 }
 
@@ -3726,6 +3757,10 @@
                   } else {
                     pre.textContent = `// Found bucket="${bucketName}" in ${foundFile}\n// initialValue calls ${foundFunc}()\n// But could not locate function source`;
                   }
+                } else if (foundInlineValue) {
+                  // Show inline object literal
+                  const formatted = `{\n  ${foundInlineValue.content}\n}`;
+                  pre.textContent = `// AppState bucket="${bucketName}" in ${foundInlineValue.file}\n// Inline initialValue (line ${foundInlineValue.startLine}):\n\n${formatted}`;
                 } else {
                   pre.textContent = `// Could not find AppState with bucket="${bucketName}"\n// Searched ${sourceFiles.length} source files`;
                 }
