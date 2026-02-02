@@ -2,34 +2,44 @@
   This component represents a modal dialog that allows the user to rename an item.
 
   Methods:
-    open(item): Opens the rename modal dialog.
-                item: The item to be renamed (required).
+   - open(item): Opens the rename modal dialog.
+                 parameter 'item': The item to be renamed (file or folder).
 -->
 <Component
   name="RenameItemModal"
   method.open="(item) => renameModal.open(item)"
 >
+  <!--
+    This modal dialog allows the user to rename an item.
 
+    Parameter accessible via $param: is the item to be renamed (passed via the `open` method).
+  -->
   <ModalDialog id="renameModal" title="Rename">
+
+    <script>
+    function doRename(newName) {
+        renameModal.close();
+
+        const result = confirm({
+          title: `Confirm renaming ` +  $param.name + ` to ` + newName,
+          buttons: [
+            {
+              label: `Confirm`,
+              value: `confirm`,
+            },
+          ],
+        })
+        if (result !== `confirm`) return;
+
+        toast.success(`Rename successful`);
+    }
+    </script>
+
     <!-- The form that allows the user to rename the item. -->
     <Form
       id="renameForm"
       data="{{ name: $param.name }}"
-      onSubmit="(data) => {renameModal.close();
-
-      const result = confirm({
-        title: `Confirm renaming ` +  $param.name + ` to ` + data.name,
-        buttons: [
-          {
-            label: `Confirm`,
-            value: `confirm`,
-          },
-        ],
-      });
-      if (result !== `confirm`) return;
-
-      toast.success(`Rename successful`);
-      }"
+      onSubmit="(data) => doRename(data.name)"
     >
       <!-- The input field that allows the user to enter the new name. -->
       <FormItem
