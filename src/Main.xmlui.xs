@@ -4,6 +4,30 @@ function toastSuccess(message) {
   toast.success(message);
 }
 
+function handleFileOperation(payload) {
+  if (!payload || !payload.type) return;
+
+  switch(payload.type) {
+    case 'navigate':
+      navigateTo(payload.target);
+      break;
+    case 'remove':
+      remove(payload.items);
+      break;
+    case 'copy':
+      copyOrCut(payload.items, 'copy');
+      break;
+    case 'cut':
+      copyOrCut(payload.items, 'cut');
+      break;
+    case 'paste':
+      paste(payload.items);
+      break;
+    default:
+      console.warn('Unknown action type:', payload.type);
+  }
+}
+
 function navigateTo(pathOrItem) {
   // Handle both string paths and item objects
   if (!pathOrItem) return;
@@ -28,22 +52,22 @@ function navigateTo(pathOrItem) {
   }
 }
 
-function copyOrCut(utilities, items, action) {
+function copyOrCut(items, action) {
   const list = items || [];
   const names = list.map((i) => (i && i.name ? i.name : "")).join(", ");
-  utilities.toastSuccess((action === "copy" ? "Copied " : "Cut ") + names);
+  toastSuccess((action === "copy" ? "Copied " : "Cut ") + names);
 }
 
-function paste(utilities, items) {
+function paste(items) {
   const list = items || [];
   const names = list.map((i) => (i && i.name ? i.name : "")).join(", ");
-  utilities.toastSuccess("Pasted " + names + " item(s)");
+  toastSuccess("Pasted " + names + " item(s)");
 }
 
-function remove(utilities, items) {
+function remove(items) {
   const list = items || [];
   const names = list.map((i) => (i && i.name ? i.name : "")).join(", ");
-  utilities.toastSuccess("Deleted " + names + " item(s)");
+  toastSuccess("Deleted " + names + " item(s)");
 }
 
 function rename(utilities, refs, item) {
@@ -73,9 +97,6 @@ function getFileOperationsInitial() {
   const utilities = {
     toastSuccess,
     navigateTo,
-    copyOrCut,
-    paste,
-    remove,
     rename,
   };
 
@@ -85,10 +106,6 @@ function getFileOperationsInitial() {
   };
 
   return {
-    navigateTo: (pathOrItem) => utilities.navigateTo(pathOrItem),
-    copyOrCut: (items, action) => utilities.copyOrCut(utilities, items, action),
-    paste: (items) => utilities.paste(utilities, items),
-    remove: (items) => utilities.remove(utilities, items),
     rename: (item) => {
       utilities.rename(utilities, refs, item);
     },

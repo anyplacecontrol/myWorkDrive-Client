@@ -36,6 +36,7 @@
       <Toolbar
         drive="{defaultTo($queryParams.drive, currentDrive)}"
         folder="{defaultTo($queryParams.folder, '/')}"
+        onFileOperation="handleFileOperation"
       />
       <template name="profileMenuTemplate">
         <Stack padding="1rem">
@@ -67,11 +68,13 @@
         <FoldersTree
           drive="{defaultTo($queryParams.drive, currentDrive)}"
           when="{appState.value.isFoldersVisible}"
+          onFileOperation="handleFileOperation"
         />
         <FilesContainer
           id="filesContainer"
           drive="{defaultTo($queryParams.drive, currentDrive)}"
           folder="{defaultTo($queryParams.folder, '/')}"
+          onFileOperation="handleFileOperation"
         />
       </HSplitter>
 

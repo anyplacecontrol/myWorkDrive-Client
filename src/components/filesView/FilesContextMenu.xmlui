@@ -4,6 +4,8 @@
   Properties:
   - `selectedItems`: The list of currently selected files/folders (their paths)
 
+  Events:
+  - `fileOperation`: Universal event for all actions. Payload: { type: string, items: array, ... }
 -->
 
 <Component
@@ -86,18 +88,18 @@
   <MenuSeparator />
 
   <!-- Clipboard group -->
-  <MenuItem icon="cmd_copy" onClick="fileOpsState.value.copyOrCut($props.selectedItems, 'copy')">
+  <MenuItem icon="cmd_copy" onClick="emitEvent('fileOperation', { type: 'copy', items: $props.selectedItems })">
     Copy
   </MenuItem>
 
-  <MenuItem icon="cmd_cut" onClick="fileOpsState.value.copyOrCut($props.selectedItems, 'cut')">
+  <MenuItem icon="cmd_cut" onClick="emitEvent('fileOperation', { type: 'cut', items: $props.selectedItems })">
     Cut
   </MenuItem>
 
   <MenuItem
     icon="cmd_paste"
     when="{isSingleSelection && isAnyFolder}"
-    onClick="fileOpsState.value.paste($props.selectedItems)"
+    onClick="emitEvent('fileOperation', { type: 'paste', items: $props.selectedItems })"
   >
     Paste
   </MenuItem>
@@ -112,7 +114,7 @@
   >
     Rename
   </MenuItem>
-  <MenuItem icon="cmd_delete" onClick="fileOpsState.value.remove($props.selectedItems)">
+  <MenuItem icon="cmd_delete" onClick="emitEvent('fileOperation', { type: 'remove', items: $props.selectedItems })">
     Delete
   </MenuItem>
 

@@ -5,6 +5,8 @@
   - `drive`: The ID of the drive containing the files/folders
   - `folder`: The path of the folder to display
 
+  Events:
+  - `fileOperation`: Universal event for all actions. Payload: { type: string, target: ... }
 -->
 
 <Component name="FoldersTree">
@@ -48,7 +50,7 @@
             }]}"
 
       onLoadChildren="loadChildren"
-      onSelectionDidChange="{(event)=>fileOpsState.value.navigateTo(event.newNode)}"
+      onSelectionDidChange="(event) => emitEvent('fileOperation', { type: 'navigate', target: event.newNode })"
       onContextMenu="ev => {delay(300); contextMenu.openAt(ev, $item)}"
       dynamic="true"
     >
