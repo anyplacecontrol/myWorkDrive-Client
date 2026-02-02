@@ -34,6 +34,15 @@
           };
         },
 
+        // Get parent folder path (one level up)
+        getParentFolder: (folder) => {
+          if (!folder) return null;
+          // Remove trailing slashes and find parent folder
+          const normalized = folder.replace(/\/+$/g, '');
+          const lastSlash = normalized.lastIndexOf('/');
+          return lastSlash > 0 ? normalized.substring(0, lastSlash) : '/';
+        },
+
         // Build navigation URL for a folder path
         buildNavigationUrl: (folderPath) => {
           const queryParams = MwdHelpers.fileItemQueryParams({

@@ -8,22 +8,6 @@
 -->
 
 <Component name="Toolbar">
-  <script>
-    function navigateUp() {
-      const folder = $props.folder || '';
-      if (!folder) return;
-
-      // Remove trailing slashes and find parent folder
-      const normalized = folder.replace(/\/+$/g, '');
-      const lastSlash = normalized.lastIndexOf('/');
-      const parent = lastSlash > 0 ? normalized.substring(0, lastSlash) : '/';
-
-      // Build URL and navigate to parent folder
-      const targetUrl = MwdHelpers.buildNavigationUrl(parent);
-      Actions.navigate(targetUrl);
-    }
-  </script>
-
   <AppState
     id="appState"
     bucket="fileCatalogView"
@@ -94,7 +78,7 @@
           label="{mediaSize.largeScreen ? 'Up one level' : undefined}"
           icon="btn_up"
           variant="ghost"
-          onClick="() => navigateUp()"
+          onClick="() => fileOpsState.value.navigateTo(MwdHelpers.getParentFolder($props.folder))"
         />
         <Button
           label="{mediaSize.largeScreen ? 'Refresh' : undefined}"

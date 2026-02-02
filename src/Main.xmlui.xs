@@ -4,6 +4,30 @@ function toastSuccess(message) {
   toast.success(message);
 }
 
+function navigateTo(pathOrItem) {
+  // Handle both string paths and item objects
+  if (!pathOrItem) return;
+
+  let path;
+  if (typeof pathOrItem === "string") {
+    path = pathOrItem;
+  } else if (pathOrItem && typeof pathOrItem === "object") {
+    // If it's an object, check if it's a folder
+    if (pathOrItem.isFolder === false) return;
+    path =
+      typeof pathOrItem.path === "string" ? pathOrItem.path : pathOrItem.id;
+  } else {
+    return;
+  }
+
+  if (!path || typeof path !== "string") return;
+
+  const targetUrl = MwdHelpers.buildNavigationUrl(path);
+  if (targetUrl) {
+    Actions.navigate(targetUrl);
+  }
+}
+
 function copyOrCut(utilities, items, action) {
   const list = items || [];
   const names = list.map((i) => (i && i.name ? i.name : "")).join(", ");
@@ -46,9 +70,9 @@ function rename(utilities, refs, item) {
 //=================== FILE OPERATIONS STATE INITIALIZER ======================
 
 function getFileOperationsInitial() {
-
   const utilities = {
     toastSuccess,
+    navigateTo,
     copyOrCut,
     paste,
     remove,
@@ -58,9 +82,10 @@ function getFileOperationsInitial() {
   const refs = {
     renameModal,
     filesContainer,
-  }
+  };
 
   return {
+    navigateTo: (pathOrItem) => utilities.navigateTo(pathOrItem),
     copyOrCut: (items, action) => utilities.copyOrCut(utilities, items, action),
     paste: (items) => utilities.paste(utilities, items),
     remove: (items) => utilities.remove(utilities, items),

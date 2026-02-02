@@ -18,18 +18,9 @@
   <AppState id="fileOpsState" bucket="fileOperations" />
 
   <script>
-    function navigateToItem(item) {
-      try {
-        // Only navigate when the target is a folder. Ignore files.
-        if (!item || !item.isFolder) return;
-
-        if (window.MwdHelpers && window.MwdHelpers.buildNavigationUrl) {
-          const target = window.MwdHelpers.buildNavigationUrl(item.path || '');
-          Actions.navigate(target);
-          return;
-        }
-      } catch (e) {
-      }
+    function onItemDoubleClick(item) {
+      if (item.isFolder)
+        fileOpsState.value.navigateTo(item);
     }
 
     function reselectAndOpenMenu(ev, item) {
@@ -74,7 +65,7 @@
       appState.update({ sortBy, sortDirection: direction });
       return true;
     }"
-    onRowDoubleClick="(item)=>navigateToItem(item)"
+    onRowDoubleClick="(item)=>onItemDoubleClick(item)"
     hideSelectionCheckboxes="true"
     onCutAction="(row, selectedItems) => fileOpsState.value.copyOrCut(selectedItems, 'cut')"
     onCopyAction="(row, selectedItems) =>  fileOpsState.value.copyOrCut(selectedItems, 'copy')"
@@ -93,7 +84,6 @@
           testId="link-{$item.name}"
           gap="0"
           verticalAlignment="center"
-          onDoubleClick="() => navigateToItem($item)"
         >
           <Icon
             name="{ $item.isFolder ? 'folder' : getFileExtension($item.name) }"

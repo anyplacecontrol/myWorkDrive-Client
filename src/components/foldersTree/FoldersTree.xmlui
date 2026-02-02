@@ -9,6 +9,8 @@
 
 <Component name="FoldersTree">
 
+  <AppState id="fileOpsState" bucket="fileOperations" />
+
   <!-- Context menu for tree nodes -->
   <ContextMenu id="contextMenu" menuWidth="220px">
     <FoldersContextMenu selectedNode="{$context}" />
@@ -36,7 +38,6 @@
       autoLoadAfter="1000"
       testId="tree"
       dataFormat="hierarchy"
-      itemClickExpands
       overflowX="hidden"
       iconSize="$space-6"
       data="{ [{
@@ -45,8 +46,9 @@
               icon: `folder`,
               dynamic: true,
             }]}"
+
       onLoadChildren="loadChildren"
-      onSelectionDidChange="onTreeSelectionDidChange"
+      onSelectionDidChange="{(event)=>fileOpsState.value.navigateTo(event.newNode)}"
       onContextMenu="ev => {delay(300); contextMenu.openAt(ev, $item)}"
       dynamic="true"
     >
