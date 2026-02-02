@@ -905,10 +905,18 @@
         }
       }
 
+      // Escape HTML to prevent XSS and rendering issues in diff display
+      function escapeHtml(str) {
+        return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      }
+
       // Convert functions to their source code for display (jsondiffpatch can't handle function objects)
       // Multi-line functions are wrapped with markers for later conversion to <details> dropdowns
+      // Also escapes HTML in strings to prevent rendering issues (e.g., Mastodon toots with HTML content)
       function stripFunctions(obj, seen = new WeakSet()) {
-        if (obj === null || typeof obj !== "object") return obj;
+        if (obj === null) return obj;
+        if (typeof obj === "string") return escapeHtml(obj);
+        if (typeof obj !== "object") return obj;
         if (typeof obj === "function") {
           const src = obj.toString();
           // Wrap multi-line functions with markers for dropdown display
