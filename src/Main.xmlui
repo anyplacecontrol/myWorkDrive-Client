@@ -28,7 +28,6 @@
           sortBy: 'name', //controls sorting of files
           sortDirection: 'ascending', //controls sorting direction
           isFoldersVisible: true,  //controls visibility of folders Tree
-          fileCatalogDataRef: null  // reference to the fileCatalogData DataSource (used for refresh)
           }}"
   />
 
@@ -70,6 +69,7 @@
           when="{appState.value.isFoldersVisible}"
         />
         <FilesContainer
+          id="filesContainer"
           drive="{defaultTo($queryParams.drive, currentDrive)}"
           folder="{defaultTo($queryParams.folder, '/')}"
         />

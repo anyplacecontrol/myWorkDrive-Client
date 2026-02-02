@@ -22,8 +22,8 @@ function remove(utilities, items) {
   utilities.toastSuccess("Deleted " + names + " item(s)");
 }
 
-function rename(utilities, modals, item) {
-  modals.renameModal.open({
+function rename(utilities, refs, item) {
+  refs.renameModal.open({
     item,
     onSubmit: (newName) => {
       const result = confirm({
@@ -46,6 +46,7 @@ function rename(utilities, modals, item) {
 //=================== FILE OPERATIONS STATE INITIALIZER ======================
 
 function getFileOperationsInitial() {
+
   const utilities = {
     toastSuccess,
     copyOrCut,
@@ -54,8 +55,9 @@ function getFileOperationsInitial() {
     rename,
   };
 
-  const modals = {
-    renameModal
+  const refs = {
+    renameModal,
+    filesContainer,
   }
 
   return {
@@ -63,7 +65,8 @@ function getFileOperationsInitial() {
     paste: (items) => utilities.paste(utilities, items),
     remove: (items) => utilities.remove(utilities, items),
     rename: (item) => {
-      utilities.rename(utilities, modals, item);
+      utilities.rename(utilities, refs, item);
     },
+    refresh: () => refs.filesContainer.refresh(),
   };
 }

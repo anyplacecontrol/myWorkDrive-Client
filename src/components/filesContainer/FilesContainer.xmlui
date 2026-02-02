@@ -8,7 +8,9 @@
   The `fileCatalogData` DataSource fetches the list of files and folders in the
   folder specified by `drive` and `folder`.
 -->
-<Component name="FilesContainer">
+<Component name="FilesContainer"
+ method.refresh="() => fileCatalogData.refetch()"
+>
   <script>
     var sortedFiles = MwdHelpers.sortFiles(
       fileCatalogData.value,
@@ -27,11 +29,6 @@
         type: item.isFolder ? 'Folder' : 'File ' + getFileExtension(item.path)
       })
     )}"
-  />
-
-  <ChangeListener
-    listenTo="{fileCatalogData}"
-    onDidChange="{ appState.update({ fileCatalogDataRef: fileCatalogData })}"
   />
 
   <!--  sorting and view state here -->

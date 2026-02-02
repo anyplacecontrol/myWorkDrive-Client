@@ -8,7 +8,7 @@
 -->
 
 <Component name="Toolbar">
-<script>
+  <script>
     function navigateUp() {
       const folder = $props.folder || '';
       if (!folder) return;
@@ -28,12 +28,19 @@
     id="appState"
     bucket="fileCatalogView"
   />
+  <AppState id="fileOpsState" bucket="fileOperations" />
 
- <ModalDialog
+  <ModalDialog
     id="xsLogDialog"
     testId="InspectorDialog"
-    title="XMLUI Inspector">
-    <IFrame src="/xs-diff.html" testId="InspectorFrame" width="70vw" height="90vh" />
+    title="XMLUI Inspector"
+  >
+    <IFrame
+      src="/xs-diff.html"
+      testId="InspectorFrame"
+      width="70vw"
+      height="90vh"
+    />
   </ModalDialog>
 
   <Theme>
@@ -52,7 +59,13 @@
         space-4="1rem"
         textColor-Button="$fgColor-Toolbar"
       >
-      <Button label="Inspector" width="100px" testId="Inspector" variant="outlined" onClick="xsLogDialog.open()" />
+        <Button
+          label="Inspector"
+          width="100px"
+          testId="Inspector"
+          variant="outlined"
+          onClick="xsLogDialog.open()"
+        />
         <Theme
           textColor-Button="{ appState.value.isFoldersVisible ? '$fgColor-Toolbar--selected' : '$fgColor-Toolbar' }"
         >
@@ -87,12 +100,9 @@
           label="{mediaSize.largeScreen ? 'Refresh' : undefined}"
           icon="btn_refresh"
           variant="ghost"
-          onClick="() => {
-            if (appState.value.fileCatalogDataRef !== null) {
-              appState.value.fileCatalogDataRef.refetch();
-            }
-          }"
+          onClick="() => fileOpsState.value.refresh()"
         />
+
         <ContentSeparator
           orientation="vertical"
           thickness="1.5px"
