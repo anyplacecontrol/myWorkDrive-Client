@@ -6,11 +6,17 @@
   paddingVertical="0"
   var.currentDrive="{window.AppConfig.currentDrive}"
 >
-
+<!-- Global file operations state to access shared utility function -->
   <AppState
     id="fileOpsState"
     bucket="fileOperations"
-    initialValue="{getFileOperationsInitial()}"
+  />
+  <Timer
+    id="fileOpsAttachTimer"
+    initialDelay="1000"
+    once="true"
+    enabled="true"
+    onTick="fileOpsState.update(getFileOperationsInitial())"
   />
 
   <!-- Let's keep the sorting and view state here -->
@@ -72,6 +78,7 @@
     </Page>
   </Pages>
 
-  <ModalsAggregator />
+  <!-- Global modals -->
+  <RenameItemModal id="renameModal" />
 
 </App>

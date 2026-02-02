@@ -1,12 +1,16 @@
 <!--
   This component represents a modal dialog that allows the user to rename an item.
 
-  Properties:
-    initialValue: The initial value of the input field
+  Methods:
+    open(args): Opens the rename modal dialog.
+      args: {
+        item: The item to be renamed (required).
+        onSubmit: A callback function that is called when the user submits the new name (required).
+      }
 -->
 <Component
   name="RenameItemModal"
-  method.open="(item) => renameModal.open(item)"
+  method.open="(args) => renameModal.open(args)"
 >
 
   <ModalDialog id="renameModal" title="Rename">
@@ -14,8 +18,8 @@
     <!-- The form that allows the user to rename the item. -->
     <Form
       id="renameForm"
-      data="{{ name: $param.name }}"
-      onSubmit="(data) => {renameModal.close(); fileOpsState.value.rename($param, data.name);}"
+      data="{{ name: $param.item.name }}"
+      onSubmit="(data) => {renameModal.close(); $param.onSubmit(data.name);}"
     >
       <!-- The input field that allows the user to enter the new name. -->
       <FormItem
@@ -23,7 +27,7 @@
         autoFocus="true"
         required="true"
         onValidate="(value) => {
-          const original = $param.name.trim();
+          const original = $param.item.name.trim();
           if ((value && value.trim()) === original) {
             return {
               isValid: false,
