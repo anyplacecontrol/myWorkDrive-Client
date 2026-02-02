@@ -7,9 +7,12 @@
 
   Events:
   - `fileOperation`: Universal event for all actions. Payload: { type: string, target/items: ... }
+
+  Methods:
+  - `refresh`: Refresh the file list in the current folder
 -->
 <Component name="FilesContainer"
- method.refresh="() => fileCatalogData.refetch()"
+   method.refresh="() => fileCatalogData.refetch()"
 >
   <script>
     var sortedFiles = MwdHelpers.sortFiles(

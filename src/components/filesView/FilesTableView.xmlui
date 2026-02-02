@@ -18,7 +18,6 @@
   <!-- We obtain the view mode and sorting state from the AppState -->
   <AppState id="appState" bucket="fileCatalogView" />
   <AppState id="selectionState" bucket="fileCatalogSelection" />
-  <AppState id="fileOpsState" bucket="fileOperations" />
 
   <script>
     function onItemDoubleClick(item) {

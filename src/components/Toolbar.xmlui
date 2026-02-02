@@ -14,7 +14,6 @@
     id="appState"
     bucket="fileCatalogView"
   />
-  <AppState id="fileOpsState" bucket="fileOperations" />
 
   <ModalDialog
     id="xsLogDialog"
@@ -87,7 +86,7 @@
           label="{mediaSize.largeScreen ? 'Refresh' : undefined}"
           icon="btn_refresh"
           variant="ghost"
-          onClick="() => fileOpsState.value.refresh()"
+          onClick="(event) => emitEvent('fileOperation', { type: 'refresh' })"
         />
 
         <ContentSeparator

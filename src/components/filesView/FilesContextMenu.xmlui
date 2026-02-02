@@ -15,7 +15,6 @@
   var.isSingleFile="{$props.selectedItems.length === 1 && !$props.selectedItems[0].isFolder}"
 >
   <AppState id="selectionState" bucket="fileCatalogSelection" />
-  <AppState id="fileOpsState" bucket="fileOperations"/>
 
 
   <!-- Upload group -->
@@ -110,7 +109,7 @@
   <MenuItem
     icon="cmd_rename"
     when="{isSingleSelection}"
-    onClick="fileOpsState.value.rename($props.selectedItems[0])"
+    onClick="emitEvent('fileOperation', { type: 'rename', item: $props.selectedItems[0] })"
   >
     Rename
   </MenuItem>

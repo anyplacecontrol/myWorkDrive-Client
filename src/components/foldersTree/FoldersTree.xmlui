@@ -11,8 +11,6 @@
 
 <Component name="FoldersTree">
 
-  <AppState id="fileOpsState" bucket="fileOperations" />
-
   <!-- Context menu for tree nodes -->
   <ContextMenu id="contextMenu" menuWidth="220px">
     <FoldersContextMenu selectedNode="{$context}" />

@@ -1,8 +1,5 @@
 //=================== UTILITIES ==============================================
 
-function toastSuccess(message) {
-  toast.success(message);
-}
 
 function handleFileOperation(payload) {
   if (!payload || !payload.type) return;
@@ -23,10 +20,17 @@ function handleFileOperation(payload) {
     case 'paste':
       paste(payload.items);
       break;
+    case 'refresh':
+      filesContainer.refresh();
+      break;
+    case 'rename':
+      renameModal.open(payload.item);
+      break;
     default:
       console.warn('Unknown action type:', payload.type);
   }
 }
+
 
 function navigateTo(pathOrItem) {
   // Handle both string paths and item objects
@@ -53,62 +57,23 @@ function navigateTo(pathOrItem) {
 }
 
 function copyOrCut(items, action) {
+  //TODO: Add business logic for copy or cut
   const list = items || [];
   const names = list.map((i) => (i && i.name ? i.name : "")).join(", ");
-  toastSuccess((action === "copy" ? "Copied " : "Cut ") + names);
+  toast.success((action === "copy" ? "Copied " : "Cut ") + names);
 }
 
 function paste(items) {
+  //TODO: Add business logic for pasting items
   const list = items || [];
   const names = list.map((i) => (i && i.name ? i.name : "")).join(", ");
-  toastSuccess("Pasted " + names + " item(s)");
+  toast.success("Pasted " + names + " item(s)");
 }
 
 function remove(items) {
+  //TODO: Add business logic for removing items
   const list = items || [];
   const names = list.map((i) => (i && i.name ? i.name : "")).join(", ");
-  toastSuccess("Deleted " + names + " item(s)");
+  toast.success("Deleted " + names + " item(s)");
 }
 
-function rename(utilities, refs, item) {
-  refs.renameModal.open({
-    item,
-    onSubmit: (newName) => {
-      const result = confirm({
-        title: "Confirm renaming " + item.name + " to " + newName,
-        buttons: [
-          {
-            label: "Confirm",
-            value: "confirm",
-          },
-        ],
-      });
-      if (result !== "confirm") return;
-      if (!item) return;
-
-      utilities.toastSuccess("Rename successful");
-    },
-  });
-}
-
-//=================== FILE OPERATIONS STATE INITIALIZER ======================
-
-function getFileOperationsInitial() {
-  const utilities = {
-    toastSuccess,
-    navigateTo,
-    rename,
-  };
-
-  const refs = {
-    renameModal,
-    filesContainer,
-  };
-
-  return {
-    rename: (item) => {
-      utilities.rename(utilities, refs, item);
-    },
-    refresh: () => refs.filesContainer.refresh(),
-  };
-}
