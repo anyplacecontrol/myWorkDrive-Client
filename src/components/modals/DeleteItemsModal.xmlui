@@ -9,6 +9,8 @@
   name="DeleteItemsModal"
   method.open="(items) => deleteModal.open(items)"
   var.inProgress="{false}"
+  var.failedItems="{[]}"
+  var.itemsToDelete="{[]}"
 >
   <!--
     This modal dialog asks the user to confirm deletion of items.

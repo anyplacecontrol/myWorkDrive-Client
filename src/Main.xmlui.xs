@@ -21,6 +21,7 @@ function handleFileOperation(payload) {
       break;
     case "refresh":
       filesContainer.refresh();
+      window.postMessage({ type: 'collapseRoot' }, '*');
       break;
     case "rename":
       renameModal.open(payload.item);

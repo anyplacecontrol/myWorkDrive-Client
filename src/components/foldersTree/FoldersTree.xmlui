@@ -13,7 +13,7 @@
 <Component
   name="FoldersTree"
 >
-  <MessageListener onMessageReceived="handleRenameMessage">
+  <MessageListener onMessageReceived="handleMessage">
     <!-- Context menu for tree nodes -->
     <ContextMenu id="contextMenu" menuWidth="220px">
       <FoldersContextMenu selectedNode="{$context}" />
