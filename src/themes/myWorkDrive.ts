@@ -56,7 +56,9 @@ export const MyWorkDriveTheme: ThemeDefinition = {
 
     //Splitter
     "thickness-resizer-Splitter": "$space-1",
-    "backgroundColor-resizer-Splitter": "transparent"
+    "backgroundColor-resizer-Splitter": "transparent",
+
+    "borderRadius-ModalDialog": "$space-3",
   },
   resources: {
     //button icons

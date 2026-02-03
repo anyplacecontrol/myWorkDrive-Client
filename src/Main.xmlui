@@ -46,13 +46,14 @@
 
         <!-- Global rename modal component (opened via its component method) -->
 
-        <property name="splitterTemplate">
+        <template name="splitterTemplate">
           <Stack
             height="100%"
             borderLeft="1px solid $borderColor"
           />
-        </property>
+        </template>
         <FoldersTree
+          id="foldersTree"
           drive="{defaultTo($queryParams.drive, currentDrive)}"
           when="{appState.value.isFoldersVisible}"
           onFileOperation="handleFileOperation"
@@ -69,6 +70,6 @@
   </Pages>
 
   <!-- Global modals -->
-  <RenameItemModal id="renameModal" />
+  <RenameItemModal id="renameModal"/>
 
 </App>

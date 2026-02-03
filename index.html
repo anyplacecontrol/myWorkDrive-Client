@@ -66,6 +66,14 @@
             ? filePath?.split(".").pop()?.toLowerCase()
             : undefined,
 
+        // --- Get the file/folder name from the full path
+        getFileName: (filePath) => {
+          if (!filePath) return '';
+          const normalized = filePath.replace(/\/+$/g, '');
+          const lastSlash = normalized.lastIndexOf('/');
+          return lastSlash >= 0 ? normalized.substring(lastSlash + 1) : normalized;
+        },
+
         // --- Get the object property by path (e.g. "a.b[0].c")
         getPropertyByPath: (object, path) => {
           if (!object || typeof object !== "object") {

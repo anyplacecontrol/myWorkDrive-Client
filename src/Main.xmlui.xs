@@ -1,36 +1,34 @@
 //=================== UTILITIES ==============================================
 
-
 function handleFileOperation(payload) {
   if (!payload || !payload.type) return;
 
-  switch(payload.type) {
-    case 'navigate':
+  switch (payload.type) {
+    case "navigate":
       navigateTo(payload.target);
       break;
-    case 'remove':
+    case "remove":
       remove(payload.items);
       break;
-    case 'copy':
-      copyOrCut(payload.items, 'copy');
+    case "copy":
+      copyOrCut(payload.items, "copy");
       break;
-    case 'cut':
-      copyOrCut(payload.items, 'cut');
+    case "cut":
+      copyOrCut(payload.items, "cut");
       break;
-    case 'paste':
+    case "paste":
       paste(payload.items);
       break;
-    case 'refresh':
+    case "refresh":
       filesContainer.refresh();
       break;
-    case 'rename':
+    case "rename":
       renameModal.open(payload.item);
       break;
     default:
-      console.warn('Unknown action type:', payload.type);
+      console.warn("Unknown action type:", payload.type);
   }
 }
-
 
 function navigateTo(pathOrItem) {
   // Handle both string paths and item objects
@@ -42,8 +40,7 @@ function navigateTo(pathOrItem) {
   } else if (pathOrItem && typeof pathOrItem === "object") {
     // If it's an object, check if it's a folder
     if (pathOrItem.isFolder === false) return;
-    path =
-      typeof pathOrItem.path === "string" ? pathOrItem.path : pathOrItem.id;
+    path = typeof pathOrItem.path === "string" ? pathOrItem.path : pathOrItem.id;
   } else {
     return;
   }
@@ -76,4 +73,3 @@ function remove(items) {
   const names = list.map((i) => (i && i.name ? i.name : "")).join(", ");
   toast.success("Deleted " + names + " item(s)");
 }
-
