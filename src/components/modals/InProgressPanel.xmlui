@@ -1,0 +1,13 @@
+<!--
+  This component is used to show a spinner and message when an action is in progress. It is used in the RenameItemModal when the rename action is in progress.
+  Props:
+    - message: The message to show next to the spinner.
+-->
+<Component name="InProgressPanel">
+  <HStack verticalAlignment="center" >
+    <Spinner delay="0" />
+    <Text>
+      {$props.message}
+    </Text>
+  </HStack>
+</Component>

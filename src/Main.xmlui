@@ -71,5 +71,6 @@
 
   <!-- Global modals -->
   <RenameItemModal id="renameModal"/>
+  <DeleteItemsModal id="deleteModal"/>
 
 </App>

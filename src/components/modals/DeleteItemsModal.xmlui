@@ -1,0 +1,43 @@
+<!--
+  This component represents a modal dialog that allows the user to delete items.
+
+  Methods:
+   - open(items): Opens the delete confirmation modal dialog.
+                  parameter 'items': Array of items to be deleted (files or folders).
+-->
+<Component
+  name="DeleteItemsModal"
+  method.open="(items) => deleteModal.open(items)"
+>
+  <!--
+    This modal dialog asks the user to confirm deletion of items.
+
+    Parameter accessible via $param: is the array of items to be deleted (passed via the `open` method).
+  -->
+  <ModalDialog
+    id="deleteModal"
+    title=""
+    maxWidth="400px"
+  >
+
+      <VStack gap="$space-4">
+        <Icon name="circle_delete" width="$space-12" height="$space-12" />
+        <h2>
+          {($param && $param.length === 1)
+            ? `Are you sure you want to delete “${$param[0].name}” ${$param[0].isFolder ? 'folder' : 'file'}?`
+            : ($param && $param.length)
+              ? `Are you sure you want to delete ${$param.length} selected items?`
+              : 'Are you sure you want to delete these items?'}
+        </h2>
+
+        <Text>
+          It cannot be restored.
+        </Text>
+        <HStack gap="$space-3" justifyContent="flex-end">
+          <Button label="Cancel" size="lg" variant="outlined" onClick="deleteModal.close()" width="*" />
+          <Button label="Delete" size="lg" variant="solid" onClick="deleteModal.close()" width="*" themeColor="attention"/>
+        </HStack>
+      </VStack>
+
+  </ModalDialog>
+</Component>

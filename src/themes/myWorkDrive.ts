@@ -6,7 +6,10 @@ export const MyWorkDriveTheme: ThemeDefinition = {
   id: "myWorkDrive",
   themeVars: {
     "maxWidth-App": "$maxWidth-content",
+
+    //Modal Dialog
     "maxWidth-ModalDialog": "calc($maxWidth-content * 0.8)",
+    "borderRadius-ModalDialog": "$space-3",
 
     //General texts
     "textColor--disabled": "$color-secondary-400",
@@ -58,7 +61,9 @@ export const MyWorkDriveTheme: ThemeDefinition = {
     "thickness-resizer-Splitter": "$space-1",
     "backgroundColor-resizer-Splitter": "transparent",
 
-    "borderRadius-ModalDialog": "$space-3",
+    //Buttons
+    "borderColor-Button-primary-outlined": "$color-secondary-300",
+
   },
   resources: {
     //button icons
@@ -71,7 +76,8 @@ export const MyWorkDriveTheme: ThemeDefinition = {
     "icon.btn_view": "resources/btn-view.svg",
     "icon.btn-mediumIcons": "resources/btn-mediumIcons.svg",
     //icons
-    "icon.info_circle": "resources/info-circle.svg",
+    "icon.circle_info": "resources/circle-info.svg",
+    "icon.circle_delete": "resources/circle-delete.svg",
     //file type icons
     "icon.folder": "resources/folder.svg",
     "icon.emptyfolder": "resources/folder.svg",

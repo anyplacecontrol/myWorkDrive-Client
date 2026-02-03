@@ -13,7 +13,6 @@ function doRename({ path, newName, isFolder, conflictBehavior }) {
       conflictBehavior,
     },
   });
-
   toast.success(`"${item.name}" renamed to "${newName}"`);
   // Update tree node after successful rename
   if (isFolder) {
@@ -33,7 +32,8 @@ function onSubmitClick(newName) {
   const item = $param;
   const path = item.path;
   const isFolder = item.isFolder;
-  renameModal.close();
+  inProgress = true;
+
   try {
     doRename({
       path,
@@ -61,5 +61,8 @@ function onSubmitClick(newName) {
         });
       }
     }
+  } finally {
+    inProgress = false;
+    renameModal.close();
   }
 }

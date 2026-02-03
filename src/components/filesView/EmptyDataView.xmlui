@@ -10,7 +10,7 @@
     verticalAlignment="center"
     horizontalAlignment="center"
   >
-    <Icon name="info_circle" width="$space-12" height="$space-12" />
+    <Icon name="circle_info" width="$space-12" height="$space-12" />
     <Text fontWeight="600">
       This folder is empty.
     </Text>

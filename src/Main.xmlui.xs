@@ -8,7 +8,7 @@ function handleFileOperation(payload) {
       navigateTo(payload.target);
       break;
     case "remove":
-      remove(payload.items);
+      deleteModal.open(payload.items);
       break;
     case "copy":
       copyOrCut(payload.items, "copy");
@@ -65,11 +65,4 @@ function paste(items) {
   const list = items || [];
   const names = list.map((i) => (i && i.name ? i.name : "")).join(", ");
   toast.success("Pasted " + names + " item(s)");
-}
-
-function remove(items) {
-  //TODO: Add business logic for removing items
-  const list = items || [];
-  const names = list.map((i) => (i && i.name ? i.name : "")).join(", ");
-  toast.success("Deleted " + names + " item(s)");
 }
