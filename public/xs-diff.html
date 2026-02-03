@@ -905,10 +905,18 @@
         }
       }
 
+      // Escape HTML to prevent XSS and rendering issues in diff display
+      function escapeHtml(str) {
+        return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      }
+
       // Convert functions to their source code for display (jsondiffpatch can't handle function objects)
       // Multi-line functions are wrapped with markers for later conversion to <details> dropdowns
+      // Also escapes HTML in strings to prevent rendering issues (e.g., Mastodon toots with HTML content)
       function stripFunctions(obj, seen = new WeakSet()) {
-        if (obj === null || typeof obj !== "object") return obj;
+        if (obj === null) return obj;
+        if (typeof obj === "string") return escapeHtml(obj);
+        if (typeof obj !== "object") return obj;
         if (typeof obj === "function") {
           const src = obj.toString();
           // Wrap multi-line functions with markers for dropdown display
@@ -1485,9 +1493,27 @@
                   }
                 }
 
+                // Search all source files (component may be defined elsewhere)
+                const allFiles = getSourceFileList();
+                for (const file of allFiles) {
+                  if (file === filePath) continue; // Already checked
+                  const source = await fetchSourceRange(file, 0, 999999);
+                  if (!source) continue;
+                  const result = findActionInSource(source, actionId, file.split("/").pop());
+                  if (result) {
+                    const lines = result.source.split("\n");
+                    const formatted = lines.map((line, i) => {
+                      const lineNum = String(result.startLine + i).padStart(4, " ");
+                      return `${lineNum}: ${line}`;
+                    }).join("\n");
+                    const typeLabel = result.componentType || "component";
+                    codeEl.textContent = `// ${typeLabel} "${actionId}" (from ${result.location})\n${formatted}`;
+                    return;
+                  }
+                }
+
                 // Not found
-                codeEl.textContent = `// Component "${actionId}" not found in:\n` +
-                  `//   - ${filePath || "(no source file)"}`;
+                codeEl.textContent = `// Component "${actionId}" not found in any source file`;
               } catch (err) {
                 codeEl.textContent = "Error loading source: " + err.message;
               }
@@ -3613,7 +3639,27 @@
                   }
                 }
 
-                // 3. Fall back to _xsFunctions or window
+                // 3. Search all source files (function may be defined elsewhere)
+                if (!result) {
+                  const allFiles = getSourceFileList();
+                  for (const file of allFiles) {
+                    if (file === sourceFile) continue; // Already checked
+                    const source = await fetchSourceRange(file, 0, 999999);
+                    if (source) {
+                      result = findFunctionInSource(source, funcName, file.split("/").pop());
+                      if (result) break;
+                    }
+                    // Also try .xs file
+                    const xsFile = file + ".xs";
+                    const xsSource = await fetchSourceRange(xsFile, 0, 999999);
+                    if (xsSource) {
+                      result = findFunctionInSource(xsSource, funcName, xsFile.split("/").pop());
+                      if (result) break;
+                    }
+                  }
+                }
+
+                // 4. Fall back to _xsFunctions or window
                 if (!result) {
                   result = lookupFunctionSource(funcName);
                 }
@@ -3627,11 +3673,7 @@
                   }).join("\n");
                   pre.textContent = `// ${funcName} (from ${result.location})\n${formatted}`;
                 } else {
-                  pre.textContent = `// ${funcName} not found in:\n` +
-                    `//   - ${sourceFile || "(no source file)"}\n` +
-                    `//   - ${sourceFile ? sourceFile + ".xs" : "(no .xs file)"}\n` +
-                    `//   - window._xsFunctions\n` +
-                    `//   - window.${funcName}`;
+                  pre.textContent = `// ${funcName} not found in any source file, window._xsFunctions, or window.${funcName}`;
                 }
               } catch (err) {
                 pre.textContent = `// Error looking up ${funcName}: ${err.message}`;
@@ -3648,13 +3690,31 @@
             if (sourceFile) {
               setupActionSourceLoader(details, sourceFile, actionId);
             } else {
-              // No source file - show message on toggle
+              // No source file - search all files
               let loaded = false;
-              details.addEventListener("toggle", () => {
+              details.addEventListener("toggle", async () => {
                 if (!details.open || loaded) return;
                 loaded = true;
                 const pre = details.querySelector("pre");
-                pre.textContent = `// Action "${actionId}" - no source file available to search`;
+                pre.textContent = "Searching all source files...";
+
+                const allFiles = getSourceFileList();
+                for (const file of allFiles) {
+                  const source = await fetchSourceRange(file, 0, 999999);
+                  if (!source) continue;
+                  const result = findActionInSource(source, actionId, file.split("/").pop());
+                  if (result) {
+                    const lines = result.source.split("\n");
+                    const formatted = lines.map((line, i) => {
+                      const lineNum = String(result.startLine + i).padStart(4, " ");
+                      return `${lineNum}: ${line}`;
+                    }).join("\n");
+                    const typeLabel = result.componentType || "component";
+                    pre.textContent = `// ${typeLabel} "${actionId}" (from ${result.location})\n${formatted}`;
+                    return;
+                  }
+                }
+                pre.textContent = `// Action "${actionId}" not found in any source file`;
               });
             }
           });
