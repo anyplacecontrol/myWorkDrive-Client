@@ -21,6 +21,7 @@
     id="renameModal"
     title=""
     maxWidth="566px"
+    onClose="{()=> !inProgress}"
     var.itemType="{$param.isFolder ? 'folder' : 'file'}"
   >
 
