@@ -20,28 +20,11 @@ function loadChildren(node) {
   return mapFolderItemsToNodes(items);
 }
 
-function handleMessage(msg) {
-  if (!msg || !msg.type) return;
+// Message handling moved to BusHandler in markup
 
-  switch (msg.type) {
-    case "FoldersTree:renameFolder":
-      handleRenameTreeNode(msg);
-      break;
-    case "FoldersTree:deleteFolders":
-      handleDeleteFolders(msg);
-      break;
-    case "FoldersTree:collapseRoot":
-      handleCollapseRoot();
-      break;
-    default:
-      // Unknown message type, ignore
-      break;
-  }
-}
-
-function handleRenameTreeNode(msg) {
+function handleRenameTreeNode(payload) {
   // Get the old node to find its parent
-  const oldNode = tree.getNodeById(msg.oldPath);
+  const oldNode = tree.getNodeById(payload.oldPath);
   if (!oldNode) return;
 
   // Get parent ID
@@ -56,12 +39,13 @@ function handleRenameTreeNode(msg) {
   }
 }
 
-function handleDeleteFolders(msg) {
-  if (!msg.paths || !Array.isArray(msg.paths)) return;
+function handleDeleteFolders(payload) {
+  if (!payload || !payload.paths || !Array.isArray(payload.paths)) {
+    return;
+  }
 
-  msg.paths.forEach((path) => {
+  payload.paths.forEach((path) => {
     const node = tree.getNodeById(path);
-
     if (node) {
       tree.removeNode(path);
     }

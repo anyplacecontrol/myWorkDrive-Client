@@ -55,23 +55,11 @@ function onDeleteComplete() {
 
   // Notify FoldersTree to remove deleted folders from the tree
   if (deletedFolders.length > 0) {
-
-    window.postMessage(
-      {
-        type: "FoldersTree:deleteFolders",
-        paths: deletedPaths,
-      },
-      "*"
-    );
+    bus.dispatch('FoldersTree:delete', { paths: deletedPaths });
   }
 
   // Refresh files list after deletion
-  window.postMessage(
-    {
-      type: "FilesContainer:refresh"
-    },
-    "*"
-  );
+  bus.dispatch('FilesContainer:refresh');
 
   // Reset state
   failedItems = [];

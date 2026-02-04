@@ -17,23 +17,11 @@ function doRename({ path, newName, isFolder, conflictBehavior }) {
   toast.success(`"${item.name}" renamed to "${newName}"`);
   // Update tree node after successful rename
   if (isFolder) {
-    window.postMessage(
-      {
-        type: "FoldersTree:renameFolder",
-        oldPath: path,
-        newPath,
-      },
-      "*"
-    );
+    bus.dispatch('FoldersTree:rename', { oldPath: path, newPath });
   }
 
   // Refresh files list after rename
-  window.postMessage(
-    {
-      type: "FilesContainer:refresh"
-    },
-    "*"
-  );
+  bus.dispatch('FilesContainer:refresh');
 }
 
 // --- Handles the submit action from the rename modal

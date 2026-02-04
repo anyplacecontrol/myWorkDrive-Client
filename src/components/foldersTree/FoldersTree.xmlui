@@ -11,7 +11,9 @@
 -->
 
 <Component name="FoldersTree">
-  <MessageListener onMessageReceived="handleMessage" />
+  <BusHandler type="FoldersTree:rename" onCommand="(payload) => handleRenameTreeNode(payload)" />
+  <BusHandler type="FoldersTree:delete" onCommand="(payload) => handleDeleteFolders(payload)" />
+  <BusHandler type="FoldersTree:collapse" onCommand="() => handleCollapseRoot()" />
 
   <!-- Context menu for tree nodes -->
   <ContextMenu id="contextMenu" menuWidth="220px">

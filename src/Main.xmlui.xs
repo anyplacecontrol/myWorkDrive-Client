@@ -7,10 +7,6 @@ function handleFileOperation(payload) {
     case "navigate":
       navigateTo(payload.target);
       break;
-    case "refresh":
-      window.postMessage({ type: "FilesContainer:refresh" }, "*");
-      window.postMessage({ type: "FoldersTree:collapseRoot" }, "*");
-      break;
     case "rename":
       renameModal.open(payload.item);
       break;
