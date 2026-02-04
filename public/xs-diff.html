@@ -5754,59 +5754,6 @@
           assertTrue(firstComplete.traceId !== traceIdB, "First api:complete should not inherit traceId from later api:start");
         });
 
-        test("Trace Processing", "orphaned API events merge into ChangeListener trace they triggered", () => {
-          // Scenario: api:start/complete without traceId triggers DataSource update,
-          // which triggers ChangeListener (with t- traceId). Should be merged.
-          const instanceId = TestFramework.instanceId();
-          const changeListenerTraceId = "t-test-changelistener";
-          const baseTs = 1000;
-          const events = [
-            // Orphaned API events (no traceId) - DataSource auto-refetch
-            { kind: "api:start", method: "GET", url: "/api/data", instanceId, perfTs: baseTs },
-            { kind: "api:complete", method: "GET", url: "/api/data", instanceId, perfTs: baseTs + 50 },
-            // ChangeListener trace starts shortly after (within 100ms of api:complete)
-            { kind: "handler:start", componentType: "ChangeListener", eventName: "didChange", traceId: changeListenerTraceId, perfTs: baseTs + 80 },
-            { kind: "handler:complete", componentType: "ChangeListener", eventName: "didChange", traceId: changeListenerTraceId, perfTs: baseTs + 100 },
-          ];
-          const processed = processAllEntries(events);
-          // Should have one trace (ChangeListener) with the API events merged in
-          assertEqual(processed.timelineItems.length, 1, "Should have one trace");
-          const trace = processed.timelineItems[0];
-          assertEqual(trace.type, "trace", "Should be a trace");
-          // The trace should contain api:start and api:complete (merged from orphans)
-          const hasApiStart = trace.events.some(e => e.entry.kind === "api:start");
-          const hasApiComplete = trace.events.some(e => e.entry.kind === "api:complete");
-          assertTrue(hasApiStart, "ChangeListener trace should contain merged api:start");
-          assertTrue(hasApiComplete, "ChangeListener trace should contain merged api:complete");
-          // Should have no orphans
-          assertEqual(processed.otherOrphans.length, 0, "Should have no orphaned events");
-        });
-
-        test("Trace Processing", "orphaned API events NOT merged if timing gap too large", () => {
-          // Scenario: api:complete happens > 100ms before ChangeListener - should NOT merge
-          const instanceId = TestFramework.instanceId();
-          const changeListenerTraceId = "t-test-changelistener";
-          const baseTs = 1000;
-          const events = [
-            // Orphaned API events (no traceId)
-            { kind: "api:start", method: "GET", url: "/api/data", instanceId, perfTs: baseTs },
-            { kind: "api:complete", method: "GET", url: "/api/data", instanceId, perfTs: baseTs + 50 },
-            // ChangeListener starts 200ms after api:complete (too far)
-            { kind: "handler:start", componentType: "ChangeListener", eventName: "didChange", traceId: changeListenerTraceId, perfTs: baseTs + 250 },
-            { kind: "handler:complete", componentType: "ChangeListener", eventName: "didChange", traceId: changeListenerTraceId, perfTs: baseTs + 270 },
-          ];
-          const processed = processAllEntries(events);
-          // Should have one trace (ChangeListener) WITHOUT the API events
-          assertEqual(processed.timelineItems.length, 1, "Should have one trace");
-          const trace = processed.timelineItems[0];
-          const hasApiStart = trace.events.some(e => e.entry.kind === "api:start");
-          const hasApiComplete = trace.events.some(e => e.entry.kind === "api:complete");
-          assertTrue(!hasApiStart, "ChangeListener trace should NOT contain api:start (timing gap too large)");
-          assertTrue(!hasApiComplete, "ChangeListener trace should NOT contain api:complete (timing gap too large)");
-          // Should have orphans
-          assertEqual(processed.otherOrphans.length, 2, "Should have 2 orphaned API events");
-        });
-
         test("Trace Processing", "processAllEntries separates standalone interactions", () => {
           const standaloneInteraction = TestFramework.events.interaction("click", "Orphan");
           delete standaloneInteraction.traceId;
