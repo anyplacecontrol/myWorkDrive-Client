@@ -6,9 +6,6 @@
   - `loading`: Whether the data is currently loading
   - `height`: The height of the component
 
-  Events:
-  - `fileOperation`: Universal event for all actions. Payload: { type: string, target/items: ... }
-
   Note: We pass an AppState bucket through the `appState` property to keep the
   sorting state in sync with the parent component.
     - `sortBy`: The field to sort by
@@ -22,7 +19,7 @@
   <script>
     function onItemDoubleClick(item) {
       if (item.isFolder)
-        emitEvent('fileOperation', { type: 'navigate', target: item });
+        window.publishTopic('Main:navigate', { target: item });
     }
 
     function reselectAndOpenMenu(ev, item) {
@@ -44,7 +41,6 @@
   <ContextMenu id="contextMenu" menuWidth="240px">
     <FilesContextMenu
       selectedItems="{$context}"
-      onFileOperation="(payload) => emitEvent('fileOperation', payload)"
     />
   </ContextMenu>
 
@@ -72,10 +68,10 @@
     }"
     onRowDoubleClick="(item)=>onItemDoubleClick(item)"
     hideSelectionCheckboxes="true"
-    onCutAction="(row, selectedItems) => emitEvent('fileOperation', { type: 'cut', items: selectedItems })"
-    onCopyAction="(row, selectedItems) => emitEvent('fileOperation', { type: 'copy', items: selectedItems })"
-    onPasteAction="(row, selectedItems) => emitEvent('fileOperation', { type: 'paste', items: selectedItems })"
-    onDeleteAction="(row, selectedItems) => emitEvent('fileOperation', { type: 'remove', items: selectedItems })"
+    onCutAction="(row, selectedItems) => window.publishTopic('Main:cut', { items: selectedItems })"
+    onCopyAction="(row, selectedItems) => window.publishTopic('Main:copy', { items: selectedItems })"
+    onPasteAction="(row, selectedItems) => window.publishTopic('Main:paste', { items: selectedItems })"
+    onDeleteAction="(row, selectedItems) => window.publishTopic('Main:remove', { items: selectedItems })"
     canSort="true"
     onContextMenu="ev => {reselectAndOpenMenu(ev, $item)}"
   >

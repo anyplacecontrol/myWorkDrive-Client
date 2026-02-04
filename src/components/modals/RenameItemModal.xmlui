@@ -4,8 +4,6 @@
   Methods:
    - open(item): Opens the rename modal dialog.
                  parameter 'item': The item to be renamed (file or folder).
-  Events:
-   - `fileOperation`: Universal event for all actions. Payload: { type: string, items: array, ... }
 -->
 <Component
   name="RenameItemModal"

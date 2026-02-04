@@ -4,9 +4,6 @@
   Properties:
   - `drive`: The ID of the drive containing the files/folders
   - `folder`: The path of the folder to display
-
-  Events:
-  - `fileOperation`: Universal event for all actions. Payload: { type: string, target: ... }
 -->
 
 <Component name="Toolbar">
@@ -79,7 +76,7 @@
           label="{mediaSize.largeScreen ? 'Up one level' : undefined}"
           icon="btn_up"
           variant="ghost"
-          onClick="(event) => emitEvent('fileOperation', { type: 'navigate', target: MwdHelpers.getParentFolder($props.folder) })"
+          onClick="(event) => window.publishTopic('Main:navigate', { target: MwdHelpers.getParentFolder($props.folder) })"
         />
 
         <Button

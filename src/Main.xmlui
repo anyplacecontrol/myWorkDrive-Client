@@ -6,6 +6,9 @@
   paddingVertical="0"
   var.currentDrive="{window.AppConfig.currentDrive}"
 >
+  <!-- Listen for file operation commands via window.postMessage -->
+  <MessageListener onMessageReceived="(msg) => handleFileOperation(msg)"/>
+
   <!-- Let's keep the sorting and view state here -->
   <AppState
     id="appState"
@@ -23,7 +26,6 @@
       <Toolbar
         drive="{defaultTo($queryParams.drive, currentDrive)}"
         folder="{defaultTo($queryParams.folder, '/')}"
-        onFileOperation="handleFileOperation"
       />
       <template name="profileMenuTemplate">
         <Stack padding="1rem">
@@ -54,13 +56,11 @@
           id="foldersTree"
           drive="{defaultTo($queryParams.drive, currentDrive)}"
           when="{appState.value.isFoldersVisible}"
-          onFileOperation="handleFileOperation"
         />
         <FilesContainer
           id="filesContainer"
           drive="{defaultTo($queryParams.drive, currentDrive)}"
           folder="{defaultTo($queryParams.folder, '/')}"
-          onFileOperation="handleFileOperation"
         />
       </HSplitter>
 

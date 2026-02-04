@@ -1,30 +1,33 @@
 //=================== UTILITIES ==============================================
 
-function handleFileOperation(payload) {
-  if (!payload || !payload.type) return;
+function handleFileOperation(message) {
+  if (!message || !message.type) return;
 
-  switch (payload.type) {
-    case "navigate":
-      navigateTo(payload.target);
-      break;
-    case "rename":
-      renameModal.open(payload.item);
-      break;
-    case "remove":
-      deleteModal.open(payload.items);
-      break;
+  const data = message.payload || {};
 
-    case "copy":
-      copyOrCut(payload.items, "copy");
+
+  // Prefer matching the full topic string per request (analyze full strings)
+  switch (message.type) {
+    case 'Main:navigate':
+      navigateTo(data.target);
       break;
-    case "cut":
-      copyOrCut(payload.items, "cut");
+    case 'Main:rename':
+      renameModal.open(data.item);
       break;
-    case "paste":
-      paste(payload.items);
+    case 'Main:remove':
+      deleteModal.open(data.items);
+      break;
+    case 'Main:copy':
+      copyOrCut(data.items, 'copy');
+      break;
+    case 'Main:cut':
+      copyOrCut(data.items, 'cut');
+      break;
+    case 'Main:paste':
+      paste(data.items);
       break;
     default:
-      console.warn("Unknown action type:", payload.type);
+      console.warn('Unknown action topic:', fullType);
   }
 }
 

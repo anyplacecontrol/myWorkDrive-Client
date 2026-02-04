@@ -129,7 +129,9 @@
       // Global event bus using window.postMessage
       // Source: https://docs.xmlui.org/components/MessageListener
       window.publishTopic = (type, payload) => {
-        window.postMessage({ type, payload }, '*');
+        // Deep clone to strip Proxy wrappers and make data structured-clonable
+        const cloneablePayload = payload ? JSON.parse(JSON.stringify(payload)) : undefined;
+        window.postMessage({ type, payload: cloneablePayload }, '*');
       };
     </script>
   </body>

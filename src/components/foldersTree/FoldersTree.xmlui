@@ -53,7 +53,7 @@
               dynamic: true,
             }]}"
       onLoadChildren="loadChildren"
-      onSelectionDidChange="(event) => emitEvent('fileOperation', { type: 'navigate', target: event.newNode })"
+      onSelectionDidChange="(event) => window.publishTopic('Main:navigate', { target: event.newNode })"
       onContextMenu="ev => {delay(300); contextMenu.openAt(ev, $item)}"
       dynamic="true"
     >
