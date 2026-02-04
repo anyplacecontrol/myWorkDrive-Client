@@ -11,12 +11,7 @@ function handleFileOperation(message) {
     case 'Main:navigate':
       navigateTo(data.target);
       break;
-    case 'Main:rename':
-      renameModal.open(data.item);
-      break;
-    case 'Main:remove':
-      deleteModal.open(data.items);
-      break;
+
     case 'Main:copy':
       copyOrCut(data.items, 'copy');
       break;

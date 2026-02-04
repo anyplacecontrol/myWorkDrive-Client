@@ -1,15 +1,16 @@
 <!--
   This component represents a modal dialog that allows the user to rename an item.
-
-  Methods:
-   - open(item): Opens the rename modal dialog.
-                 parameter 'item': The item to be renamed (file or folder).
 -->
 <Component
   name="RenameItemModal"
-  method.open="(item) => renameModal.open(item)"
   var.inProgress="{false}"
 >
+  <MessageListener onMessageReceived="(msg) => {
+    if (msg && msg.type === 'RenameItemModal:open') {
+      const data = msg.payload || {};
+      renameModal.open(data.item);
+    }
+  }"/>
   <!--
     This modal dialog allows the user to rename an item.
 

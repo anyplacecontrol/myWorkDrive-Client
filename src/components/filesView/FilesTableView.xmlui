@@ -71,7 +71,7 @@
     onCutAction="(row, selectedItems) => window.publishTopic('Main:cut', { items: selectedItems })"
     onCopyAction="(row, selectedItems) => window.publishTopic('Main:copy', { items: selectedItems })"
     onPasteAction="(row, selectedItems) => window.publishTopic('Main:paste', { items: selectedItems })"
-    onDeleteAction="(row, selectedItems) => window.publishTopic('Main:remove', { items: selectedItems })"
+    onDeleteAction="(row, selectedItems) => window.publishTopic('DeleteItemsModal:open', { items: selectedItems })"
     canSort="true"
     onContextMenu="ev => {reselectAndOpenMenu(ev, $item)}"
   >

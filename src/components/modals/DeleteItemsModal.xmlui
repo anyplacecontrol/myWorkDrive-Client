@@ -1,17 +1,18 @@
 <!--
   This component represents a modal dialog that allows the user to delete items.
-
-  Methods:
-   - open(items): Opens the delete confirmation modal dialog.
-                  parameter 'items': Array of items to be deleted (files or folders).
 -->
 <Component
   name="DeleteItemsModal"
-  method.open="(items) => deleteModal.open(items)"
   var.inProgress="{false}"
-  var.failedItems="{[]}"
-  var.itemsToDelete="{[]}"
+  var.failedItems="{[] }"
+  var.itemsToDelete="{[] }"
 >
+  <MessageListener onMessageReceived="(msg) => {
+    if (msg && msg.type === 'DeleteItemsModal:open') {
+      const data = msg.payload || {};
+      deleteModal.open(data.items || []);
+    }
+  }"/>
   <!--
     This modal dialog asks the user to confirm deletion of items.
 

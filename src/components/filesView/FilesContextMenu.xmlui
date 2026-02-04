@@ -106,11 +106,11 @@
   <MenuItem
     icon="cmd_rename"
     when="{isSingleSelection}"
-    onClick="window.publishTopic('Main:rename', { item: $props.selectedItems[0] })"
+    onClick="window.publishTopic('RenameItemModal:open', { item: $props.selectedItems[0] })"
   >
     Rename
   </MenuItem>
-  <MenuItem icon="cmd_delete" onClick="window.publishTopic('Main:remove', { items: $props.selectedItems })">
+  <MenuItem icon="cmd_delete" onClick="window.publishTopic('DeleteItemsModal:open', { items: $props.selectedItems })">
     Delete
   </MenuItem>
 
