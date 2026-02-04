@@ -8,21 +8,20 @@
   Events:
   - `fileOperation`: Universal event for all actions. Payload: { type: string, target/items: ... }
 
-  Methods:
-  - `refresh`: Refresh the file list in the current folder
 -->
 <Component name="FilesContainer"
-   method.refresh="() => fileCatalogData.refetch()"
 >
-  <script>
-    var sortedFiles = MwdHelpers.sortFiles(
-      fileCatalogData.value,
-      appState.value.sortBy,
-      appState.value.sortDirection);
-     var isAnyFiles = (sortedFiles.length > 0 && !fileCatalogData.loading);
-  </script>
+  <MessageListener onMessageReceived="handleMessage"/>
 
-  <!-- Get the content of the folder (ignore the file property) -->
+    <script>
+      var sortedFiles = MwdHelpers.sortFiles(
+        fileCatalogData.value,
+        appState.value.sortBy,
+        appState.value.sortDirection);
+       var isAnyFiles = (sortedFiles.length > 0 && !fileCatalogData.loading);
+    </script>
+
+    <!-- Get the content of the folder (ignore the file property) -->
   <DataSource
     id="fileCatalogData"
     url="/ListFolder?path={$props.drive}{defaultTo($props.folder, '/')}"

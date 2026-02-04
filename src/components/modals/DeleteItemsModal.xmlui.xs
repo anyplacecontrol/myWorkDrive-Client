@@ -23,6 +23,7 @@ function onDeleteQueuedItem(eventArgs) {
     queryParams: {
       path: item.path,
     },
+    invalidates: [],
   });
 }
 
@@ -57,12 +58,20 @@ function onDeleteComplete() {
 
     window.postMessage(
       {
-        type: "deleteFolders",
+        type: "FoldersTree:deleteFolders",
         paths: deletedPaths,
       },
       "*"
     );
   }
+
+  // Refresh files list after deletion
+  window.postMessage(
+    {
+      type: "FilesContainer:refresh"
+    },
+    "*"
+  );
 
   // Reset state
   failedItems = [];

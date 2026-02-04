@@ -10,59 +10,58 @@
     Payload: { oldPath: string, newPath: string }
 -->
 
-<Component
-  name="FoldersTree"
->
-  <MessageListener onMessageReceived="handleMessage">
-    <!-- Context menu for tree nodes -->
-    <ContextMenu id="contextMenu" menuWidth="220px">
-      <FoldersContextMenu selectedNode="{$context}" />
-    </ContextMenu>
+<Component name="FoldersTree">
+  <MessageListener onMessageReceived="handleMessage" />
 
-    <!-- Panel with fixed toolbar (46px) and scrollable tree area below -->
-    <VStack
-      height="100%"
-      overflow="hidden"
-      paddingTop="$space-5"
-      paddingLeft="$space-4"
-      paddingRight="$space-2"
-      gap="$space-1"
-    >
+  <!-- Context menu for tree nodes -->
+  <ContextMenu id="contextMenu" menuWidth="220px">
+    <FoldersContextMenu selectedNode="{$context}" />
+  </ContextMenu>
 
-      <Text color="$textColor--disabled" paddingLeft="$space-1">
-        My Folders
-      </Text>
-      <!-- Tree container: fills remaining space and scrolls independently
+  <!-- Panel with fixed toolbar (46px) and scrollable tree area below -->
+  <VStack
+    height="100%"
+    overflow="hidden"
+    paddingTop="$space-5"
+    paddingLeft="$space-4"
+    paddingRight="$space-2"
+    gap="$space-1"
+  >
+
+    <Text color="$textColor--disabled" paddingLeft="$space-1">
+      My Folders
+    </Text>
+    <!-- Tree container: fills remaining space and scrolls independently
     onNodeDidCollapse="onNodeCollapse"
     -->
-      <Tree
-        id="tree"
-        spinnerDelay="250"
-        autoLoadAfter="0"
-        testId="tree"
-        dataFormat="hierarchy"
-        overflowX="hidden"
-        iconSize="$space-6"
-        data="{ [{
+    <Tree
+      id="tree"
+      spinnerDelay="250"
+      autoLoadAfter="0"
+      testId="tree"
+      dataFormat="hierarchy"
+      overflowX="hidden"
+      iconSize="$space-6"
+      data="{ [{
               id: $props.drive + '/',
               name: `Root`,
               icon: `folder`,
               dynamic: true,
             }]}"
-        onLoadChildren="loadChildren"
-        onSelectionDidChange="(event) => emitEvent('fileOperation', { type: 'navigate', target: event.newNode })"
-        onContextMenu="ev => {delay(300); contextMenu.openAt(ev, $item)}"
-        dynamic="true"
-      >
-        <template name="itemTemplate">
-          <HStack verticalAlignment="center" gap="$space-2" height="$space-10">
-            <Icon when="{$item.icon}" name="{$item.icon}" height="$space-5" />
-            <Text value="{$item.name}" />
-          </HStack>
+      onLoadChildren="loadChildren"
+      onSelectionDidChange="(event) => emitEvent('fileOperation', { type: 'navigate', target: event.newNode })"
+      onContextMenu="ev => {delay(300); contextMenu.openAt(ev, $item)}"
+      dynamic="true"
+    >
+      <template name="itemTemplate">
+        <HStack verticalAlignment="center" gap="$space-2" height="$space-10">
+          <Icon when="{$item.icon}" name="{$item.icon}" height="$space-5" />
+          <Text value="{$item.name}" />
+        </HStack>
 
-        </template>
-      </Tree>
+      </template>
+    </Tree>
 
-    </VStack>
-  </MessageListener>
+  </VStack>
+
 </Component>

@@ -7,9 +7,17 @@ function handleFileOperation(payload) {
     case "navigate":
       navigateTo(payload.target);
       break;
+    case "refresh":
+      window.postMessage({ type: "FilesContainer:refresh" }, "*");
+      window.postMessage({ type: "FoldersTree:collapseRoot" }, "*");
+      break;
+    case "rename":
+      renameModal.open(payload.item);
+      break;
     case "remove":
       deleteModal.open(payload.items);
       break;
+
     case "copy":
       copyOrCut(payload.items, "copy");
       break;
@@ -18,13 +26,6 @@ function handleFileOperation(payload) {
       break;
     case "paste":
       paste(payload.items);
-      break;
-    case "refresh":
-      filesContainer.refresh();
-      window.postMessage({ type: 'collapseRoot' }, '*');
-      break;
-    case "rename":
-      renameModal.open(payload.item);
       break;
     default:
       console.warn("Unknown action type:", payload.type);

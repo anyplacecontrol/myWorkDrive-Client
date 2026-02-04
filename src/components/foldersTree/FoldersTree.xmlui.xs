@@ -13,6 +13,7 @@ function loadChildren(node) {
   const response = Actions.callApi({
     method: "get",
     url: `/ListFolder?path=${node.id}`,
+    invalidates: [],
   });
 
   const items = Array.isArray(response) ? response : [];
@@ -23,13 +24,13 @@ function handleMessage(msg) {
   if (!msg || !msg.type) return;
 
   switch (msg.type) {
-    case "renameTreeNode":
+    case "FoldersTree:renameFolder":
       handleRenameTreeNode(msg);
       break;
-    case "deleteFolders":
+    case "FoldersTree:deleteFolders":
       handleDeleteFolders(msg);
       break;
-    case "collapseRoot":
+    case "FoldersTree:collapseRoot":
       handleCollapseRoot();
       break;
     default:

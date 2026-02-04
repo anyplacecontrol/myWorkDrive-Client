@@ -44,8 +44,6 @@
     <Page url="/my-files" padding="0">
       <HSplitter initialPrimarySize="260px">
 
-        <!-- Global rename modal component (opened via its component method) -->
-
         <template name="splitterTemplate">
           <Stack
             height="100%"
