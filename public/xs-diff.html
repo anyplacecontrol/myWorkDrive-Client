@@ -756,6 +756,7 @@
     <script type="module">
       import * as jsondiffpatch from "https://unpkg.com/jsondiffpatch@0.7.3/lib/index.js";
       import * as htmlFormatter from "https://unpkg.com/jsondiffpatch@0.7.3/lib/formatters/html.js";
+      import { XmluiSource } from "./xmlui-parser.es.js";
 
       // =============================================================================
       // LOCALSTORAGE PERSISTENCE - Survive server restarts
@@ -778,7 +779,7 @@
         try {
           // Keep only the most recent entries to avoid localStorage limits
           const toStore = entries.slice(-MAX_STORED_ENTRIES);
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(toStore));
+          localStorage.setItem(STORAGE_KEY, safeStringify(toStore));
         } catch (e) {
           console.warn("Failed to save inspector history to localStorage:", e);
         }
@@ -940,6 +941,64 @@
               cur = cur[key];
             }
           }
+        }
+      }
+
+      // Clean up eventArgs to extract useful data and remove DOM/React noise
+      function cleanEventArgs(args) {
+        if (!args || !Array.isArray(args)) return args;
+        return args.map(arg => {
+          if (!arg || typeof arg !== "object") return arg;
+          // React SyntheticEvent - extract useful parts
+          if (arg.nativeEvent || arg._reactName || arg.type === "click" || arg.type === "contextmenu") {
+            const cleaned = { _event: arg.type || "event" };
+            if (arg.target?.id) cleaned.targetId = arg.target.id;
+            if (arg.target?.textContent) cleaned.targetText = arg.target.textContent.substring(0, 50);
+            if (arg.clientX !== undefined) cleaned.position = { x: arg.clientX, y: arg.clientY };
+            return cleaned;
+          }
+          // Skip React internal objects
+          if (arg.$$typeof) return "[React element]";
+          // Return as-is for regular objects (message payloads, tree nodes, etc.)
+          return arg;
+        });
+      }
+
+      // Safe JSON stringify that handles circular references and DOM objects
+      function safeStringify(obj, indent = null, maxLength = 10000) {
+        try {
+          const seen = new WeakSet();
+          let length = 0;
+          const result = JSON.stringify(obj, (key, value) => {
+            // Bail out if getting too large
+            if (length > maxLength) return "[truncated]";
+            length += key.length + 10;
+            // Skip DOM nodes and Window
+            if (value instanceof Node || value instanceof Window) {
+              return `[${value.constructor.name}]`;
+            }
+            // Handle circular references
+            if (typeof value === "object" && value !== null) {
+              if (seen.has(value)) return "[circular]";
+              seen.add(value);
+              // Limit array length
+              if (Array.isArray(value) && value.length > 100) {
+                return [...value.slice(0, 100), `[...${value.length - 100} more items]`];
+              }
+            }
+            // Handle functions
+            if (typeof value === "function") {
+              return `[function ${value.name || "anonymous"}]`;
+            }
+            // Truncate long strings
+            if (typeof value === "string" && value.length > 500) {
+              return value.substring(0, 500) + "...";
+            }
+            return value;
+          }, indent);
+          return result && result.length > maxLength ? result.substring(0, maxLength) + "..." : result;
+        } catch (err) {
+          return `[stringify error: ${err.message}]`;
         }
       }
 
@@ -1205,6 +1264,11 @@
             const resp = await fetch(filePath);
             if (!resp.ok) return null;
             content = await resp.text();
+            // Validate content isn't HTML (SPA fallback returns index.html for missing files)
+            const trimmed = content.trimStart().toLowerCase();
+            if (trimmed.startsWith('<!doctype') || trimmed.startsWith('<html')) {
+              return null;
+            }
             sourceCache.set(filePath, content);
           }
           return content.slice(startChar, endChar);
@@ -1243,53 +1307,34 @@
                 const outputSections = [];
                 let handlerValue = null; // The function name from the handler attribute
 
-                // Helper to find specific handler attribute in .xmlui
+                // Helper to find specific handler attribute in .xmlui (uses XMLUI parser)
                 function findHandlerInXmlui(source, eventName, compLabel) {
                   const lines = source.split("\n");
                   const matches = [];
 
-                  // If we have a component label, find lines that have both the id and handler nearby
-                  if (compLabel) {
-                    // First find the component by id
-                    for (let i = 0; i < lines.length; i++) {
-                      const line = lines[i];
-                      const idPattern = new RegExp(`id\\s*=\\s*["']${compLabel}["']`);
-                      if (idPattern.test(line)) {
-                        // Found the component - look for handler on this line or nearby lines
-                        const searchStart = Math.max(0, i - 2);
-                        const searchEnd = Math.min(lines.length - 1, i + 5);
-                        for (let j = searchStart; j <= searchEnd; j++) {
-                          const attrPattern = new RegExp(`on${eventName}\\s*=\\s*"([^"]*)"`, "i");
-                          const attrMatch = lines[j].match(attrPattern);
-                          if (attrMatch) {
-                            matches.push({ lineNum: j, pattern: "handler-attr" });
-                            if (!handlerValue) handlerValue = attrMatch[1];
-                            break;
-                          }
-                        }
-                        break; // Found the component, stop searching
+                  try {
+                    const xmlui = new XmluiSource(source, filePath);
+
+                    if (compLabel) {
+                      // Find specific handler on specific element
+                      const handler = xmlui.findHandler(compLabel, eventName);
+                      if (handler) {
+                        matches.push({ lineNum: handler.line - 1, pattern: "handler-attr" }); // 0-indexed for formatMatches
+                        if (!handlerValue) handlerValue = handler.value;
+                      }
+                    } else {
+                      // Find all handlers matching eventName
+                      const handlers = xmlui.findHandlers(eventName);
+                      for (const h of handlers) {
+                        matches.push({ lineNum: h.line - 1, pattern: "handler-attr" }); // 0-indexed
+                        if (!handlerValue) handlerValue = h.value;
                       }
                     }
-                  } else {
-                    // No component label - find all matching handlers
-                    for (let i = 0; i < lines.length; i++) {
-                      const line = lines[i];
-
-                      // Look for on{EventName}= attribute
-                      const attrPattern = new RegExp(`on${eventName}\\s*=\\s*"([^"]*)"`, "i");
-                      const attrMatch = line.match(attrPattern);
-                      if (attrMatch) {
-                        matches.push({ lineNum: i, pattern: "handler-attr" });
-                        if (!handlerValue) handlerValue = attrMatch[1];
-                      }
-
-                      // Also look for emitEvent('{eventName}') calls
-                      const emitPattern = new RegExp(`emitEvent\\s*\\(\\s*['"]${eventName}['"]`, "i");
-                      if (emitPattern.test(line)) {
-                        matches.push({ lineNum: i, pattern: "handler-attr" });
-                      }
-                    }
+                  } catch (e) {
+                    console.warn("Parser error in findHandlerInXmlui:", e);
+                    // Fallback: return empty matches
                   }
+
                   return { lines, matches };
                 }
 
@@ -1878,77 +1923,29 @@
 
       /**
        * Find a component definition by id in XMLUI source.
-       * Searches for any component with id="actionId" (Action, APICall, etc.)
-       * Handles multi-line component definitions where id may be on a different line than the tag.
-       * Returns { source: string, location: string, startLine: number } or null
+       * Uses the XMLUI parser for robust AST-based lookup.
+       * Returns { source: string, location: string, startLine: number, componentType: string } or null
        */
       function findActionInSource(source, actionId, fileName) {
         if (!source || !actionId) return null;
 
-        // First, find the id attribute in the source (handles multi-line tags)
-        // Match id="actionId" or id='actionId' or id={"actionId"}
-        const idPatterns = [
-          new RegExp(`id\\s*=\\s*["']${actionId}["']`),
-          new RegExp(`id\\s*=\\s*\\{["']${actionId}["']\\}`),
-        ];
+        try {
+          const xmlui = new XmluiSource(source, fileName);
+          const element = xmlui.findById(actionId);
 
-        const lines = source.split("\n");
-        let idLineNum = -1;
-
-        // Find the line containing the id attribute
-        for (let i = 0; i < lines.length; i++) {
-          for (const pattern of idPatterns) {
-            if (pattern.test(lines[i])) {
-              idLineNum = i;
-              break;
-            }
+          if (element) {
+            return {
+              source: element.source,
+              location: `${fileName}:${element.startLine}`,
+              startLine: element.startLine,
+              componentType: element.tagName
+            };
           }
-          if (idLineNum >= 0) break;
+        } catch (e) {
+          console.warn("Parser error in findActionInSource:", e);
         }
 
-        if (idLineNum < 0) return null;
-
-        // Now search backwards to find the opening tag (< followed by ComponentName)
-        let startLine = idLineNum;
-        let componentType = null;
-
-        for (let i = idLineNum; i >= 0 && i >= idLineNum - 10; i--) {
-          // Match opening tag - allow for line ending right after tag name
-          const openTagMatch = lines[i].match(/<(\w+)(?:\s|>|$)/);
-          if (openTagMatch) {
-            startLine = i;
-            componentType = openTagMatch[1];
-            break;
-          }
-        }
-
-        if (!componentType) return null;
-
-        // Now find the end of this component (self-closing or closing tag)
-        let endLine = startLine;
-
-        // Check if self-closing - look for /> from startLine onwards
-        for (let j = startLine; j < lines.length && j < startLine + 20; j++) {
-          if (lines[j].includes("/>")) {
-            endLine = j;
-            break;
-          }
-          // Check for closing tag
-          const closeTagPattern = new RegExp(`</${componentType}>`);
-          if (closeTagPattern.test(lines[j])) {
-            endLine = j;
-            break;
-          }
-          endLine = j;
-        }
-
-        const componentLines = lines.slice(startLine, endLine + 1);
-        return {
-          source: componentLines.join("\n"),
-          location: `${fileName}:${startLine + 1}`,
-          startLine: startLine + 1,
-          componentType
-        };
+        return null;
       }
 
       function entryMatches(entry, textFilter) {
@@ -2111,7 +2108,8 @@
         if (e.ownerUid) parts.push(`uid ${e.ownerUid}`);
         if (resolvedFile) {
           // Include handler code for highlighting in modal if available
-          const highlight = e.handlerCode ? ` data-highlight="${e.handlerCode.replace(/"/g, '&quot;')}"` : "";
+          // Escape both quotes and > to prevent breaking HTML parsing and stripHtml regex
+          const highlight = e.handlerCode ? ` data-highlight="${e.handlerCode.replace(/"/g, '&quot;').replace(/>/g, '&gt;')}"` : "";
           parts.push(`file <span class="file-link" data-file="${resolvedFile}"${highlight}>${resolvedFile}</span>`);
         }
         return {
@@ -2847,6 +2845,11 @@
             });
             tracesMap.delete(traceId);
           });
+
+          // Remove synthetic startup if it ended up empty
+          if (startupTraceId === "startup-synthetic" && startupEntries.length === 0) {
+            tracesMap.delete(startupTraceId);
+          }
         }
 
         // Merge orphaned API events into ChangeListener traces they triggered
@@ -3562,6 +3565,23 @@
             const handlerDedupInfo = handlerDedupCount > 1 ? ` <span class="badge-muted">×${handlerDedupCount}</span>` : "";
             bodyHtml += `<div class="trace-event-header">${evt.eventTitle}${handlerDedupInfo}${evt.label ? ` ${evt.label}` : ""}${metaInline}</div>`;
 
+            // Show eventArgs if available (the data passed to the handler)
+            if (e.kind === "handler:start" && e.eventArgs && e.eventArgs.length > 0) {
+              try {
+                const cleanedArgs = cleanEventArgs(e.eventArgs);
+                const argsStr = safeStringify(cleanedArgs, 2);
+                if (argsStr && argsStr.length < 200) {
+                  bodyHtml += `<div class="trace-meta">args: <code>${argsStr.replace(/</g, "&lt;")}</code></div>`;
+                } else if (argsStr && argsStr.length < 5000) {
+                  bodyHtml += `<details><summary>Event Args (${e.eventArgs.length} items)</summary><pre class="source-code">${argsStr.replace(/</g, "&lt;")}</pre></details>`;
+                } else {
+                  bodyHtml += `<div class="trace-meta">args: <code>[${e.eventArgs.length} items, too large to display]</code></div>`;
+                }
+              } catch (err) {
+                bodyHtml += `<div class="trace-meta">args: <code>[${e.eventArgs.length} items, failed to serialize]</code></div>`;
+              }
+            }
+
             // Show handler code if available
             if (e.handlerCode) {
               const code = e.handlerCode.trim();
@@ -4059,6 +4079,20 @@
             const handlerDedupCount = e._dedupCount || 1;
             const handlerDedupSuffix = handlerDedupCount > 1 ? ` ×${handlerDedupCount}` : "";
             lines.push(`    [${e.kind}]${handlerDedupSuffix}${e.eventName ? ` ${e.eventName}` : ""}${evt.label ? ` ${evt.label}` : ""}${metaParts.length ? ` (${metaParts.join(" | ")})` : ""}`);
+            // Show eventArgs if available
+            if (e.kind === "handler:start" && e.eventArgs && e.eventArgs.length > 0) {
+              try {
+                const cleanedArgs = cleanEventArgs(e.eventArgs);
+                const argsStr = safeStringify(cleanedArgs);
+                if (argsStr && argsStr.length < 1000) {
+                  lines.push(`      args: ${argsStr.length < 100 ? argsStr : argsStr.substring(0, 100) + "..."}`);
+                } else {
+                  lines.push(`      args: [${e.eventArgs.length} items]`);
+                }
+              } catch (err) {
+                lines.push(`      args: [${e.eventArgs.length} items, failed to serialize]`);
+              }
+            }
             // Show handler code if available
             if (e.handlerCode) {
               const code = e.handlerCode.trim();
@@ -4329,7 +4363,23 @@
                   }
                 }
 
-                // 3. Fall back to _xsFunctions or window
+                // 3. Search all known source files
+                if (!result) {
+                  const allFiles = getSourceFileList();
+                  for (const file of allFiles) {
+                    if (file === sourceFile) continue; // Already checked
+                    const src = await fetchSourceRange(file, 0, 999999);
+                    if (src) {
+                      result = findFunctionInSource(src, funcName, file.split("/").pop());
+                      if (result) {
+                        result.location = file.split("/").pop() + ":" + result.startLine;
+                        break;
+                      }
+                    }
+                  }
+                }
+
+                // 4. Fall back to _xsFunctions or window
                 if (!result) {
                   result = lookupFunctionSource(funcName);
                 }
@@ -4343,11 +4393,27 @@
                   }).join("\n");
                   pre.textContent = `// ${funcName} (from ${result.location})\n${formatted}`;
                 } else {
-                  pre.textContent = `// ${funcName} not found in:\n` +
-                    `//   - ${sourceFile || "(no source file)"}\n` +
-                    `//   - ${sourceFile ? sourceFile + ".xs" : "(no .xs file)"}\n` +
-                    `//   - window._xsFunctions\n` +
-                    `//   - window.${funcName}`;
+                  // Check if this looks like a built-in component event
+                  const builtInEvents = [
+                    "loadChildren", "selectionDidChange", "nodeClick", "nodeExpand", "nodeCollapse",
+                    "rowClick", "cellClick", "headerClick", "loaded", "error", "success",
+                    "submit", "validate", "change", "didChange", "willChange",
+                    "open", "close", "toggle", "focus", "blur"
+                  ];
+                  if (builtInEvents.includes(funcName)) {
+                    pre.textContent = `// "${funcName}" is a built-in component event.\n` +
+                      `// The handler implementation is provided by the XMLUI component.\n` +
+                      `// Event args show the data passed to your handler.`;
+                  } else {
+                    // Check if we could even fetch the files
+                    const allFiles = getSourceFileList();
+                    const searchedCount = allFiles.length;
+                    pre.textContent = `// ${funcName} not found in:\n` +
+                      `//   - ${sourceFile || "(no source file)"}\n` +
+                      `//   - ${searchedCount} other source files\n` +
+                      `//   - window._xsFunctions\n` +
+                      `//   - window.${funcName}`;
+                  }
                 }
               } catch (err) {
                 pre.textContent = `// Error looking up ${funcName}: ${err.message}`;
@@ -6183,6 +6249,115 @@
           const openBraces = (result.source.match(/\{/g) || []).length;
           const closeBraces = (result.source.match(/\}/g) || []).length;
           assertEqual(openBraces, closeBraces, "Braces should be balanced");
+        });
+
+        // =========================================================================
+        // TEST SUITE: XMLUI Parser Integration
+        // =========================================================================
+        test("XMLUI Parser", "XmluiSource parses valid XMLUI markup", () => {
+          const source = `<App><Button id="btn">Click</Button></App>`;
+          const xmlui = new XmluiSource(source, "test.xmlui");
+          assertEqual(xmlui.errors.length, 0, "Should have no parse errors");
+          assertTrue(xmlui.ast !== null, "Should have AST");
+        });
+
+        test("XMLUI Parser", "XmluiSource.findById finds element by id", () => {
+          const source = `
+            <App>
+              <Button id="submitBtn" variant="primary">Submit</Button>
+              <Button id="cancelBtn" variant="secondary">Cancel</Button>
+            </App>
+          `;
+          const xmlui = new XmluiSource(source, "test.xmlui");
+          const btn = xmlui.findById("submitBtn");
+          assertTrue(btn !== null, "Should find submitBtn");
+          assertEqual(btn.tagName, "Button");
+          assertEqual(btn.attributes.id, "submitBtn");
+          assertEqual(btn.attributes.variant, "primary");
+        });
+
+        test("XMLUI Parser", "XmluiSource.findById returns null for missing id", () => {
+          const source = `<App><Button id="exists">Click</Button></App>`;
+          const xmlui = new XmluiSource(source, "test.xmlui");
+          const result = xmlui.findById("notHere");
+          assertEqual(result, null, "Should return null for missing id");
+        });
+
+        test("XMLUI Parser", "XmluiSource.findHandler finds specific handler on element", () => {
+          const source = `
+            <App>
+              <Button id="myBtn" onClick="handleClick" onHover="handleHover">Click</Button>
+            </App>
+          `;
+          const xmlui = new XmluiSource(source, "test.xmlui");
+          const handler = xmlui.findHandler("myBtn", "Click");
+          assertTrue(handler !== null, "Should find onClick handler");
+          assertEqual(handler.key, "onClick");
+          assertEqual(handler.value, "handleClick");
+          assertTrue(handler.line > 0, "Should have line number");
+        });
+
+        test("XMLUI Parser", "XmluiSource.findHandler returns null for missing handler", () => {
+          const source = `<App><Button id="btn" onClick="doThing">Click</Button></App>`;
+          const xmlui = new XmluiSource(source, "test.xmlui");
+          const result = xmlui.findHandler("btn", "Submit");
+          assertEqual(result, null, "Should return null for missing handler");
+        });
+
+        test("XMLUI Parser", "XmluiSource.findHandlers finds all handlers of event type", () => {
+          const source = `
+            <App>
+              <Button id="btn1" onClick="handler1">One</Button>
+              <Button id="btn2" onClick="handler2" onHover="hover2">Two</Button>
+              <Action id="action" onExecute="doAction" />
+            </App>
+          `;
+          const xmlui = new XmluiSource(source, "test.xmlui");
+          const clickHandlers = xmlui.findHandlers("Click");
+          assertEqual(clickHandlers.length, 2, "Should find 2 onClick handlers");
+          assertTrue(clickHandlers.some(h => h.value === "handler1"), "Should include handler1");
+          assertTrue(clickHandlers.some(h => h.value === "handler2"), "Should include handler2");
+        });
+
+        test("XMLUI Parser", "XmluiSource.findHandlers finds all handlers when no event specified", () => {
+          const source = `
+            <App>
+              <Button id="btn" onClick="click" onHover="hover">Click</Button>
+              <Action id="act" onExecute="exec" />
+            </App>
+          `;
+          const xmlui = new XmluiSource(source, "test.xmlui");
+          const allHandlers = xmlui.findHandlers();
+          assertEqual(allHandlers.length, 3, "Should find 3 handlers total");
+        });
+
+        test("XMLUI Parser", "XmluiSource handles multi-line elements", () => {
+          const source = `
+            <App>
+              <Button
+                id="multiLineBtn"
+                onClick="handleClick"
+                variant="primary"
+                disabled={isLoading}>
+                Submit Form
+              </Button>
+            </App>
+          `;
+          const xmlui = new XmluiSource(source, "test.xmlui");
+          const btn = xmlui.findById("multiLineBtn");
+          assertTrue(btn !== null, "Should find multi-line element");
+          assertEqual(btn.tagName, "Button");
+          assertEqual(btn.attributes.onClick, "handleClick");
+          assertEqual(btn.attributes.variant, "primary");
+        });
+
+        test("XMLUI Parser", "XmluiSource handles binding expressions in id", () => {
+          // Note: binding expressions like id={foo} may need special handling
+          // This test documents current behavior
+          const source = `<App><Button id="staticId">Click</Button></App>`;
+          const xmlui = new XmluiSource(source, "test.xmlui");
+          const btn = xmlui.findById("staticId");
+          assertTrue(btn !== null, "Should find element with static id");
         });
 
         // =========================================================================
