@@ -11,7 +11,9 @@
 -->
 <Component name="FilesContainer"
 >
-  <BusHandler type="FilesContainer:refresh" onCommand="() => fileCatalogData.refetch()" />
+  <MessageListener onMessageReceived="(msg) => {
+    if (msg.type === 'FilesContainer:refresh') fileCatalogData.refetch();
+  }"/>
 
     <script>
       var sortedFiles = MwdHelpers.sortFiles(

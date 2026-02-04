@@ -15,9 +15,6 @@
     bucket="fileCatalogView"
   />
 
-  <!-- Access to command bus for dispatching events -->
-  <CommandBus id="bus" />
-
   <ModalDialog
     id="xsLogDialog"
     testId="InspectorDialog"
@@ -89,7 +86,7 @@
           label="{mediaSize.largeScreen ? 'Refresh' : undefined}"
           icon="btn_refresh"
           variant="ghost"
-          onClick="() => { bus.dispatch('FilesContainer:refresh'); bus.dispatch('FoldersTree:collapse'); }"
+          onClick="() => { window.publishTopic('FilesContainer:refresh'); window.publishTopic('FoldersTree:collapse'); }"
         />
 
         <ContentSeparator

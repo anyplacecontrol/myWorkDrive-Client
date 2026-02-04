@@ -12,9 +12,6 @@
   var.failedItems="{[]}"
   var.itemsToDelete="{[]}"
 >
-  <!-- Access to command bus for dispatching events -->
-  <CommandBus id="bus" />
-
   <!--
     This modal dialog asks the user to confirm deletion of items.
 

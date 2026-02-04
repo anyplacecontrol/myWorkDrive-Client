@@ -12,9 +12,6 @@
   method.open="(item) => renameModal.open(item)"
   var.inProgress="{false}"
 >
-  <!-- Access to command bus for dispatching events -->
-  <CommandBus id="bus" />
-
   <!--
     This modal dialog allows the user to rename an item.
 

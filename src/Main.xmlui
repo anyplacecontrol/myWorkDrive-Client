@@ -6,9 +6,6 @@
   paddingVertical="0"
   var.currentDrive="{window.AppConfig.currentDrive}"
 >
-  <!-- Command bus for inter-component communication -->
-  <CommandBus id="bus" root="true" />
-
   <!-- Let's keep the sorting and view state here -->
   <AppState
     id="appState"
