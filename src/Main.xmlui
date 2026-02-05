@@ -7,7 +7,7 @@
   var.currentDrive="{window.AppConfig.currentDrive}"
 >
   <!-- Listen for file operation commands via window.postMessage -->
-  <MessageListener onMessageReceived="(msg) => handleFileOperation(msg)"/>
+  <MessageListener onMessageReceived="(msg) => handleFileOperation(msg)" />
 
   <!-- Let's keep the sorting and view state here -->
   <AppState
@@ -68,7 +68,18 @@
   </Pages>
 
   <!-- Global modals -->
-  <RenameItemModal id="renameModal"/>
-  <DeleteItemsModal id="deleteModal"/>
+  <Theme
+    paddingHorizontal-Button-sm="$space-5"
+    paddingVertical-Button-sm="$space-3"
+    fontWeight-Button="$fontWeight-small"
+    borderRadius-Button="6px"
+  >
+    <RenameItemModal />
+    <DeleteItemsModal />
+    <NewFolderModal
+      drive="{defaultTo($queryParams.drive, currentDrive)}"
+      folder="{defaultTo($queryParams.folder, '/')}"
+    />
+  </Theme>
 
 </App>

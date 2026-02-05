@@ -59,7 +59,7 @@ function onSubmitClick(newName) {
       }
     }
   } finally {
-    inProgress = false;
+    inProgress=null
     renameModal.close();
   }
 }

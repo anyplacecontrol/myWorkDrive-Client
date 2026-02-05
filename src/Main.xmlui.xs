@@ -1,5 +1,3 @@
-//=================== UTILITIES ==============================================
-
 function handleFileOperation(message) {
   if (!message || !message.type) return;
 

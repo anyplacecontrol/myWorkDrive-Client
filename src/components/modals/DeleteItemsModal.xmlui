@@ -7,12 +7,17 @@
   var.failedItems="{[] }"
   var.itemsToDelete="{[] }"
 >
-  <MessageListener onMessageReceived="(msg) => {
+  <MessageListener
+    onMessageReceived="(msg) => {
     if (msg && msg.type === 'DeleteItemsModal:open') {
+      inProgress = false;
+      failedItems = [];
+      itemsToDelete = [];
       const data = msg.payload || {};
       deleteModal.open(data.items || []);
     }
-  }"/>
+  }"
+  />
   <!--
     This modal dialog asks the user to confirm deletion of items.
 
@@ -42,7 +47,7 @@
     onClose="{()=> !inProgress}"
   >
 
-    <VStack gap="$space-4" when="{!inProgress}">
+    <VStack gap="$space-4" when="{inProgress===false}">
       <Icon name="circle_delete" width="$space-12" height="$space-12" />
       <h2>
         {($param && $param.length === 1)

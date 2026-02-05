@@ -1,0 +1,59 @@
+<!--
+  This component represents a modal dialog that allows the user to rename an item.
+
+  Properties:
+  - `drive`: The ID of the drive containing the files/folders
+  - `folder`: The path of the current folder
+-->
+<Component
+  name="NewFolderModal"
+  var.inProgress="{false}"
+>
+  <MessageListener
+    onMessageReceived="(msg) => {
+    if (msg && msg.type === 'NewFolderModal:open') {
+      inProgress = false;
+      newFolderModal.open();
+    }
+  }"
+  />
+  <!--
+    This modal dialog allows the user to create a new folder.
+  -->
+
+  <ModalDialog
+    id="newFolderModal"
+    title=""
+    maxWidth="560px"
+    onClose="{()=> !inProgress}"
+  >
+
+    <!-- The form that allows the user to rename the item. -->
+    <Form
+      when="{inProgress===false}"
+      id="newFolderForm"
+      data="{{ name: '' }}"
+      saveLabel="Create"
+      onSubmit="(data) => onSubmitClick( data.name )"
+    >
+      <VStack gap="$space-1">
+        <h2>
+          Create new folder
+        </h2>
+        <Text>
+          Add a folder to organize your files.
+        </Text>
+      </VStack>
+      <!-- The input field that allows the user to enter the name. -->
+      <FormItem
+        label="Name"
+        bindTo="name"
+        autoFocus="true"
+        required="true"
+      />
+    </Form>
+    <InProgressPanel when="{inProgress}" message="Creating..." />
+
+  </ModalDialog>
+
+</Component>

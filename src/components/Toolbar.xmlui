@@ -133,8 +133,9 @@
             </Button>
           </template>
           <MenuItem
-            label="New"
-            onClick="toast.error('Not implemented yet')"
+            label="New Folder"
+            icon="btn_folders"
+             onClick="() => { window.publishTopic('NewFolderModal:open'); }"
           />
         </DropdownMenu>
         <SpaceFiller />

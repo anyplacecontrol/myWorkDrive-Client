@@ -43,26 +43,26 @@ function onDeleteQueuedItemError(error, eventArgs) {
 }
 // --- Called when delete queue completes all items
 function onDeleteComplete() {
-  const allItems = itemsToDelete || [];
-  const failedPaths = failedItems.map(item => item.path);
+  try {
+    const allItems = itemsToDelete || [];
+    const failedPaths = failedItems.map((item) => item.path);
 
-  // Find successfully deleted folders
-  const deletedFolders = allItems.filter(
-    item => item.isFolder && !failedPaths.includes(item.path)
-  );
+    // Find successfully deleted folders
+    const deletedFolders = allItems.filter(
+      (item) => item.isFolder && !failedPaths.includes(item.path)
+    );
 
-   const deletedPaths = deletedFolders.map(folder => folder.path);
+    const deletedPaths = deletedFolders.map((folder) => folder.path);
 
-  // Notify FoldersTree to remove deleted folders from the tree
-  if (deletedFolders.length > 0) {
-    window.publishTopic('FoldersTree:delete', { paths: deletedPaths });
+    // Notify FoldersTree to remove deleted folders from the tree
+    if (deletedFolders.length > 0) {
+      window.publishTopic("FoldersTree:delete", { paths: deletedPaths });
+    }
+
+    // Refresh files list after deletion
+    window.publishTopic("FilesContainer:refresh");
+  } finally {
+    inProgress = null;
+    deleteModal.close();
   }
-
-  // Refresh files list after deletion
-  window.publishTopic('FilesContainer:refresh');
-  // Reset state
-  failedItems = [];
-  itemsToDelete = [];
-  inProgress = false;
-  deleteModal.close();
 }

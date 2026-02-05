@@ -13,6 +13,7 @@
 <Component name="FoldersTree">
   <MessageListener onMessageReceived="(msg) => {
     if (msg.type === 'FoldersTree:rename') handleRenameTreeNode(msg.payload);
+    else if (msg.type === 'FoldersTree:insert') handleInsertFolder(msg.payload);
     else if (msg.type === 'FoldersTree:delete') handleDeleteFolders(msg.payload);
     else if (msg.type === 'FoldersTree:collapse') handleCollapseRoot();
   }"/>

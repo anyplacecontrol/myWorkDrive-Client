@@ -8,6 +8,7 @@
   <MessageListener onMessageReceived="(msg) => {
     if (msg && msg.type === 'RenameItemModal:open') {
       const data = msg.payload || {};
+      inProgress = false;
       renameModal.open(data.item);
     }
   }"/>
@@ -19,14 +20,14 @@
   <ModalDialog
     id="renameModal"
     title=""
-    maxWidth="566px"
+    maxWidth="560px"
     onClose="{()=> !inProgress}"
     var.itemType="{$param.isFolder ? 'folder' : 'file'}"
   >
 
     <!-- The form that allows the user to rename the item. -->
     <Form
-      when="{!inProgress}"
+      when="{inProgress===false}"
       id="renameForm"
       data="{{ name: $param.name }}"
       saveLabel="Rename"

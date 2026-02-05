@@ -48,6 +48,7 @@
     height="100%"
     onUpload="()=>{}"
     overflowX="hidden"
+    border="none"
   >
 
     <FilesContainerHeader
