@@ -6,10 +6,8 @@
     "start": "xmlui start --withMock=false",
     "start:backend": "cd backend/ClientAPIServer && dotnet run",
     "start:dev": "npm run start & npm run start:backend",
-
     "start:backend-windows": "node scripts/start-backend.js",
     "start:dev-windows": "npm run start:backend-windows && npm run start",
-
     "build": "xmlui build",
     "preview": "xmlui preview",
     "build-prod": "npm run build -- --prod --withMock=true",
@@ -20,6 +18,7 @@
     "xmlui": "*"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.1",
     "typescript": "^5.7.3",
     "vite": "^7.1.12"
   }

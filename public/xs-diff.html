@@ -736,6 +736,7 @@
         <option value="">Export...</option>
         <option value="html">Download HTML</option>
         <option value="md">Download Markdown</option>
+        <option value="json">Download JSON (for Playwright)</option>
       </select>
     </div>
     <div id="diff"></div>
@@ -777,11 +778,14 @@
 
       function saveEntriesToStorage(entries) {
         try {
-          // Keep only the most recent entries to avoid localStorage limits
-          const toStore = entries.slice(-MAX_STORED_ENTRIES);
-          localStorage.setItem(STORAGE_KEY, safeStringify(toStore));
+          // Keep only the most recent entries and strip large fields for localStorage
+          const toStore = entries.slice(-500).map(e => {
+            const { text, diffPretty, diffJson, eventArgs, ...rest } = e;
+            return rest; // Strip large fields to save space
+          });
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(toStore));
         } catch (e) {
-          console.warn("Failed to save inspector history to localStorage:", e);
+          // Silently fail - localStorage is optional, export to JSON still works
         }
       }
 
@@ -965,13 +969,13 @@
       }
 
       // Safe JSON stringify that handles circular references and DOM objects
-      function safeStringify(obj, indent = null, maxLength = 10000) {
+      function safeStringify(obj, indent = null, maxLength = 10000, maxArrayLength = 100) {
         try {
           const seen = new WeakSet();
           let length = 0;
           const result = JSON.stringify(obj, (key, value) => {
             // Bail out if getting too large
-            if (length > maxLength) return "[truncated]";
+            if (maxLength !== Infinity && length > maxLength) return "[truncated]";
             length += key.length + 10;
             // Skip DOM nodes and Window
             if (value instanceof Node || value instanceof Window) {
@@ -981,22 +985,22 @@
             if (typeof value === "object" && value !== null) {
               if (seen.has(value)) return "[circular]";
               seen.add(value);
-              // Limit array length
-              if (Array.isArray(value) && value.length > 100) {
-                return [...value.slice(0, 100), `[...${value.length - 100} more items]`];
+              // Limit array length (skip if maxArrayLength is Infinity)
+              if (maxArrayLength !== Infinity && Array.isArray(value) && value.length > maxArrayLength) {
+                return [...value.slice(0, maxArrayLength), `[...${value.length - maxArrayLength} more items]`];
               }
             }
             // Handle functions
             if (typeof value === "function") {
               return `[function ${value.name || "anonymous"}]`;
             }
-            // Truncate long strings
-            if (typeof value === "string" && value.length > 500) {
+            // Truncate long strings (skip if maxLength is very large)
+            if (maxLength < 100000 && typeof value === "string" && value.length > 500) {
               return value.substring(0, 500) + "...";
             }
             return value;
           }, indent);
-          return result && result.length > maxLength ? result.substring(0, maxLength) + "..." : result;
+          return maxLength !== Infinity && result && result.length > maxLength ? result.substring(0, maxLength) + "..." : result;
         } catch (err) {
           return `[stringify error: ${err.message}]`;
         }
@@ -7047,6 +7051,53 @@
           downloadFile(`xs-diff-${timestamp}.md`, generateMarkdownExport(processed), "text/markdown");
         } else if (format === "html") {
           downloadFile(`xs-diff-${timestamp}.html`, generateHtmlExport(processed), "text/html");
+        } else if (format === "json") {
+          // Export raw logs directly for Playwright test generation
+          // Start from parent (skip iframe's own window which has localStorage merged)
+          // Make a copy immediately to avoid race conditions with log splicing
+          let rawLogs = [];
+          let win = window.parent;
+          while (win) {
+            try {
+              if (win._xsLogs && win._xsLogs.length > rawLogs.length) {
+                rawLogs = [...win._xsLogs]; // Copy to avoid mutation
+              }
+              if (win.parent && win.parent !== win) {
+                win = win.parent;
+              } else {
+                break;
+              }
+            } catch (e) {
+              break; // Cross-origin, stop traversing
+            }
+          }
+          console.log(`Exporting ${rawLogs.length} raw entries as JSON for Playwright`);
+          console.log(`MoveFile entries: ${rawLogs.filter(e=>e.url?.includes('MoveFile')).length}`);
+          if (rawLogs.length === 0) {
+            alert("No logs found. Try running this in the app console:\ncopy(JSON.stringify(window._xsLogs, (k,v) => v instanceof Node || v instanceof Window || typeof v === 'function' ? undefined : v))");
+            return;
+          }
+          // Stringify each entry separately to avoid cross-entry circular tracking
+          const jsonEntries = rawLogs.map(entry => {
+            const seen = new WeakSet();
+            return JSON.stringify(entry, (key, value) => {
+              if (value instanceof Node || value instanceof Window) return undefined;
+              if (typeof value === 'function') return undefined;
+              if (typeof value === 'object' && value !== null) {
+                if (seen.has(value)) return '[circular]';
+                seen.add(value);
+              }
+              return value;
+            });
+          });
+          const jsonContent = '[\n  ' + jsonEntries.join(',\n  ') + '\n]';
+          console.log(`JSON size: ${jsonContent.length} bytes`);
+          const defaultName = `xs-trace-${timestamp}`;
+          const filename = prompt("Save trace as:", defaultName);
+          if (filename) {
+            const finalName = filename.endsWith('.json') ? filename : `${filename}.json`;
+            downloadFile(finalName, jsonContent, "application/json");
+          }
         }
       });
 
