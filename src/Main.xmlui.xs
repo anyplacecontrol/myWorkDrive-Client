@@ -19,6 +19,9 @@ function handleFileOperation(message) {
     case 'Main:paste':
       paste(data.items);
       break;
+    case 'Main:download':
+      downloadFile(data.file);
+      break;
     default:
       console.warn('Unknown action topic:', fullType);
   }
@@ -59,4 +62,30 @@ function paste(items) {
   const list = items || [];
   const names = list.map((i) => (i && i.name ? i.name : "")).join(", ");
   toast.success("Pasted " + names + " item(s)");
+}
+
+function downloadFile(file) {
+  if (!file || !file.path) return;
+
+  // Get actual file info to ensure size is up-to-date
+  const fileInfo = Actions.callApi({
+    url: '/GetFileInfo',
+    method: 'get',
+    queryParams: {
+      path: file.path,
+    },
+  });
+
+  if (fileInfo.isFolder)
+    return;
+
+  Actions.download({
+    url: '/ReadFile',
+    queryParams: {
+      path: file.path,
+      startPosition: 0,
+      count: fileInfo.size,
+    },
+    fileName: file.name,
+  });
 }

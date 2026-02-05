@@ -35,7 +35,7 @@
   <MenuItem
     icon="cmd_download_file"
     when="{isSingleFile}"
-    onClick="toast.success('Download to PC')"
+    onClick="window.publishTopic('Main:download', { file: $props.selectedItems[0] })"
   >
     Download to PC
   </MenuItem>

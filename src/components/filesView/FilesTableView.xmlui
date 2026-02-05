@@ -108,7 +108,7 @@
     >
       <Link onContextMenu="ev => {reselectAndOpenMenu(ev, null)}">
         <Text
-          value="{ $item.size==null ? '' : formatFileSizeInBytes($item.size) }"
+          value="{ $item.isFolder ? '' : $item.size ? formatFileSizeInBytes($item.size):'0 KiB' }"
           maxLines="1"
         />
       </Link>
