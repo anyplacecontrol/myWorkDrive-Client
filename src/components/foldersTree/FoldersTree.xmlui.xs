@@ -1,3 +1,4 @@
+
 function mapFolderItemsToNodes(items) {
   return (items || [])
     .filter((item) => item.isFolder)

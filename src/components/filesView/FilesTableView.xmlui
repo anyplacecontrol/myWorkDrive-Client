@@ -17,9 +17,11 @@
   <AppState id="selectionState" bucket="fileCatalogSelection" />
 
   <script>
+    import { navigateTo, copyOrCut, paste } from "../../shared.xs";
+
     function onItemDoubleClick(item) {
       if (item.isFolder)
-        window.publishTopic('Main:navigate', { target: item });
+        navigateTo(item);
     }
 
     function reselectAndOpenMenu(ev, item) {
@@ -54,7 +56,6 @@
     sortBy="{appState.value.sortBy}"
     sortDirection="{appState.value.sortDirection}"
     syncWithAppState="{ selectionState }"
-    autoFocus="true"
     items="{$props.fileEntries}"
     loading="{$props.loading}"
     iconSortAsc="arrowup"
@@ -68,9 +69,9 @@
     }"
     onRowDoubleClick="(item)=>onItemDoubleClick(item)"
     hideSelectionCheckboxes="true"
-    onCutAction="(row, selectedItems) => window.publishTopic('Main:cut', { items: selectedItems })"
-    onCopyAction="(row, selectedItems) => window.publishTopic('Main:copy', { items: selectedItems })"
-    onPasteAction="(row, selectedItems) => window.publishTopic('Main:paste', { items: selectedItems })"
+    onCutAction="(row, selectedItems) => copyOrCut(selectedItems, 'cut')"
+    onCopyAction="(row, selectedItems) => copyOrCut(selectedItems, 'copy')"
+    onPasteAction="(row, selectedItems) => paste(selectedItems)"
     onDeleteAction="(row, selectedItems) => window.publishTopic('DeleteItemsModal:open', { items: selectedItems })"
     canSort="true"
     onContextMenu="ev => {reselectAndOpenMenu(ev, $item)}"

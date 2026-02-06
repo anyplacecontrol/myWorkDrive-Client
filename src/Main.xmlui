@@ -6,8 +6,6 @@
   paddingVertical="0"
   var.rootDrive="{window.AppConfig.rootDrive}"
 >
-  <!-- Listen for file operation commands via window.postMessage -->
-  <MessageListener onMessageReceived="(msg) => handleFileOperation(msg)" />
 
   <!-- Let's keep the sorting and view state here -->
   <AppState
@@ -31,7 +29,7 @@
         <Stack padding="1rem">
           <DropdownMenu>
             <template name="triggerTemplate">
-              <Avatar size="xs" name="A" />
+              <Avatar size="xs" name="TT" />
             </template>
             <MenuItem label="Log out" />
           </DropdownMenu>

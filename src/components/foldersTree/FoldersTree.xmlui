@@ -10,6 +10,10 @@
 <Component name="FoldersTree"
   var.rootDrive="{window.AppConfig.rootDrive}"
 >
+  <script>
+    import { navigateTo } from "../../shared.xs";
+  </script>
+
   <MessageListener onMessageReceived="(msg) => {
     if (msg.type === 'FoldersTree:rename') handleRenameTreeNode(msg.payload);
     else if (msg.type === 'FoldersTree:insert') handleInsertFolder(msg.payload);
@@ -53,7 +57,7 @@
               dynamic: true,
             }]}"
       onLoadChildren="loadChildren"
-      onSelectionDidChange="(event) => window.publishTopic('Main:navigate', { target: event.newNode })"
+      onSelectionDidChange="(event) => navigateTo(event.newNode)"
       onContextMenu="ev => {delay(300); contextMenu.openAt(ev, $item)}"
       dynamic="true"
     >

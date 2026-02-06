@@ -9,6 +9,8 @@
   name="FilesContextMenu"
 >
   <script>
+  import { downloadFile, copyOrCut, paste } from "../../shared.xs";
+
   function isSingleSelection() {
     return $props.selectedItems.length === 1;
   }
@@ -46,7 +48,7 @@
   <MenuItem
     icon="cmd_download_file"
     when="{isSingleFile()}"
-    onClick="window.publishTopic('Main:download', { file: $props.selectedItems[0] })"
+    onClick="downloadFile($props.selectedItems[0])"
   >
     Download to PC
   </MenuItem>
@@ -97,14 +99,14 @@
   <!-- Clipboard group -->
   <MenuItem
     icon="cmd_copy"
-    onClick="window.publishTopic('Main:copy', { items: $props.selectedItems })"
+    onClick="copyOrCut($props.selectedItems, 'copy')"
   >
     Copy
   </MenuItem>
 
   <MenuItem
     icon="cmd_cut"
-    onClick="window.publishTopic('Main:cut', { items: $props.selectedItems })"
+    onClick="copyOrCut($props.selectedItems, 'cut')"
   >
     Cut
   </MenuItem>
@@ -112,7 +114,7 @@
   <MenuItem
     icon="cmd_paste"
     when="{isSingleSelection() && isAnyFolder()}"
-    onClick="window.publishTopic('Main:paste', { items: $props.selectedItems })"
+    onClick="paste($props.selectedItems)"
   >
     Paste
   </MenuItem>
