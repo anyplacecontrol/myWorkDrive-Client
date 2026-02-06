@@ -1,28 +1,12 @@
-// --- Executes the create folder operation
-function doCreateFolder({ parentFolder, name, conflictBehavior }) {
-  Actions.callApi({
-    url: "/CreateFile",
-    method: "post",
-    body: {
-      name,
-      path: parentFolder,
-      conflictBehavior,
-    },
-    invalidates: [],
-  });
-  toast.success(`"${name}" folder successfully created`);
-
-  // Update tree node after successful creation
-  window.publishTopic("FoldersTree:insert", { name, parentFolder });
-
-  // Refresh files list after creation
-  window.publishTopic("FilesContainer:refresh");
-}
-
 // --- Handles the submit action from the new folder modal
 function onSubmitClick(name) {
+  const parentFolder = window.MwdHelpers.joinPath(drive, folder);
+  if (!window.MwdHelpers.validateFileOperation( parentFolder + name)) {
+    newFolderModal.close();
+    return;
+  }
+
   inProgress = true;
-  const parentFolder = $props.drive + defaultTo($props.folder, "/");
   try {
     Actions.callApi({
       url: "/CreateFile",

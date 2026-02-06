@@ -2,12 +2,16 @@
   This component displays the header of the file catalog, including search box and Bedcrumbs.
 
   Properties:
-  - `drive`: The current drive
-  - `folder`: The ID of the current folder
   - `isAnyFiles`: Whether there are any files in the current folder
 
 -->
-<Component name="FilesContainerHeader">
+<Component name="FilesContainerHeader"
+>
+  <script>
+    import { getCurrentDrive, getCurrentFolder } from "../../shared.xs";
+    var drive = getCurrentDrive();
+    var folder = getCurrentFolder();
+  </script>
 
 <!--Search box -->
     <HStack
@@ -36,10 +40,7 @@
     </HStack>
 
 <!--Breadcrumbs -->
-    <FilesContainerBreadcrumbs
-      drive="{$props.drive}"
-      folder="{$props.folder}"
-    />
+    <FilesContainerBreadcrumbs />
     </HStack>
 
 

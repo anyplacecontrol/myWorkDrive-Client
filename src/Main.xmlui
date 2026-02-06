@@ -18,13 +18,14 @@
           isFoldersVisible: true,  //controls visibility of folders Tree
           }}"
   />
+  <AppState
+     id="fileClipboard"
+     bucket="fileClipboard"
+     initialValue="{{ items: [], action: null }}" />
 
   <Theme space-4="0px">
     <AppHeader padding="0" height="$space-11">
-      <Toolbar
-        drive="{defaultTo($queryParams.drive, rootDrive)}"
-        folder="{defaultTo($queryParams.folder, '/')}"
-      />
+      <Toolbar />
       <template name="profileMenuTemplate">
         <Stack padding="1rem">
           <DropdownMenu>
@@ -56,8 +57,6 @@
         />
         <FilesContainer
           id="filesContainer"
-          drive="{defaultTo($queryParams.drive, rootDrive)}"
-          folder="{defaultTo($queryParams.folder, '/')}"
         />
       </HSplitter>
 
@@ -73,10 +72,7 @@
   >
     <RenameItemModal />
     <DeleteItemsModal />
-    <NewFolderModal
-      drive="{defaultTo($queryParams.drive, rootDrive)}"
-      folder="{defaultTo($queryParams.folder, '/')}"
-    />
+    <NewFolderModal />
   </Theme>
 
 </App>

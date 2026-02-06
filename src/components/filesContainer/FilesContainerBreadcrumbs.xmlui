@@ -1,11 +1,29 @@
 <!--
   This component displays a list of breadcrumbs for a particular folder.
-
-  Properties:
-  - `drive`: The ID of the drive containing the folder
-  - `folder`: The path of the folder to display
 -->
-<Component name="FilesContainerBreadcrumbs">
+<Component
+  name="FilesContainerBreadcrumbs"
+>
+  <script>
+    import { getCurrentDrive, getCurrentFolder } from "../../shared.xs";
+    var drive = getCurrentDrive();
+    var folder = getCurrentFolder();
+
+    var decoded = decodeURIComponent(folder);
+    var isWindows = /\\/.test(decoded);
+
+    var crumbs = isWindows
+      ? [{ name: decoded.split(/[\\\/]+/).filter(p => p).pop() || folder, folder: folder }]
+      : (folder.startsWith('/') ? folder : '/' + folder)
+          .split('/')
+          .filter(p => p)
+          .map((p, i, a) => ({
+             name: p,
+             folder: a.slice(0, i + 1).join('/')
+          }));
+
+    var driveName = drive.replace(':sh:', '').replace(':/', '').replace(':', '');
+  </script>
   <HStack
     gap="$gap-tight"
     verticalAlignment="center"
@@ -15,31 +33,37 @@
     <SafeLink
       canShrink="true"
       testId="file-catalog-breadcrumb-item-Root"
-      to="{{
-                queryParams: {
-                  drive: $props.drive,
-                  folder: '/',
-              }
-          }}"
+      to="{{ }}"
     >
       <Text value="Root" maxLines="1" />
     </SafeLink>
-    <Items items="{$props.folder.split('/').slice(1)}">
-      <Fragment>
-        <Icon name="chevronright" size="sm" />
-        <SafeLink
-          canShrink="true"
-          to="{{
-                queryParams: {
-                  drive: $props.drive,
-                  folder: '/' + $props.folder.split('/').slice(1, $itemIndex + 2).join('/'),
-              }
-          }}"
-          testId="file-catalog-breadcrumb-item-{$itemIndex}"
-        >
-          <Text value="{$item}" maxLines="1" />
-        </SafeLink>
-      </Fragment>
-    </Items>
+    <Fragment when="{drive}">
+      <Icon name="chevronright" size="sm" />
+      <SafeLink
+        canShrink="true"
+        testId="file-catalog-breadcrumb-item-Drive"
+        to="{{
+                  queryParams: {
+                    drive: drive,
+                }
+            }}"
+      >
+        <Text value="{driveName}" maxLines="1" />
+      </SafeLink>
+    </Fragment>
+    <Fragment when="{crumbs.length > 0}">
+      <Items items="{crumbs}">
+        <Fragment>
+          <Icon name="chevronright" size="sm" />
+          <SafeLink
+            canShrink="true"
+            to="{{ queryParams: { drive: drive, folder: $item.folder } }}"
+            testId="file-catalog-breadcrumb-item-{$itemIndex}"
+          >
+            <Text value="{$item.name}" maxLines="1" />
+          </SafeLink>
+        </Fragment>
+      </Items>
+    </Fragment>
   </HStack>
 </Component>

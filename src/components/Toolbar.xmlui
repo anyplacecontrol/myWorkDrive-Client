@@ -1,14 +1,13 @@
 <!--
   This component provides the toolbar for the file browser.
-
-  Properties:
-  - `drive`: The ID of the drive containing the files/folders
-  - `folder`: The path of the folder to display
 -->
 
-<Component name="Toolbar">
+<Component name="Toolbar"
+>
   <script>
-    import { navigateTo } from "../shared.xs";
+    import { navigateTo, getCurrentDrive, getCurrentFolder } from "../shared.xs";
+    var drive = getCurrentDrive();
+    var folder = getCurrentFolder();
   </script>
 
   <AppState
@@ -81,7 +80,8 @@
           icon="btn_up"
           variant="ghost"
           onClick="(event) => {
-            navigateTo(MwdHelpers.getParentFolder($props.folder) || '/');
+            const currentFolder = window.MwdHelpers.joinPath(drive, folder);
+            navigateTo(MwdHelpers.getParentFolder(currentFolder) || '/');
           }"
         />
 

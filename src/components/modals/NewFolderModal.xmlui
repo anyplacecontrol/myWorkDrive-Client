@@ -1,14 +1,15 @@
 <!--
   This component represents a modal dialog that allows the user to rename an item.
-
-  Properties:
-  - `drive`: The ID of the drive containing the files/folders
-  - `folder`: The path of the current folder
 -->
 <Component
   name="NewFolderModal"
-  var.inProgress="{false}"
 >
+  <script>
+    import { getCurrentDrive, getCurrentFolder } from "../../shared.xs";
+    var drive = getCurrentDrive();
+    var folder = getCurrentFolder();
+    var inProgress = false;
+  </script>
   <MessageListener
     onMessageReceived="(msg) => {
     if (msg && msg.type === 'NewFolderModal:open') {

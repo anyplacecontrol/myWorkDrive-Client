@@ -24,21 +24,34 @@ function loadChildren(node) {
 
 // Message handling moved to BusHandler in markup
 
+function updateNodeAndChildren(node, oldPathPrefix, newPathPrefix) {
+  const updatedNode = {
+    id: node.id.replace(oldPathPrefix, newPathPrefix),
+    name: node.id === oldPathPrefix
+      ? window.MwdHelpers.getFileName(newPathPrefix)
+      : node.name,
+    icon: node.icon,
+    dynamic: true,
+  };
+
+  if (node.children && node.children.length > 0) {
+    updatedNode.children = node.children.map(child =>
+      updateNodeAndChildren(child, oldPathPrefix, newPathPrefix)
+    );
+  }
+
+  return updatedNode;
+}
+
 function handleRenameTreeNode(payload) {
-  // Get the old node to find its parent
-  const oldNode = tree.getNodeById(payload.oldPath);
+  const { oldPath, newPath } = payload;
+  if (!oldPath || !newPath) return;
+
+  const oldNode = tree.getNodeById(oldPath);
   if (!oldNode) return;
 
-  // Get parent ID
-  const parentId =
-    oldNode.parentIds.length > 0 ? oldNode.parentIds[oldNode.parentIds.length - 1] : null;
-
-  // If there's a parent, check if it's expanded
-  if (parentId) {
-    tree.markNodeUnloaded(parentId);
-    delay(100);
-    tree.collapseNode(parentId);
-  }
+  const updatedNodeTree = updateNodeAndChildren(oldNode, oldPath, newPath);
+  tree.replaceNode(oldPath, updatedNodeTree);
 }
 
 function handleDeleteFolders(payload) {

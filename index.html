@@ -16,17 +16,20 @@
         fileItemQueryParams: (item) => {
           const segs = (item?.path || '').split(':');
           const drive = segs.length === 4
-            ? `:${segs.slice(1, 3).join(':')}:`
+            ? `:${segs.slice(1, 3).join(':')}:/`
             : item?.drive || '';
           const path = segs.length === 4
             ? segs.slice(3).join(':')
             : item?.path || '';
 
+          // Remove leading slash from path
+          const cleanPath = path.startsWith('/') ? path.substring(1) : path;
+
           if (item?.isFolder) {
-            return { drive, folder: path };
+            return { drive, folder: cleanPath };
           }
 
-          const parts = path.split('/');
+          const parts = cleanPath.split('/');
           return {
             drive,
             folder: parts.slice(0, -1).join('/'),
@@ -36,11 +39,16 @@
 
         // Join parent path and child name with /
         joinPath: (parentPath, childName) => {
-          if (!parentPath) return childName;
-          if (!childName) return parentPath;
-          return parentPath.endsWith('/')
-            ? parentPath + childName
-            : parentPath + '/' + childName;
+          if (!parentPath) return childName || '/';
+          if (!childName) return parentPath || '/';
+
+          // Remove leading slash from childName
+          const cleanChild = childName.startsWith('/') ? childName.substring(1) : childName;
+
+          const res = parentPath.endsWith('/')
+            ? parentPath + cleanChild
+            : parentPath + '/' + cleanChild;
+          return res || '/';
         },
 
         // Validate if file operation is allowed

@@ -51,7 +51,7 @@
       overflowX="hidden"
       iconSize="$space-6"
       data="{ [{
-              id: rootDrive + '/',
+              id: window.MwdHelpers.joinPath(rootDrive, '/'),
               name: `Root`,
               icon: `folder`,
               dynamic: true,
