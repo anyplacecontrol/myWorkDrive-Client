@@ -1,7 +1,13 @@
 // --- Executes the rename operation
 function doRename({ path, newName, isFolder, conflictBehavior }) {
+  // Validate if operation is allowed
+  if (!window.MwdHelpers.validateFileOperation(path)) {
+    toast.error(`Unable to execute operation with: ${path}`);
+    return;
+  }
+
   const parentPath = window.MwdHelpers.getParentFolder(path);
-  const newPath = parentPath + "/" + newName;
+  const newPath = window.MwdHelpers.joinPath(parentPath, newName);
 
   const url = isFolder ? "/MoveFolder" : "/MoveFile";
   Actions.callApi({

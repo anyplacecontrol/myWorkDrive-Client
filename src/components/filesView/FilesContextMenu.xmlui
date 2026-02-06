@@ -7,23 +7,34 @@
 
 <Component
   name="FilesContextMenu"
-  var.isSingleSelection="{$props.selectedItems.length === 1}"
-  var.isAnyFolder="{$props.selectedItems.length > 0 && $props.selectedItems.some(item => item.isFolder)}"
-  var.isSingleFile="{$props.selectedItems.length === 1 && !$props.selectedItems[0].isFolder}"
 >
-  <AppState id="selectionState" bucket="fileCatalogSelection" />
+  <script>
+  function isSingleSelection() {
+    return $props.selectedItems.length === 1;
+  }
+  function isAnyFolder() {
+    return $props.selectedItems.length > 0 &&
+           $props.selectedItems.some(item => item.isFolder)
+  }
 
+  function isSingleFile() {
+    return $props.selectedItems.length === 1 &&
+           !$props.selectedItems[0].isFolder;
+  }
+  </script>
+
+  <AppState id="selectionState" bucket="fileCatalogSelection" />
 
   <!-- Upload group -->
   <MenuItem
     icon="cmd_upload_files"
-    when="{isSingleSelection}"
+    when="{isSingleSelection()}"
     onClick="toast.success('Upload files')"
   >
     Upload files
   </MenuItem>
   <MenuItem
-    when="{isSingleSelection}"
+    when="{isSingleSelection()}"
     icon="cmd_upload_folder"
     onClick="toast.success('Upload folder')"
   >
@@ -34,21 +45,21 @@
   <!-- File-specific actions (single file only) -->
   <MenuItem
     icon="cmd_download_file"
-    when="{isSingleFile}"
+    when="{isSingleFile()}"
     onClick="window.publishTopic('Main:download', { file: $props.selectedItems[0] })"
   >
     Download to PC
   </MenuItem>
   <MenuItem
     icon="cmd_view_file"
-    when="{isSingleFile}"
+    when="{isSingleFile()}"
     onClick="toast.success('View online')"
   >
     View online
   </MenuItem>
   <MenuItem
     icon="cmd_save_copy"
-    when="{isSingleFile}"
+    when="{isSingleFile()}"
     onClick="toast.success('Save a copy')"
   >
     Save a copy
@@ -57,7 +68,7 @@
   <!-- Zip / archive actions -->
   <MenuItem
     icon="cmd_download_zip"
-    when="{isAnyFolder || !isSingleSelection }"
+    when="{isAnyFolder() || !isSingleSelection() }"
     onClick="toast.success('Download as zip')"
   >
     Download as zip
@@ -65,14 +76,14 @@
 
   <MenuItem
     icon="cmd_add_zip"
-    when="{isAnyFolder || !isSingleSelection}"
+    when="{isAnyFolder() || !isSingleSelection()}"
     onClick="toast.success('Add to zip')"
   >
     Add to zip
   </MenuItem>
 
   <!-- Share submenu (single selection only) -->
-  <SubMenuItem icon="cmd_share" label="Share" when="{isSingleSelection}">
+  <SubMenuItem icon="cmd_share" label="Share" when="{isSingleSelection()}">
     <MenuItem onClick="toast.success('Share via link')">
       Share via link
     </MenuItem>
@@ -84,17 +95,23 @@
   <MenuSeparator />
 
   <!-- Clipboard group -->
-  <MenuItem icon="cmd_copy" onClick="window.publishTopic('Main:copy', { items: $props.selectedItems })">
+  <MenuItem
+    icon="cmd_copy"
+    onClick="window.publishTopic('Main:copy', { items: $props.selectedItems })"
+  >
     Copy
   </MenuItem>
 
-  <MenuItem icon="cmd_cut" onClick="window.publishTopic('Main:cut', { items: $props.selectedItems })">
+  <MenuItem
+    icon="cmd_cut"
+    onClick="window.publishTopic('Main:cut', { items: $props.selectedItems })"
+  >
     Cut
   </MenuItem>
 
   <MenuItem
     icon="cmd_paste"
-    when="{isSingleSelection && isAnyFolder}"
+    when="{isSingleSelection() && isAnyFolder()}"
     onClick="window.publishTopic('Main:paste', { items: $props.selectedItems })"
   >
     Paste
@@ -105,12 +122,15 @@
   <!-- File operations -->
   <MenuItem
     icon="cmd_rename"
-    when="{isSingleSelection}"
+    when="{isSingleSelection()}"
     onClick="window.publishTopic('RenameItemModal:open', { item: $props.selectedItems[0] })"
   >
     Rename
   </MenuItem>
-  <MenuItem icon="cmd_delete" onClick="window.publishTopic('DeleteItemsModal:open', { items: $props.selectedItems })">
+  <MenuItem
+    icon="cmd_delete"
+    onClick="window.publishTopic('DeleteItemsModal:open', { items: $props.selectedItems })"
+  >
     Delete
   </MenuItem>
 
@@ -119,7 +139,7 @@
   <!-- Properties (single selection only) -->
   <MenuItem
     icon="cmd_properties"
-    when="{isSingleSelection}"
+    when="{isSingleSelection()}"
     onClick="toast.success('Properties')"
   >
     Properties

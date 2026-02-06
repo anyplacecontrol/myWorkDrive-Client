@@ -17,7 +17,8 @@ function loadChildren(node) {
   });
 
   const items = Array.isArray(response) ? response : [];
-  return mapFolderItemsToNodes(items);
+  const filtered = window.MwdHelpers.filterListResults(items, node.id);
+  return mapFolderItemsToNodes(filtered);
 }
 
 // Message handling moved to BusHandler in markup
@@ -67,17 +68,15 @@ function handleInsertFolder(payload) {
     dynamic: true,
   };
 
-  console.log('------------------Inserting folder node:', parentFolder, newNode);
   const parentNode = tree.getNodeById(parentFolder);
   if (parentNode) {
-    console.log('--------------Parent node found, appending to parent:', parentNode);
     if (tree.getNodeById(path)) return;
     tree.appendNode(parentFolder, newNode);
   }
 }
 
 function handleCollapseRoot() {
-  const rootNodeId = $props.drive + "/";
+  const rootNodeId = rootDrive + "/";
 
   tree.markNodeUnloaded(rootNodeId);
   delay(100);

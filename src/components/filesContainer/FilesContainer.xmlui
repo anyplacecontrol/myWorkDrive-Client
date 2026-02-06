@@ -23,12 +23,15 @@
   <DataSource
     id="fileCatalogData"
     url="/ListFolder?path={$props.drive}{defaultTo($props.folder, '/')}"
-    transformResult="{(result) => result.map(item => ({
+    transformResult="{(result) => {
+      const requestPath = $props.drive + defaultTo($props.folder, '/');
+      const filtered = MwdHelpers.filterListResults(result, requestPath);
+      return filtered.map(item => ({
         ...item,
         id: (item.drive || '') + (item.path || '') + (item.file || ''),
         type: item.isFolder ? 'Folder' : 'File ' + getFileExtension(item.path)
-      })
-    )}"
+      }));
+    }}"
   />
 
   <!--  sorting and view state here -->

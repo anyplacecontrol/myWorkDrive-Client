@@ -1,16 +1,15 @@
 <!--
   This component provides the folders tree view for navigating folders.
 
-  Properties:
-  - `drive`: The ID of the drive containing the files/folders
-  - `folder`: The path of the folder to display
 
   Messages for inter-component communication:
   - `renameTreeNode`: Sent when a folder or file has been renamed.
     Payload: { oldPath: string, newPath: string }
 -->
 
-<Component name="FoldersTree">
+<Component name="FoldersTree"
+  var.rootDrive="{window.AppConfig.rootDrive}"
+>
   <MessageListener onMessageReceived="(msg) => {
     if (msg.type === 'FoldersTree:rename') handleRenameTreeNode(msg.payload);
     else if (msg.type === 'FoldersTree:insert') handleInsertFolder(msg.payload);
@@ -48,7 +47,7 @@
       overflowX="hidden"
       iconSize="$space-6"
       data="{ [{
-              id: $props.drive + '/',
+              id: rootDrive + '/',
               name: `Root`,
               icon: `folder`,
               dynamic: true,

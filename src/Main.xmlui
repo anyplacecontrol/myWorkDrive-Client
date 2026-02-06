@@ -4,7 +4,7 @@
   loggedInUser="{null}"
   scrollWholePage="false"
   paddingVertical="0"
-  var.currentDrive="{window.AppConfig.currentDrive}"
+  var.rootDrive="{window.AppConfig.rootDrive}"
 >
   <!-- Listen for file operation commands via window.postMessage -->
   <MessageListener onMessageReceived="(msg) => handleFileOperation(msg)" />
@@ -24,7 +24,7 @@
   <Theme space-4="0px">
     <AppHeader padding="0" height="$space-11">
       <Toolbar
-        drive="{defaultTo($queryParams.drive, currentDrive)}"
+        drive="{defaultTo($queryParams.drive, rootDrive)}"
         folder="{defaultTo($queryParams.folder, '/')}"
       />
       <template name="profileMenuTemplate">
@@ -54,12 +54,11 @@
         </template>
         <FoldersTree
           id="foldersTree"
-          drive="{defaultTo($queryParams.drive, currentDrive)}"
           when="{appState.value.isFoldersVisible}"
         />
         <FilesContainer
           id="filesContainer"
-          drive="{defaultTo($queryParams.drive, currentDrive)}"
+          drive="{defaultTo($queryParams.drive, rootDrive)}"
           folder="{defaultTo($queryParams.folder, '/')}"
         />
       </HSplitter>
@@ -77,7 +76,7 @@
     <RenameItemModal />
     <DeleteItemsModal />
     <NewFolderModal
-      drive="{defaultTo($queryParams.drive, currentDrive)}"
+      drive="{defaultTo($queryParams.drive, rootDrive)}"
       folder="{defaultTo($queryParams.folder, '/')}"
     />
   </Theme>

@@ -7,6 +7,15 @@ function onDeleteClick() {
     return;
   }
 
+  // Validate all items before deletion
+  for (const item of items) {
+    if (!window.MwdHelpers.validateFileOperation(item.path)) {
+      toast.error(`Unable to execute operation with: ${item.path}`);
+      deleteModal.close();
+      return;
+    }
+  }
+
   // Store items for later use in onDeleteComplete
   itemsToDelete = items;
   inProgress = true;

@@ -76,7 +76,7 @@
           label="{mediaSize.largeScreen ? 'Up one level' : undefined}"
           icon="btn_up"
           variant="ghost"
-          onClick="(event) => window.publishTopic('Main:navigate', { target: MwdHelpers.getParentFolder($props.folder) })"
+          onClick="(event) => window.publishTopic('Main:navigate', { target: MwdHelpers.getParentFolder($props.folder) || '/'  })"
         />
 
         <Button

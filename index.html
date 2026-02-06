@@ -34,13 +34,45 @@
           };
         },
 
+        // Join parent path and child name with /
+        joinPath: (parentPath, childName) => {
+          if (!parentPath) return childName;
+          if (!childName) return parentPath;
+          return parentPath.endsWith('/')
+            ? parentPath + childName
+            : parentPath + '/' + childName;
+        },
+
+        // Validate if file operation is allowed
+        validateFileOperation: (path) => {
+          if (!path || !path.startsWith(':')) return false;
+          const normalized = path.replace(/\/+$/g, '');
+          const colonCount = (normalized.match(/:/g) || []).length;
+          return !(colonCount === 3 && normalized.endsWith(':'));
+        },
+
+        // Filter list results to show only virtual drive items
+        // Exception: if requestPath is '/', don't filter (show all drives)
+        filterListResults: (items, requestPath) => {
+          if (!items || !Array.isArray(items)) return items;
+          if (requestPath === '/') return items;
+          return items.filter(item => item.path && item.path.startsWith(':'));
+        },
+
         // Get parent folder path (one level up)
         getParentFolder: (folder) => {
           if (!folder) return null;
-          // Remove trailing slashes and find parent folder
+
+          // Remove trailing slashes
           const normalized = folder.replace(/\/+$/g, '');
-          const lastSlash = normalized.lastIndexOf('/');
-          return lastSlash > 0 ? normalized.substring(0, lastSlash) : '/';
+
+          // Find last /
+          const lastSlashIndex = normalized.lastIndexOf('/');
+
+          if (lastSlashIndex <= 0) return null;
+
+          // Return parent path
+          return normalized.substring(0, lastSlashIndex);
         },
 
         // Build navigation URL for a folder path
