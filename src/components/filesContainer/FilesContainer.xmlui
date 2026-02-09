@@ -52,7 +52,12 @@
     onUpload="()=>{}"
     overflowX="hidden"
     border="none"
+    onContextMenu="ev => { dropZoneContextMenu.openAt(ev); }"
   >
+
+    <ContextMenu id="dropZoneContextMenu" menuWidth="200px">
+      <FilesContextMenu selectedItems="{[]}" />
+    </ContextMenu>
 
     <FilesContainerHeader
       isAnyFiles="{isAnyFiles}"

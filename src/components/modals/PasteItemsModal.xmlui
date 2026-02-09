@@ -1,0 +1,49 @@
+<!--
+  This component represents a modal dialog that handles paste (copy/cut) operations.
+-->
+<Component
+  name="PasteItemsModal"
+  var.isDialogOpen="{false}"
+  var.clipboardData="{null}"
+>
+  <script>
+    import { getCurrentDrive, getCurrentFolder } from "../../shared.xs";
+  </script>
+
+  <MessageListener onMessageReceived="(msg) => onPasteMessageReceived(msg)" />
+
+  <!-- Queue for paste operations -->
+  <Queue
+    when="{isDialogOpen==true}"
+    id="pasteQueue"
+    onProcess="onProcessQueuedItem"
+    onComplete="onPasteComplete"
+    clearAfterFinish="true"
+  >
+    <property name="resultFeedback">
+      <Text
+        value=`{clipboardData && clipboardData.action === 'cut' ? 'Moved' : 'Copied'} {$completedItems.length} item(s)`
+      />
+    </property>
+  </Queue>
+  <!--
+    This modal dialog shows the progress of paste (copy/cut) operations.
+
+    Clipboard data is stored in the `clipboardData` variable.
+  -->
+
+  <ModalDialog
+    when="{isDialogOpen==true}"
+    title=""
+    maxWidth="400px"
+    onClose="() => {
+      if (!isFileOperationInProgress) isDialogOpen = false;
+      return !isFileOperationInProgress;
+    }"
+  >
+    <InProgressPanel
+      message="{ (clipboardData && clipboardData.action === 'cut' ? 'Moving' : 'Copying') + ' files... Remains: ' + pasteQueue.getQueueLength() + ' item(s)' }"
+    />
+
+  </ModalDialog>
+</Component>

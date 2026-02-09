@@ -11,9 +11,18 @@
   <script>
   import { downloadFile, copyOrCut, paste } from "../../shared.xs";
 
+  function isAnythingSelected() {
+    return $props.selectedItems && $props.selectedItems.length > 0;
+  }
+
   function isSingleSelection() {
     return $props.selectedItems.length === 1;
   }
+
+  function isMultipleSelection() {
+    return $props.selectedItems.length > 1;
+  }
+
   function isAnyFolder() {
     return $props.selectedItems.length > 0 &&
            $props.selectedItems.some(item => item.isFolder)
@@ -70,7 +79,7 @@
   <!-- Zip / archive actions -->
   <MenuItem
     icon="cmd_download_zip"
-    when="{isAnyFolder() || !isSingleSelection() }"
+    when="{isAnyFolder() || isMultipleSelection() }"
     onClick="toast.success('Download as zip')"
   >
     Download as zip
@@ -78,7 +87,7 @@
 
   <MenuItem
     icon="cmd_add_zip"
-    when="{isAnyFolder() || !isSingleSelection()}"
+    when="{isAnyFolder() || isMultipleSelection()}"
     onClick="toast.success('Add to zip')"
   >
     Add to zip
@@ -98,6 +107,7 @@
 
   <!-- Clipboard group -->
   <MenuItem
+    when="{isAnythingSelected()}"
     icon="cmd_copy"
     onClick="copyOrCut($props.selectedItems, 'copy')"
   >
@@ -105,6 +115,7 @@
   </MenuItem>
 
   <MenuItem
+    when="{isAnythingSelected()}"
     icon="cmd_cut"
     onClick="copyOrCut($props.selectedItems, 'cut')"
   >
@@ -113,8 +124,9 @@
 
   <MenuItem
     icon="cmd_paste"
-    when="{isSingleSelection() && isAnyFolder()}"
-    onClick="paste($props.selectedItems)"
+    onClick="() => {
+      window.publishTopic('PasteItemsModal:open');
+    }"
   >
     Paste
   </MenuItem>
@@ -130,6 +142,7 @@
     Rename
   </MenuItem>
   <MenuItem
+    when="{isAnythingSelected()}"
     icon="cmd_delete"
     onClick="window.publishTopic('DeleteItemsModal:open', { items: $props.selectedItems })"
   >

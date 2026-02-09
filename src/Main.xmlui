@@ -73,6 +73,7 @@
     <RenameItemModal />
     <DeleteItemsModal />
     <NewFolderModal />
+    <PasteItemsModal />
   </Theme>
 
 </App>

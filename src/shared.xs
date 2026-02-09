@@ -59,6 +59,8 @@ function downloadFile(file) {
 
 function copyOrCut(items, action) {
   const list = Array.isArray(items) ? items : [];
+  if (list.length === 0) return;
+
   const payload = {
     action: action === "cut" ? "cut" : "copy",
     items: list
@@ -70,50 +72,4 @@ function copyOrCut(items, action) {
   toast.success((payload.action === "copy" ? "Copied " : "Cut ") + (names || "item(s)"));
 }
 
-function paste(items) {
-  //TODO: Add business logic for pasting items
-  const targetList = Array.isArray(items) ? items : [];
 
-  const target = targetList.find((it) => it && it.isFolder) || targetList[0];
-  if (!target || !target.path) {
-    toast.error("Select a folder to paste into");
-    return;
-  }
-
-  const clipboard = AppState.get('fileClipboard');
-  if (!clipboard || !Array.isArray(clipboard.items) || clipboard.items.length === 0) {
-    toast.error("Nothing to paste");
-    return;
-  }
-
-  const results = [];
-
-  for (const it of clipboard.items) {
-    if (!it || !it.path) continue;
-
-    const isFolder = !!it.isFolder;
-    const url = clipboard.action === 'cut' ? (isFolder ? '/MoveFolder' : '/MoveFile') : (isFolder ? '/CopyFolder' : '/CopyFile');
-    const newPath = MwdHelpers.joinPath(target.path, it.name || MwdHelpers.getFileName(it.path));
-
-    try {
-      const res = Actions.callApi({
-        url,
-        method: 'post',
-        body: {
-          path: it.path,
-          newPath,
-        },
-      });
-      results.push(res);
-    } catch (err) {
-      results.push({ error: err });
-    }
-  }
-
-  if (clipboard.action === 'cut') {
-    AppState.set('fileClipboard', null);
-  }
-
-  toast.success("Paste operation started");
-  return results;
-}

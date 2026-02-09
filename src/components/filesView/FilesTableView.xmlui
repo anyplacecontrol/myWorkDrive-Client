@@ -55,6 +55,7 @@
     paddingRight="$space-4"
     sortBy="{appState.value.sortBy}"
     sortDirection="{appState.value.sortDirection}"
+    rowsSelectable="true"
     syncWithAppState="{ selectionState }"
     items="{$props.fileEntries}"
     loading="{$props.loading}"
@@ -62,7 +63,6 @@
     iconSortDesc="arrowdown"
     iconNoSort="-"
     alwaysShowSelectionHeader="true"
-    rowsSelectable="true"
     onWillSort="(sortBy, direction) => {
       appState.update({ sortBy, sortDirection: direction });
       return true;
@@ -71,7 +71,9 @@
     hideSelectionCheckboxes="true"
     onCutAction="(row, selectedItems) => copyOrCut(selectedItems, 'cut')"
     onCopyAction="(row, selectedItems) => copyOrCut(selectedItems, 'copy')"
-    onPasteAction="(row, selectedItems) => paste(selectedItems)"
+    onPasteAction="(row, selectedItems) => {
+      window.publishTopic('PasteItemsModal:open');
+    }"
     onDeleteAction="(row, selectedItems) => window.publishTopic('DeleteItemsModal:open', { items: selectedItems })"
     canSort="true"
     onContextMenu="ev => {reselectAndOpenMenu(ev, $item)}"
