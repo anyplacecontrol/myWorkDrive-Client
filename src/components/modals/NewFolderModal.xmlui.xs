@@ -2,11 +2,12 @@
 function onSubmitClick(name) {
   const parentFolder = window.MwdHelpers.joinPath(drive, folder);
   if (!window.MwdHelpers.validateFileOperation( parentFolder + name)) {
-    newFolderModal.close();
+    toast.error(`Unable to execute operation in current folder`);
+    isDialogOpen = false;
     return;
   }
 
-  inProgress = true;
+  isFileOperationInProgress = true;
   try {
     Actions.callApi({
       url: "/CreateFile",
@@ -32,7 +33,7 @@ function onSubmitClick(name) {
       toast.error("Error creating folder");
     }
   } finally {
-    inProgress = null;
-    newFolderModal.close();
+    isDialogOpen = false;
+    isFileOperationInProgress = false;
   }
 }

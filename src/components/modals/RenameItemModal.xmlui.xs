@@ -32,10 +32,10 @@ function doRename({ path, newName, isFolder, conflictBehavior }) {
 
 // --- Handles the submit action from the rename modal
 function onSubmitClick(newName) {
-  const item = $param;
+  const item = itemToRename;
   const path = item.path;
   const isFolder = item.isFolder;
-  inProgress = true;
+  isFileOperationInProgress = true;
 
   try {
     doRename({
@@ -65,7 +65,7 @@ function onSubmitClick(newName) {
       }
     }
   } finally {
-    inProgress=null
-    renameModal.close();
+    isDialogOpen = false;
+    isFileOperationInProgress = false;
   }
 }

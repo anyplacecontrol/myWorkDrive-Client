@@ -1,9 +1,9 @@
 // --- Handles the delete button click
 function onDeleteClick() {
-  const items = $param || [];
+  const items = itemsToDelete || [];
   console.log("Deleting items:", items);
   if (items.length === 0) {
-    deleteModal.close();
+    isDialogOpen = false;
     return;
   }
 
@@ -11,14 +11,14 @@ function onDeleteClick() {
   for (const item of items) {
     if (!window.MwdHelpers.validateFileOperation(item.path)) {
       toast.error(`Unable to execute operation with: ${item.path}`);
-      deleteModal.close();
+      isDialogOpen = false;
       return;
     }
   }
 
   // Store items for later use in onDeleteComplete
   itemsToDelete = items;
-  inProgress = true;
+  isFileOperationInProgress = true;
   deleteQueue.enqueueItems(items);
 }
 
@@ -71,7 +71,7 @@ function onDeleteComplete() {
     // Refresh files list after deletion
     window.publishTopic("FilesContainer:refresh");
   } finally {
-    inProgress = null;
-    deleteModal.close();
+    isDialogOpen = false;
+    isFileOperationInProgress = false;
   }
 }

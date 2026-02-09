@@ -3,33 +3,38 @@
 -->
 <Component
   name="RenameItemModal"
-  var.inProgress="{false}"
+  var.itemToRename="{null}"
+  var.isDialogOpen="{false}"
 >
   <MessageListener onMessageReceived="(msg) => {
     if (msg && msg.type === 'RenameItemModal:open') {
+      isFileOperationInProgress = false;
       const data = msg.payload || {};
-      inProgress = false;
-      renameModal.open(data.item);
+      itemToRename = data.item;
+      isDialogOpen = true;
     }
   }"/>
   <!--
     This modal dialog allows the user to rename an item.
 
-    Parameter accessible via $param: is the item to be renamed (passed via the `open` method).
+    Item to be renamed is stored in the `itemToRename` variable.
   -->
   <ModalDialog
-    id="renameModal"
+    when="{isDialogOpen}"
     title=""
     maxWidth="560px"
-    onClose="{()=> !inProgress}"
-    var.itemType="{$param.isFolder ? 'folder' : 'file'}"
+    onClose="() => {
+      if (!isFileOperationInProgress) isDialogOpen = false;
+      return !isFileOperationInProgress;
+    }"
+    var.itemType="{itemToRename?.isFolder ? 'folder' : 'file'}"
   >
 
     <!-- The form that allows the user to rename the item. -->
     <Form
-      when="{inProgress===false}"
+      when="{!isFileOperationInProgress}"
       id="renameForm"
-      data="{{ name: $param.name }}"
+      data="{{ name: itemToRename.name }}"
       saveLabel="Rename"
       onSubmit="(data) => onSubmitClick(data.name)"
     >
@@ -48,7 +53,7 @@
         autoFocus="true"
         required="true"
         onValidate="(value) => {
-          const original = $param.name.trim();
+          const original = itemToRename.name.trim();
           if ((value && value.trim()) === original) {
             return {
               isValid: false,
@@ -60,7 +65,7 @@
         }"
       />
     </Form>
-    <InProgressPanel when="{inProgress}" message="Renaming..." />
+    <InProgressPanel message="Renaming..." />
 
   </ModalDialog>
 </Component>

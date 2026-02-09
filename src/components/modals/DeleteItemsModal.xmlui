@@ -3,57 +3,58 @@
 -->
 <Component
   name="DeleteItemsModal"
-  var.inProgress="{false}"
   var.failedItems="{[] }"
   var.itemsToDelete="{[] }"
+  var.isDialogOpen="{false}"
 >
   <MessageListener
     onMessageReceived="(msg) => {
     if (msg && msg.type === 'DeleteItemsModal:open') {
-      inProgress = false;
+      isFileOperationInProgress = false;
       failedItems = [];
-      itemsToDelete = [];
-      const data = msg.payload || {};
-      deleteModal.open(data.items || []);
+      itemsToDelete = msg.payload.items || [];
+      isDialogOpen = true;
     }
   }"
   />
   <!--
     This modal dialog asks the user to confirm deletion of items.
 
-    Parameter accessible via $param: is the array of items to be deleted (passed via the `open` method).
+    Items to be deleted are stored in the `itemsToDelete` variable.
   -->
 
-  <!-- Queue for delete operations -->
-  <Queue
-    id="deleteQueue"
-    onProcess="onDeleteQueuedItem"
-    onProcessError="onDeleteQueuedItemError"
-    onComplete="onDeleteComplete"
-    clearAfterFinish="true"
-  >
-
-    <property name="resultFeedback">
-      <Text
-        value=`Deleted {$completedItems.length} item(s)`
-      />
-    </property>
-  </Queue>
-
   <ModalDialog
-    id="deleteModal"
+    when="{isDialogOpen}"
     title=""
     maxWidth="400px"
-    onClose="{()=> !inProgress}"
+    onClose="() => {
+      if (!isFileOperationInProgress) isDialogOpen = false;
+      return !isFileOperationInProgress;
+    }"
   >
+    <!-- Queue for delete operations -->
+    <Queue
+      id="deleteQueue"
+      onProcess="onDeleteQueuedItem"
+      onProcessError="onDeleteQueuedItemError"
+      onComplete="onDeleteComplete"
+      clearAfterFinish="true"
+    >
 
-    <VStack gap="$space-4" when="{inProgress===false}">
+      <property name="resultFeedback">
+        <Text
+          value=`Deleted {$completedItems.length} item(s)`
+        />
+      </property>
+    </Queue>
+
+    <VStack gap="$space-4" when="{!isFileOperationInProgress}">
       <Icon name="circle_delete" width="$space-12" height="$space-12" />
       <h2>
-        {($param && $param.length === 1)
-            ? `Are you sure you want to delete “${$param[0].name}” ${$param[0].isFolder ? 'folder' : 'file'}?`
-            : ($param && $param.length)
-              ? `Are you sure you want to delete ${$param.length} selected items?`
+        {(itemsToDelete && itemsToDelete.length === 1)
+            ? `Are you sure you want to delete "${itemsToDelete[0].name}" ${itemsToDelete[0].isFolder ? 'folder' : 'file'}?`
+            : (itemsToDelete && itemsToDelete.length)
+              ? `Are you sure you want to delete ${itemsToDelete.length} selected items?`
               : 'Are you sure you want to delete these items?'}
       </h2>
 
@@ -65,7 +66,7 @@
           label="Cancel"
           size="lg"
           variant="outlined"
-          onClick="deleteModal.close()"
+          onClick="isDialogOpen = false"
           width="*"
         />
         <Button
@@ -79,7 +80,6 @@
       </HStack>
     </VStack>
     <InProgressPanel
-      when="{inProgress}"
       message="{ 'Remains to delete:  ' + deleteQueue.getQueueLength() + ' item(s)'  }"
     />
 
