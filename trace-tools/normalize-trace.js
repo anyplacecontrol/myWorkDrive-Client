@@ -285,22 +285,12 @@ function extractStepFromJsonLogs(trace) {
     target.selectorPath = interaction.detail.selectorPath;
   }
 
-  // Look for a unique testId in the path (one that includes the item name, like "link-foo")
-  const testIdsInPath = interaction.detail?.testIdsInPath || [];
-  const uniqueTestId = testIdsInPath.find(id =>
-    id && id.includes('-') && !['filesTable', 'fileUploadDialog', 'tree'].includes(id)
-  );
-  if (uniqueTestId) {
-    target.testId = uniqueTestId;
-    target.selector = { testId: uniqueTestId };
+  // Capture ARIA role and accessible name for Playwright getByRole selectors
+  if (interaction.detail?.ariaRole) {
+    target.ariaRole = interaction.detail.ariaRole;
   }
-
-  // For form elements, capture the form's testId
-  if (!target.testId && testIdsInPath.length > 0) {
-    const formTestId = testIdsInPath.find(id => id.includes('Form') || id.includes('Modal'));
-    if (formTestId) {
-      target.formTestId = formTestId;
-    }
+  if (interaction.detail?.ariaName) {
+    target.ariaName = interaction.detail.ariaName;
   }
 
   // Extract label from interaction detail

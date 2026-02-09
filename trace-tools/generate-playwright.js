@@ -114,112 +114,59 @@ function generateStepCode(step) {
 
 function generateClickCode(step, indent, method = 'click') {
   const lines = [];
-  const selector = step.target?.selector;
-  const testId = step.target?.testId;
   const label = step.target?.label;
-  const component = step.target?.component;
+  const ariaRole = step.target?.ariaRole;
+  const ariaName = step.target?.ariaName;
   const targetTag = step.target?.targetTag;
-  const selectorPath = step.target?.selectorPath;
-  const formTestId = step.target?.formTestId;
+  const formData = step.target?.formData;
 
-  // Skip raw HTML element clicks that have no semantic selector (svg icons, bare inputs)
-  const rawHtmlTags = ['svg', 'path', 'INPUT', 'TEXTAREA'];
-  if (rawHtmlTags.includes(targetTag) && !label && !testId && !selector?.testId && !selectorPath) {
-    lines.push(`${indent}// TODO: ${targetTag} click — needs a testId or aria-label`);
+  // Form submit: fill fields by label, then click the submit button
+  if (formData && typeof formData === 'object') {
+    for (const [fieldName, fieldValue] of Object.entries(formData)) {
+      if (typeof fieldValue === 'string') {
+        const labelName = fieldName.charAt(0).toUpperCase() + fieldName.slice(1).replace(/([A-Z])/g, ' $1');
+        lines.push(`${indent}await page.getByLabel('${labelName}').clear();`);
+        lines.push(`${indent}await page.getByLabel('${labelName}').fill('${fieldValue}');`);
+      }
+    }
+  }
+
+  // Best: ARIA role + name → getByRole(role, { name })
+  if (ariaRole && ariaName) {
+    lines.push(`${indent}await page.getByRole('${ariaRole}', { name: '${ariaName}' }).${method}();`);
     return lines;
   }
 
-  // For form button clicks, handle form data filling and button click
-  if (targetTag === 'BUTTON' && (selectorPath || formTestId)) {
-    const formData = step.target?.formData;
-    const formId = formTestId || selectorPath?.match(/\[data-testid="([^"]+)"\]/)?.[1];
-
-    // If we have form data, fill in the fields first
-    if (formData && formId) {
-      for (const [fieldName, fieldValue] of Object.entries(formData)) {
-        if (typeof fieldValue === 'string') {
-          // Use getByLabel to find inputs by their label
-          const labelName = fieldName.charAt(0).toUpperCase() + fieldName.slice(1).replace(/([A-Z])/g, ' $1');
-          lines.push(`${indent}await page.getByTestId('${formId}').getByLabel('${labelName}').clear();`);
-          lines.push(`${indent}await page.getByTestId('${formId}').getByLabel('${labelName}').fill('${fieldValue}');`);
-        }
-      }
-    }
-
-    // Now click the button
-    if (selectorPath) {
-      const match = selectorPath.match(/\[data-testid="([^"]+)"\]\s*>>\s*text=(.+)/);
-      if (match) {
-        lines.push(`${indent}await page.getByTestId('${match[1]}').getByRole('button', { name: '${match[2]}' }).${method}();`);
-        return lines;
-      }
-    }
-    if (formId && label) {
-      lines.push(`${indent}await page.getByTestId('${formId}').getByRole('button', { name: '${label}' }).${method}();`);
-      return lines;
-    }
-  }
-
-  if (selector?.testId) {
-    // Best option: use the unique testId from trace
-    lines.push(`${indent}await page.getByTestId('${selector.testId}').${method}();`);
-  } else if (testId) {
-    lines.push(`${indent}await page.getByTestId('${testId}').${method}();`);
-  } else if (selector?.role === 'treeitem' || (label && component === 'Tree')) {
-    // Tree navigation is unreliable in Playwright - convert to file list dblclick
-    // Skip 'Root' as it's the initial tree node, not a folder to navigate into
-    const name = selector?.name || label;
-    if (name && name !== 'Root') {
-      lines.push(`${indent}await page.getByTestId('link-${name}').dblclick();`);
-      // Wait briefly for folder navigation to complete
-      lines.push(`${indent}await page.waitForTimeout(1000);`);
-    }
-    // Return with special marker to skip additional await code
-    lines._skipAwait = true;
+  // ARIA role without name — accessibility gap, but still usable if unique
+  if (ariaRole && !ariaName) {
+    lines.push(`${indent}// ACCESSIBILITY GAP: ${ariaRole} has no accessible name`);
+    lines.push(`${indent}await page.getByRole('${ariaRole}').${method}();`);
     return lines;
-  } else if (selector?.role === 'menuitem') {
-    lines.push(`${indent}await page.getByRole('menuitem', { name: '${selector.name}' }).${method}();`);
-  } else if (label) {
-    // Check if this looks like a menu item (short label, DIV tag, after contextmenu)
-    if (targetTag === 'DIV' && label.length < 20 && !label.includes(' ')) {
-      // Likely a menu item
-      lines.push(`${indent}await page.getByRole('menuitem', { name: '${label}' }).${method}();`);
-    } else if (targetTag === 'BUTTON') {
-      lines.push(`${indent}await page.getByRole('button', { name: '${label}' }).${method}();`);
-    } else {
-      // Try text-based selector
-      lines.push(`${indent}await page.getByText('${label}').${method}();`);
-    }
-  } else if (component) {
-    // Fallback to test id if available
-    lines.push(`${indent}await page.getByTestId('${component}').${method}();`);
-  } else {
-    lines.push(`${indent}// TODO: need selector for ${method}`);
   }
 
+  // Fallback: use label with getByText (exact match to avoid ambiguity)
+  if (label) {
+    lines.push(`${indent}await page.getByText('${label}', { exact: true }).${method}();`);
+    return lines;
+  }
+
+  // No ARIA, no label — not actionable
+  lines.push(`${indent}// ACCESSIBILITY GAP: ${targetTag || 'element'} has no role or accessible name`);
   return lines;
 }
 
 function generateContextMenuCode(step, indent) {
   const lines = [];
-  const testId = step.target?.testId;
+  const ariaRole = step.target?.ariaRole;
+  const ariaName = step.target?.ariaName;
   const label = step.target?.label;
-  const component = step.target?.component;
 
-  if (testId) {
-    // Best option: use the unique testId
-    lines.push(`${indent}await page.getByTestId('${testId}').click({ button: 'right' });`);
+  if (ariaRole && ariaName) {
+    lines.push(`${indent}await page.getByRole('${ariaRole}', { name: '${ariaName}' }).click({ button: 'right' });`);
   } else if (label) {
-    // Fallback: use text to find the element
-    lines.push(`${indent}await page.getByText('${label}').click({ button: 'right' });`);
-  } else if (step.target?.selectedPath) {
-    // Use the path to construct a selector
-    const name = step.target.selectedPath.split('/').pop();
-    lines.push(`${indent}await page.getByText('${name}').click({ button: 'right' });`);
-  } else if (component) {
-    lines.push(`${indent}await page.getByTestId('${component}').click({ button: 'right' });`);
+    lines.push(`${indent}await page.getByText('${label}', { exact: true }).click({ button: 'right' });`);
   } else {
-    lines.push(`${indent}// TODO: need selector for contextmenu`);
+    lines.push(`${indent}// ACCESSIBILITY GAP: context menu target has no role or accessible name`);
   }
 
   return lines;
