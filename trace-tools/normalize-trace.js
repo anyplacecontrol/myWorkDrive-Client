@@ -263,6 +263,13 @@ function extractStepFromJsonLogs(trace) {
     return null; // Skip non-interaction traces (message handlers, etc.)
   }
 
+  // Skip inspector UI interactions — not part of user journey
+  if (interaction.componentLabel === 'XMLUI Inspector' ||
+      interaction.componentType === 'XSInspector' ||
+      (interaction.detail?.text || '').includes('XMLUI Inspector')) {
+    return null;
+  }
+
   const target = {
     component: interaction.componentType || interaction.componentLabel,
     label: null
@@ -341,7 +348,9 @@ function extractStepFromJsonLogs(trace) {
   if (!target.label && interaction.componentLabel) {
     const label = interaction.componentLabel;
     const isGeneric = /^[A-Z][a-z]+[A-Z]|^(HStack|VStack|Tree|Stack|Box|Link|Text)$/.test(label);
-    if (!isGeneric) {
+    // Also skip raw HTML element names used as labels (svg, input, div, etc.)
+    const isHtmlTag = /^(svg|path|input|textarea|div|span|button|a|img|label|select|option|ul|li|ol|tr|td|th|table|form|section|header|footer|nav|main|aside|article)$/i.test(label);
+    if (!isGeneric && !isHtmlTag) {
       target.label = label;
     }
   }

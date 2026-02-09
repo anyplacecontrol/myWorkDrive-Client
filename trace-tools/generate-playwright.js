@@ -68,12 +68,13 @@ function generateStepCode(step) {
         const firstApi = step.await.api[0];
         const endpoint = extractEndpointPath(firstApi);
         // Wait for initial data load by combining goto with response wait
+        // Use './' so Playwright resolves relative to baseURL (preserves path like /ui/)
         lines.push(`${indent}await Promise.all([`);
         lines.push(`${indent}  page.waitForResponse(r => r.url().includes('${endpoint}')),`);
-        lines.push(`${indent}  page.goto('/my-files'),`);
+        lines.push(`${indent}  page.goto('./'),`);
         lines.push(`${indent}]);`);
       } else {
-        lines.push(`${indent}await page.goto('/my-files');`);
+        lines.push(`${indent}await page.goto('./');`);
       }
       break;
 
@@ -121,6 +122,13 @@ function generateClickCode(step, indent, method = 'click') {
   const selectorPath = step.target?.selectorPath;
   const formTestId = step.target?.formTestId;
 
+  // Skip raw HTML element clicks that have no semantic selector (svg icons, bare inputs)
+  const rawHtmlTags = ['svg', 'path', 'INPUT', 'TEXTAREA'];
+  if (rawHtmlTags.includes(targetTag) && !label && !testId && !selector?.testId && !selectorPath) {
+    lines.push(`${indent}// TODO: ${targetTag} click — needs a testId or aria-label`);
+    return lines;
+  }
+
   // For form button clicks, handle form data filling and button click
   if (targetTag === 'BUTTON' && (selectorPath || formTestId)) {
     const formData = step.target?.formData;
@@ -163,7 +171,8 @@ function generateClickCode(step, indent, method = 'click') {
     const name = selector?.name || label;
     if (name && name !== 'Root') {
       lines.push(`${indent}await page.getByTestId('link-${name}').dblclick();`);
-      lines.push(`${indent}await page.waitForResponse(r => r.url().includes('ListFolder')).catch(() => {});`);
+      // Wait briefly for folder navigation to complete
+      lines.push(`${indent}await page.waitForTimeout(1000);`);
     }
     // Return with special marker to skip additional await code
     lines._skipAwait = true;
@@ -175,6 +184,8 @@ function generateClickCode(step, indent, method = 'click') {
     if (targetTag === 'DIV' && label.length < 20 && !label.includes(' ')) {
       // Likely a menu item
       lines.push(`${indent}await page.getByRole('menuitem', { name: '${label}' }).${method}();`);
+    } else if (targetTag === 'BUTTON') {
+      lines.push(`${indent}await page.getByRole('button', { name: '${label}' }).${method}();`);
     } else {
       // Try text-based selector
       lines.push(`${indent}await page.getByText('${label}').${method}();`);
@@ -245,7 +256,10 @@ function extractEndpointPath(endpoint) {
     // Remove query params for matching
     return endpoint.split('?')[0].replace(/^\//, '');
   }
-  return 'ListFolder'; // default
+  if (endpoint?.endpoint) {
+    return endpoint.endpoint.split('?')[0].replace(/^\//, '');
+  }
+  return '';
 }
 
 // Export
