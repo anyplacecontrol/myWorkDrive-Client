@@ -1,3 +1,19 @@
+// --- Handles incoming message to open delete modal
+function handleMessageReceived(msg) {
+  if (msg && msg.type === 'DeleteItemsModal:open') {
+    isFileOperationInProgress = false;
+    failedItems = [];
+    itemsToDelete = msg.payload.items || [];
+    isDialogOpen = true;
+  }
+}
+
+// --- Handles modal close
+function handleClose() {
+  if (!isFileOperationInProgress) isDialogOpen = false;
+  return !isFileOperationInProgress;
+}
+
 // --- Handles the delete button click
 function onDeleteClick() {
   const items = itemsToDelete || [];

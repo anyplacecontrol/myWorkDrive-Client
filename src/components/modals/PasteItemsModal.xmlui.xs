@@ -7,6 +7,12 @@ function onProcessQueuedItem(eventArgs) {
   return Actions.delay(500);
 }
 
+// --- Handles modal close
+function handleClose() {
+  if (!isFileOperationInProgress) isDialogOpen = false;
+  return !isFileOperationInProgress;
+}
+
 // --- Called when paste queue completes all items
 function onPasteComplete() {
   try {
@@ -45,15 +51,20 @@ function onPasteMessageReceived(msg) {
     return;
   }
 
-  // Compute destination path from current drive/folder
-  const drive = getCurrentDrive();
-  const folder = getCurrentFolder();
-  const destPath = window.MwdHelpers.joinPath(drive, folder);
+  // Compute destination path: use targetPath from message if provided, otherwise use current drive/folder
+  let destPath;
+  if (msg.targetPath) {
+    destPath = msg.targetPath;
+  } else {
+    const drive = getCurrentDrive();
+    const folder = getCurrentFolder();
+    destPath = window.MwdHelpers.joinPath(drive, folder);
+  }
   const pathAfterCopying = window.MwdHelpers.joinPath(destPath, "someFile");
 
   // Validate destination folder is valid for file operations
   if (!window.MwdHelpers.validateFileOperation(pathAfterCopying)) {
-    toast.error(`Cannot paste into the current folder`);
+    toast.error(`Cannot paste into the target folder: ${pathAfterCopying}`);
     isDialogOpen = false;
 
     return;
@@ -62,8 +73,29 @@ function onPasteMessageReceived(msg) {
   // Prevent pasting into the same folder as the first item
   const firstItemPath = clipboard.items[0] && clipboard.items[0].path;
   if (firstItemPath && destPath && firstItemPath.includes(destPath)) {
-    toast.error("Cannot paste into the same folder");
+    toast.error(`Cannot paste into the same folder you copied from: ${destPath}`);
     isDialogOpen = false;
+    return;
+  }
+
+  // Ask user for confirmation before pasting (ENGLISH, with File/Folder type)
+  let itemsDescription;
+  if (clipboard.items.length === 1) {
+    const item = clipboard.items[0];
+    const typeLabel = item.isFolder ? "Folder" : "File";
+    itemsDescription = `${typeLabel}: \"${item.name}\"`;
+  } else {
+    itemsDescription = `${clipboard.items.length} items`;
+  }
+  const actionText = clipboard.action === "cut" ? "move" : "copy";
+  const folderName = window.MwdHelpers.getFileName(destPath) || destPath;
+
+  const userConfirmed = confirm(
+    `Paste Confirmation`,
+    `Do you want to ${actionText} ${itemsDescription} to \"${folderName}\"?`,
+    "Paste"
+  );
+  if (!userConfirmed) {
     return;
   }
 

@@ -10,7 +10,7 @@
     import { getCurrentDrive, getCurrentFolder } from "../../shared.xs";
   </script>
 
-  <MessageListener onMessageReceived="(msg) => onPasteMessageReceived(msg)" />
+  <MessageListener onMessageReceived="msg => onPasteMessageReceived(msg)" />
 
   <!-- Queue for paste operations -->
   <Queue
@@ -36,10 +36,7 @@
     when="{isDialogOpen==true}"
     title=""
     maxWidth="400px"
-    onClose="() => {
-      if (!isFileOperationInProgress) isDialogOpen = false;
-      return !isFileOperationInProgress;
-    }"
+    onClose="handleClose"
   >
     <InProgressPanel
       message="{ (clipboardData && clipboardData.action === 'cut' ? 'Moving' : 'Copying') + ' files... Remains: ' + pasteQueue.getQueueLength() + ' item(s)' }"

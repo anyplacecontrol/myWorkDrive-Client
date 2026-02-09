@@ -1,6 +1,21 @@
+
+// --- Handles incoming message to open new folder modal
+function handleMessageReceived(msg) {
+  if (msg && msg.type === 'NewFolderModal:open') {
+    isFileOperationInProgress = false;
+    isDialogOpen = true;
+  }
+}
+
+// --- Handles modal close
+function handleClose() {
+  if (!isFileOperationInProgress) isDialogOpen = false;
+  return !isFileOperationInProgress;
+}
+
 // --- Handles the submit action from the new folder modal
 function onSubmitClick(name) {
-  const parentFolder = window.MwdHelpers.joinPath(drive, folder);
+  const parentFolder = window.MwdHelpers.joinPath(getCurrentDrive(), getCurrentFolder());
   if (!window.MwdHelpers.validateFileOperation( parentFolder + name)) {
     toast.error(`Unable to execute operation in current folder`);
     isDialogOpen = false;

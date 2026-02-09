@@ -1,4 +1,30 @@
 
+// Handle incoming messages
+function handleMessageReceived(msg) {
+  if (msg.type === 'FoldersTree:rename') handleRenameTreeNode(msg.payload);
+  else if (msg.type === 'FoldersTree:insert') handleInsertFolder(msg.payload);
+  else if (msg.type === 'FoldersTree:delete') handleDeleteFolders(msg.payload);
+  else if (msg.type === 'FoldersTree:collapse') handleCollapseRoot();
+}
+
+function treeNodeToFolderItem(node) {
+  if (!node) return null;
+  return {
+    name: node.name,
+    path: node.id,
+    isFolder: true
+  };
+}
+
+// Handle context menu on tree node
+function handleTreeContextMenu(ev, node, contextMenu) {
+  delay(300);
+  const folderItem = treeNodeToFolderItem(node);
+  const targetPath = node.id; // Use the node's id (path) as targetPath
+  if (folderItem && targetPath)
+    contextMenu.openAt(ev, { selectedItems: [folderItem], targetPath });
+}
+
 function mapFolderItemsToNodes(items) {
   return (items || [])
     .filter((item) => item.isFolder)

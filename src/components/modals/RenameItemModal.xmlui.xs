@@ -1,3 +1,32 @@
+// --- Handles incoming message to open rename modal
+function handleMessageReceived(msg) {
+  if (msg && msg.type === 'RenameItemModal:open') {
+    isFileOperationInProgress = false;
+    const data = msg.payload || {};
+    itemToRename = data.item;
+    isDialogOpen = true;
+  }
+}
+
+// --- Handles modal close
+function handleClose() {
+  if (!isFileOperationInProgress) isDialogOpen = false;
+  return !isFileOperationInProgress;
+}
+
+// --- Validates new name
+function handleValidateName(value) {
+  const original = itemToRename.name.trim();
+  if ((value && value.trim()) === original) {
+    return {
+      isValid: false,
+      severity: 'error',
+      invalidMessage: 'The specified name is the same as the current name.',
+    };
+  }
+  return true;
+}
+
 // --- Executes the rename operation
 function doRename({ path, newName, isFolder, conflictBehavior }) {
   // Validate if operation is allowed

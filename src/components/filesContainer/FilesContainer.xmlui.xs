@@ -1,1 +1,26 @@
-// Message handling moved to BusHandler in markup
+var drive = getCurrentDrive();
+var folder = getCurrentFolder();
+
+var sortedFiles = MwdHelpers.sortFiles(
+  fileCatalogData.value,
+  appState.value.sortBy,
+  appState.value.sortDirection
+);
+
+var isAnyFiles = sortedFiles.length > 0 && !fileCatalogData.loading;
+
+function handleTreeContextMenu(ev) {
+  const targetPath = window.MwdHelpers.joinPath(drive, folder);
+  dropZoneContextMenu.openAt(ev, { selectedItems: [], targetPath });
+}
+
+function transformResult(result) {
+  const requestPath = window.MwdHelpers.joinPath(drive, folder);
+  const filtered = MwdHelpers.filterListResults(result, requestPath);
+  return filtered.map((item) => {
+    let item_ = JSON.parse(JSON.stringify(item));
+    item_.id = item.path;
+    item_.type = item.isFolder ? "Folder" : "File " + getFileExtension(item.path);
+    return item_;
+  });
+}

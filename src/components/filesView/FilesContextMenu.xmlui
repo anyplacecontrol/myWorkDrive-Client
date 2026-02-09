@@ -1,8 +1,9 @@
 <!--
   Content of Context Menu for files view
 
-  Properties:
-  - `selectedItems`: The list of currently selected files/folders (their paths)
+  Context ($context):
+  - `selectedItems`: The list of currently selected files/folders
+  - `targetPath`: The target folder path for paste operations
 -->
 
 <Component
@@ -10,28 +11,6 @@
 >
   <script>
   import { downloadFile, copyOrCut, paste } from "../../shared.xs";
-
-  function isAnythingSelected() {
-    return $props.selectedItems && $props.selectedItems.length > 0;
-  }
-
-  function isSingleSelection() {
-    return $props.selectedItems.length === 1;
-  }
-
-  function isMultipleSelection() {
-    return $props.selectedItems.length > 1;
-  }
-
-  function isAnyFolder() {
-    return $props.selectedItems.length > 0 &&
-           $props.selectedItems.some(item => item.isFolder)
-  }
-
-  function isSingleFile() {
-    return $props.selectedItems.length === 1 &&
-           !$props.selectedItems[0].isFolder;
-  }
   </script>
 
   <AppState id="selectionState" bucket="fileCatalogSelection" />
@@ -57,7 +36,7 @@
   <MenuItem
     icon="cmd_download_file"
     when="{isSingleFile()}"
-    onClick="downloadFile($props.selectedItems[0])"
+    onClick="downloadFile($context.selectedItems[0])"
   >
     Download to PC
   </MenuItem>
@@ -109,7 +88,7 @@
   <MenuItem
     when="{isAnythingSelected()}"
     icon="cmd_copy"
-    onClick="copyOrCut($props.selectedItems, 'copy')"
+    onClick="copyOrCut($context.selectedItems, 'copy')"
   >
     Copy
   </MenuItem>
@@ -117,7 +96,7 @@
   <MenuItem
     when="{isAnythingSelected()}"
     icon="cmd_cut"
-    onClick="copyOrCut($props.selectedItems, 'cut')"
+    onClick="copyOrCut($context.selectedItems, 'cut')"
   >
     Cut
   </MenuItem>
@@ -125,7 +104,7 @@
   <MenuItem
     icon="cmd_paste"
     onClick="() => {
-      window.publishTopic('PasteItemsModal:open');
+      window.publishTopic('PasteItemsModal:open', { targetPath: $context.targetPath });
     }"
   >
     Paste
@@ -137,14 +116,14 @@
   <MenuItem
     icon="cmd_rename"
     when="{isSingleSelection()}"
-    onClick="window.publishTopic('RenameItemModal:open', { item: $props.selectedItems[0] })"
+    onClick="window.publishTopic('RenameItemModal:open', { item: $context.selectedItems[0] })"
   >
     Rename
   </MenuItem>
   <MenuItem
     when="{isAnythingSelected()}"
     icon="cmd_delete"
-    onClick="window.publishTopic('DeleteItemsModal:open', { items: $props.selectedItems })"
+    onClick="window.publishTopic('DeleteItemsModal:open', { items: $context.selectedItems })"
   >
     Delete
   </MenuItem>

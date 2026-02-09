@@ -7,16 +7,7 @@
   var.itemsToDelete="{[] }"
   var.isDialogOpen="{false}"
 >
-  <MessageListener
-    onMessageReceived="(msg) => {
-    if (msg && msg.type === 'DeleteItemsModal:open') {
-      isFileOperationInProgress = false;
-      failedItems = [];
-      itemsToDelete = msg.payload.items || [];
-      isDialogOpen = true;
-    }
-  }"
-  />
+  <MessageListener onMessageReceived="msg => handleMessageReceived(msg)" />
   <!--
     This modal dialog asks the user to confirm deletion of items.
 
@@ -27,10 +18,7 @@
     when="{isDialogOpen}"
     title=""
     maxWidth="400px"
-    onClose="() => {
-      if (!isFileOperationInProgress) isDialogOpen = false;
-      return !isFileOperationInProgress;
-    }"
+    onClose="handleClose"
   >
     <!-- Queue for delete operations -->
     <Queue

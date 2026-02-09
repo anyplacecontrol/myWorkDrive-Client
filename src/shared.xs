@@ -61,6 +61,13 @@ function copyOrCut(items, action) {
   const list = Array.isArray(items) ? items : [];
   if (list.length === 0) return;
 
+  // Validate first item to ensure copy/cut operation is allowed
+  const firstItem = list[0];
+  if (!window.MwdHelpers.validateFileOperation(firstItem.path)) {
+    toast.error(`Unable to execute operation "${action}" with: ${firstItem.path}`);
+    return;
+  }
+
   const payload = {
     action: action === "cut" ? "cut" : "copy",
     items: list

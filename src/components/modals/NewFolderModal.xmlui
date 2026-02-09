@@ -7,18 +7,9 @@
 >
   <script>
     import { getCurrentDrive, getCurrentFolder } from "../../shared.xs";
-    var drive = getCurrentDrive();
-    var folder = getCurrentFolder();
   </script>
 
-  <MessageListener
-    onMessageReceived="(msg) => {
-    if (msg && msg.type === 'NewFolderModal:open') {
-      isFileOperationInProgress = false;
-      isDialogOpen = true;
-    }
-  }"
-  />
+  <MessageListener onMessageReceived="msg => handleMessageReceived(msg)" />
   <!--
     This modal dialog allows the user to create a new folder.
   -->
@@ -27,10 +18,7 @@
     when="{isDialogOpen}"
     title=""
     maxWidth="560px"
-    onClose="() => {
-      if (!isFileOperationInProgress) isDialogOpen = false;
-      return !isFileOperationInProgress;
-    }"
+    onClose="handleClose"
   >
 
     <!-- The form that allows the user to create a new folder. -->

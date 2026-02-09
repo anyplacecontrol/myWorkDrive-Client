@@ -14,16 +14,11 @@
     import { navigateTo } from "../../shared.xs";
   </script>
 
-  <MessageListener onMessageReceived="(msg) => {
-    if (msg.type === 'FoldersTree:rename') handleRenameTreeNode(msg.payload);
-    else if (msg.type === 'FoldersTree:insert') handleInsertFolder(msg.payload);
-    else if (msg.type === 'FoldersTree:delete') handleDeleteFolders(msg.payload);
-    else if (msg.type === 'FoldersTree:collapse') handleCollapseRoot();
-  }"/>
+  <MessageListener onMessageReceived="msg => handleMessageReceived(msg)"/>
 
   <!-- Context menu for tree nodes -->
   <ContextMenu id="contextMenu" menuWidth="220px">
-    <FoldersContextMenu selectedNode="{$context}" />
+    <FilesContextMenu />
   </ContextMenu>
 
   <!-- Panel with fixed toolbar (46px) and scrollable tree area below -->
@@ -58,7 +53,7 @@
             }]}"
       onLoadChildren="loadChildren"
       onSelectionDidChange="(event) => navigateTo(event.newNode)"
-      onContextMenu="ev => {delay(300); contextMenu.openAt(ev, $item)}"
+      onContextMenu="ev => handleTreeContextMenu(ev, $item, contextMenu)"
       dynamic="true"
     >
       <template name="itemTemplate">
