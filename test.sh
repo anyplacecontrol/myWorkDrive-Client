@@ -65,8 +65,9 @@ case "${1:-help}" in
     node "$TRACE_TOOLS/generate-playwright.js" "$ABS_BASELINE" "$2" > "$TEST_FILE"
     echo "Generated: $TEST_FILE"
 
-    # Run test
+    # Run test (clean stale capture first)
     cd "$TRACE_TOOLS"
+    rm -f captured-trace.json
     TEST_OUTPUT=$(mktemp)
     npx playwright test "generated-$2.spec.ts" > "$TEST_OUTPUT" 2>&1
     TEST_EXIT=$?
@@ -83,6 +84,12 @@ case "${1:-help}" in
       echo "FAIL — Selector error (see below)"
       echo ""
       grep -A 10 "Error:" "$TEST_OUTPUT" | head -15
+    fi
+
+    # Show XMLUI runtime errors and browser errors from test output
+    if grep -q "XMLUI RUNTIME ERRORS\|BROWSER ERRORS" "$TEST_OUTPUT"; then
+      echo ""
+      grep -A 50 "XMLUI RUNTIME ERRORS\|BROWSER ERRORS" "$TEST_OUTPUT"
     fi
     echo ""
 

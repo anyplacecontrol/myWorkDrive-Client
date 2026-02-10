@@ -7052,27 +7052,12 @@
         } else if (format === "html") {
           downloadFile(`xs-diff-${timestamp}.html`, generateHtmlExport(processed), "text/html");
         } else if (format === "json") {
-          // Export raw logs directly for Playwright test generation
-          // Start from parent (skip iframe's own window which has localStorage merged)
-          // Make a copy immediately to avoid race conditions with log splicing
-          let rawLogs = [];
-          let win = window.parent;
-          while (win) {
-            try {
-              if (win._xsLogs && win._xsLogs.length > rawLogs.length) {
-                rawLogs = [...win._xsLogs]; // Copy to avoid mutation
-              }
-              if (win.parent && win.parent !== win) {
-                win = win.parent;
-              } else {
-                break;
-              }
-            } catch (e) {
-              break; // Cross-origin, stop traversing
-            }
-          }
-          console.log(`Exporting ${rawLogs.length} raw entries as JSON for Playwright`);
-          console.log(`MoveFile entries: ${rawLogs.filter(e=>e.url?.includes('MoveFile')).length}`);
+          // Export all entries (live _xsLogs merged with localStorage) for Playwright test generation.
+          // Using getAllEntries() ensures interaction events aren't lost when the rolling
+          // _xsLogs buffer (xsLogMax) is overwritten by periodic polling events.
+          const rawLogs = getAllEntries().sort((a, b) => (a.perfTs || a.ts || 0) - (b.perfTs || b.ts || 0));
+          console.log(`Exporting ${rawLogs.length} entries as JSON for Playwright`);
+          console.log(`Interaction entries: ${rawLogs.filter(e=>e.kind === 'interaction').length}`);
           if (rawLogs.length === 0) {
             alert("No logs found. Try running this in the app console:\ncopy(JSON.stringify(window._xsLogs, (k,v) => v instanceof Node || v instanceof Window || typeof v === 'function' ? undefined : v))");
             return;
