@@ -106,6 +106,7 @@ case "${1:-help}" in
     echo "═══════════════════════════════════════════════════════════════"
 
     rm -f "$TEST_OUTPUT"
+    rm -f "$TEST_FILE"
 
     # Exit 0 if semantics match even if a selector failed
     if [ $TEST_EXIT -ne 0 ] && echo "$SEMANTIC_OUTPUT" | grep -q "Traces match semantically"; then

@@ -142,3 +142,74 @@ npm run release-prod
 - **Old prototype of web-client:** available here:
 
    https://github.com/xmlui-org/myworkdrive-ui
+
+## Regression testing
+
+This app uses [trace-tools](https://github.com/xmlui-org/trace-tools) to auto-generate Playwright regression tests from XMLUI inspector traces. See the [trace-tools README](https://github.com/xmlui-org/trace-tools#readme) for full documentation.
+
+### Quick start
+
+```bash
+git clone https://github.com/xmlui-org/trace-tools.git
+cd trace-tools && npm install && npx playwright install chromium && cd ..
+```
+
+The app must be running via `npm run start:dev` (serves at http://localhost:5173). No auth configuration needed.
+
+### Available baselines
+
+- `rename-file-roundtrip` — right-click a file, rename it, then rename it back
+
+### Example: capturing and running a test
+
+Start the app with `npm run start:dev`, open the XMLUI inspector, perform the journey, then Export → Download JSON. The inspector prompts for a filename — enter `rename-file-roundtrip`. The browser saves it to your Downloads folder.
+
+Save it as a baseline:
+
+```bash
+./test.sh save ~/Downloads/rename-file-roundtrip.json rename-file-roundtrip
+```
+
+```
+Saved baseline: rename-file-roundtrip
+Journey: 8 steps, 125 events
+  APIs: GET /ListFolder, POST /MoveFile
+```
+
+Run the regression test:
+
+```bash
+./test.sh run rename-file-roundtrip
+```
+
+```
+═══════════════════════════════════════════════════════════════
+                    REGRESSION TEST: rename-file-roundtrip
+═══════════════════════════════════════════════════════════════
+
+PASS — Journey completed successfully
+
+✓ Traces match semantically
+
+Before:
+  APIs: GET /ListFolder, POST /MoveFile
+
+After:
+  APIs: GET /ListFolder, POST /MoveFile
+
+SEMANTIC: PASS — Same APIs, forms, and navigation
+
+═══════════════════════════════════════════════════════════════
+```
+
+After refactoring, run the same test. SEMANTIC: PASS means the app still makes the same API calls in the same order. SEMANTIC: FAIL means something changed.
+
+### Commands
+
+```bash
+./test.sh list                          # List available baselines
+./test.sh run rename-file-roundtrip     # Run a regression test
+./test.sh run-all                       # Run all baselines
+./test.sh save ~/Downloads/t.json name  # Save a new baseline from a captured trace
+./test.sh update name                   # Promote latest capture to baseline
+```
