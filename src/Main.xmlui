@@ -4,7 +4,6 @@
   loggedInUser="{null}"
   scrollWholePage="false"
   paddingVertical="0"
-  var.hasRedirected="{false}"
 >
 
   <script>
@@ -52,7 +51,10 @@
         url="/ListShares"
         resultSelector="shares"
         transformResult="{transformShares}"
-        onLoaded="{(data, isRefetch) => handleSharesLoaded(data, isRefetch)}"
+      />
+      <ChangeListener
+        listenTo="{[$queryParams.drive, sharesData.value]}"
+        onDidChange="handleDriveOrSharesChange"
       />
       <HSplitter initialPrimarySize="260px">
 

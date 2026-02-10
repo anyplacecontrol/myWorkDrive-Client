@@ -17,17 +17,24 @@ function transformShares(shares) {
 		});
 }
 
-function handleSharesLoaded(data, isRefetch) {
-	if (isRefetch || hasRedirected) return;
-	if (!data || !data.length) return;
+var hasRedirected = false;
 
-	const drive = getCurrentDrive();
-	if (drive) return;
+function handleDriveOrSharesChange({ prevValue, newValue }) {
+	if (!newValue || newValue.length !== 2) return;
 
-	const first = data[0];
-	if (!first || !first.drivePath) return;
+	const drive = newValue[0];
+	const shares = newValue[1];
+
+	if (drive) {
+		hasRedirected = false;
+		return;
+	}
+
+	if (!shares || !shares.length) return;
+	if (hasRedirected) return;
 
 	hasRedirected = true;
-	const targetUrl = window.MwdHelpers.buildNavigationUrl(first.drivePath);
+	const targetUrl = window.MwdHelpers.buildNavigationUrl(shares[0].drivePath);
 	if (targetUrl) Actions.navigate(targetUrl);
 }
+
