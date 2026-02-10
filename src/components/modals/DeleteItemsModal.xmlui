@@ -24,17 +24,9 @@
     <Queue
       id="deleteQueue"
       onProcess="onDeleteQueuedItem"
-      onProcessError="onDeleteQueuedItemError"
       onComplete="onDeleteComplete"
       clearAfterFinish="true"
-    >
-
-      <property name="resultFeedback">
-        <Text
-          value=`Deleted {$completedItems.length} item(s)`
-        />
-      </property>
-    </Queue>
+    />
 
     <VStack gap="$space-4" when="{!gIsFileOperationInProgress}">
       <Icon name="circle_delete" width="$space-12" height="$space-12" />

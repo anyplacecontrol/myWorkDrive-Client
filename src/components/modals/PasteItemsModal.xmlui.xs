@@ -102,5 +102,11 @@ function onPasteMessageReceived(msg) {
 
   // Auto-start the paste queue
   gIsFileOperationInProgress = true;
-  pasteQueue.enqueueItems(clipboard.items);
+  pasteQueue.enqueueItems(clipboard.items.map((item) => {
+      const item_ = JSON.parse(JSON.stringify(item));
+      item_.newPath = window.MwdHelpers.joinPath(destPath, item.name);
+      item_.action = clipboard.action;
+      item_.conflictBehavior = "fail";
+      return item_;
+    }));
 }

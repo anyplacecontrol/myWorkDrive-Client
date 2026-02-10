@@ -197,6 +197,12 @@
           }
           return `${items.length} items`;
         },
+        // Set a property on the window object by name
+        setWindowProperty: (name, value) => {
+          window[name] = value;
+        },
+        // (getter removed - use direct window access)
+        // (array-push helper removed - use direct window access)
       };
 
       // Global event bus using window.postMessage

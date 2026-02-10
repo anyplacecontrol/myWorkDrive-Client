@@ -47,33 +47,54 @@ function onDeleteClick() {
   deleteQueue.enqueueItems(items);
 }
 
-// --- Processes a single queued item for deletion
-function onDeleteQueuedItem(eventArgs) {
-  const item = eventArgs.item;
+// --- Executes the delete operation for a single item
+function doDelete({ item, actionWhenNotEmpty }) {
   const url = item.isFolder ? "/DeleteFolder" : "/DeleteFile";
+  const queryParams = {
+    path: item.path,
+  };
+
+  // For folders, add recursive deletion parameters if specified
+  if (item.isFolder && actionWhenNotEmpty) {
+    queryParams.actionWhenNotEmpty = actionWhenNotEmpty;
+    queryParams.listFailedItems = true;
+  }
+
   Actions.callApi({
     url,
-    method: "delete",
-    queryParams: {
-      path: item.path,
-    },
+    method: "post",
+    queryParams,
     invalidates: [],
   });
 }
 
-// --- Handles errors during delete queue processing
-function onDeleteQueuedItemError(error, eventArgs) {
+// --- Processes a single queued item for deletion
+function onDeleteQueuedItem(eventArgs) {
   const item = eventArgs.item;
 
-  // Track failed item
-  failedItems.push(item);
+  try {
+    doDelete({ item, actionWhenNotEmpty: item.actionWhenNotEmpty || null });
+  } catch (error) {
+    // Handle 417 error (folder not empty) with user confirmation
+    if (error.statusCode === 417 && confirm({
+      title: "Delete non-empty folder?",
+      message: `The folder "${item.name}" is not empty.`,
+      buttons: [{ label: "Yes", value: true }]
+    })) {
+      try {
+        doDelete({ item, actionWhenNotEmpty: "stopOnError" });
+        return; // Success - exit without tracking as failed
+      } catch (retryError) {
+        // Fall through to error handling below
+      }
+    }
 
-  if (error.statusCode === 417) {
-    signError(`The folder ${item.name} is not empty, it cannot be deleted.`);
-  } else {
-    signError(`Error deleting ${item.name}.`);
+    // Track failed item and show toast for non-417 errors
+    failedItems.push(item);
+    if (error.statusCode !== 417) {
+      toast.error(`Error deleting "${item.name}".`);
+    }
   }
-  return false;
 }
 // --- Called when delete queue completes all items
 function onDeleteComplete() {
@@ -95,6 +116,16 @@ function onDeleteComplete() {
 
     // Refresh files list after deletion
     window.publishTopic("FilesContainer:refresh");
+
+    // Show completion toast
+    const deletedCount = allItems.length - failedItems.length;
+    const failedCount = failedItems.length;
+
+    if (failedCount > 0) {
+      toast.success(`Deleted ${deletedCount} item(s), ${failedCount} failed.`);
+    } else {
+      toast.success(`Deleted ${deletedCount} item(s).`);
+    }
   } finally {
     isDialogOpen = false;
     gIsFileOperationInProgress = false;
