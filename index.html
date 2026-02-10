@@ -107,8 +107,21 @@
             : undefined,
 
         // --- Get the file/folder name from the full path
+        // Handles two forms:
+        // 1) Drive-prefixed paths like ":sh:Projects:/" -> returns "Projects"
+        // 2) Drive-prefixed paths with additional path ":sh:Projects:/folder/file.txt" -> returns "file.txt"
+        // 3) Regular paths "/a/b/file.txt" -> returns "file.txt"
         getFileName: (filePath) => {
           if (!filePath) return '';
+          if (filePath.startsWith(':')) {
+            const segs = filePath.split(':');
+            const driveName = segs[2] || '';
+            const after = segs[3] || '';
+            const cleanAfter = after.replace(/^\/+/g, '').replace(/\/+$|^\/+$|\/+$/g, '');
+            if (!cleanAfter) return driveName;
+            const parts = cleanAfter.split('/');
+            return parts[parts.length - 1] || driveName;
+          }
           const normalized = filePath.replace(/\/+$/g, '');
           const lastSlash = normalized.lastIndexOf('/');
           return lastSlash >= 0 ? normalized.substring(lastSlash + 1) : normalized;
@@ -163,6 +176,26 @@
             }
           });
           return sorted;
+        },
+        // Format items array into a human-readable summary:
+        // - single file: file "filename"
+        // - single folder: folder "foldername"
+        // - multiple items: "N items"
+        // Uses `getFileName` transformation to derive display name from drive-prefixed paths.
+        formatItemsSummary: (items) => {
+          if (!items || !Array.isArray(items) || items.length === 0) return `0 items`;
+          if (items.length === 1) {
+            var it = items[0];
+            var kind = (it && it.isFolder) ? `folder` : `file`;
+            var name = '';
+            if (it && it.path) {
+              name = MwdHelpers.getFileName(it.path) || '';
+            } else if (it && it.name) {
+              name = it.name;
+            }
+            return `${kind} "${name}"`;
+          }
+          return `${items.length} items`;
         },
       };
 

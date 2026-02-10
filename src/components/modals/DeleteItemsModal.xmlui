@@ -39,11 +39,7 @@
     <VStack gap="$space-4" when="{!isFileOperationInProgress}">
       <Icon name="circle_delete" width="$space-12" height="$space-12" />
       <h2>
-        {(itemsToDelete && itemsToDelete.length === 1)
-            ? `Are you sure you want to delete "${itemsToDelete[0].name}" ${itemsToDelete[0].isFolder ? 'folder' : 'file'}?`
-            : (itemsToDelete && itemsToDelete.length)
-              ? `Are you sure you want to delete ${itemsToDelete.length} selected items?`
-              : 'Are you sure you want to delete these items?'}
+       {`Are you sure you want to delete ${window.MwdHelpers.formatItemsSummary(itemsToDelete)}?`}
       </h2>
 
       <Text>

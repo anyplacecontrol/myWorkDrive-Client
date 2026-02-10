@@ -64,7 +64,7 @@ function copyOrCut(items, action) {
   // Validate first item to ensure copy/cut operation is allowed
   const firstItem = list[0];
   if (!window.MwdHelpers.validateFileOperation(firstItem.path)) {
-    toast.error(`Unable to execute operation "${action}" with: ${firstItem.path}`);
+    toast.error(`Unable to execute operation "${action}" with: ${firstItem.name}`);
     return;
   }
 
@@ -73,10 +73,12 @@ function copyOrCut(items, action) {
     items: list
   };
 
-  AppState.set('fileClipboard', payload);
-
-  const names = list.map((i) => (i && i.name ? i.name : "")).join(", ");
-  toast.success((payload.action === "copy" ? "Copied " : "Cut ") + (names || "item(s)"));
+  // Use global clipboard helper instead of AppState bucket
+  setFileClipboard(payload);
+  // Use a formatted summary computed from the items array
+  const summary =  window.MwdHelpers.formatItemsSummary(list);
+  const actionText = payload.action === "copy" ? "Copied " : "Cut ";
+  toast.success(actionText + summary);
 }
 
 

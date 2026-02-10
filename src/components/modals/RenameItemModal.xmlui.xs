@@ -3,7 +3,13 @@ function handleMessageReceived(msg) {
   if (msg && msg.type === 'RenameItemModal:open') {
     isFileOperationInProgress = false;
     const data = msg.payload || {};
-    itemToRename = data.item;
+    const item = data.item;
+    // Validate path before opening dialog
+    if (!item || !window.MwdHelpers.validateFileOperation(item.path)) {
+      toast.error(`Unable to execute operation with: ${item.name}`);
+      return;
+    }
+    itemToRename = item;
     isDialogOpen = true;
   }
 }

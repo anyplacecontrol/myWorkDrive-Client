@@ -21,10 +21,7 @@
           isFoldersVisible: true,  //controls visibility of folders Tree
           }}"
   />
-  <AppState
-    id="fileClipboard"
-     bucket="fileClipboard"
-     initialValue="{{ items : [], action: null }}" />
+
 
   <Theme space-4="0px">
     <AppHeader padding="0" height="$space-11">

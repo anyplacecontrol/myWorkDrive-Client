@@ -3,7 +3,16 @@ function handleMessageReceived(msg) {
   if (msg && msg.type === 'DeleteItemsModal:open') {
     isFileOperationInProgress = false;
     failedItems = [];
-    itemsToDelete = msg.payload.items || [];
+    const incoming = msg.payload || {};
+    const items = incoming.items || [];
+    // Validate all item paths before opening dialog
+
+      if (!window.MwdHelpers.validateFileOperation(items[0].path)) {
+        toast.error(`Unable to execute operation with: ${items[0].name}`);
+        return;
+      }
+
+    itemsToDelete = items;
     isDialogOpen = true;
   }
 }

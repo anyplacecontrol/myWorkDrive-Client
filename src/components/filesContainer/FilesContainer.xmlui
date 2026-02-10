@@ -24,6 +24,7 @@
     id="appState"
     bucket="fileCatalogView"
   />
+
   <!-- Selection state management using AppState -->
   <AppState
     id="selectionState"

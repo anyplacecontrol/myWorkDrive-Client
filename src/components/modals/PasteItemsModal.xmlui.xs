@@ -20,7 +20,7 @@ function onPasteComplete() {
 
     // Clear clipboard if action was 'cut' (move operation)
     if (clipboardData && clipboardData.action === "cut") {
-      AppState.set("fileClipboard", null);
+        clearFileClipboard();
     }
 
     // Refresh files list after paste
@@ -38,8 +38,8 @@ function onPasteMessageReceived(msg) {
   // Ensure UI state
   isFileOperationInProgress = false;
 
-  // Read clipboard from AppState (source of truth)
-  const clipboard = AppState.get("fileClipboard");
+  // Read clipboard directly from reactive global `fileClipboard`
+  const clipboard = fileClipboard;
 
   // Validate clipboard
   if (!clipboard || !Array.isArray(clipboard.items) || clipboard.items.length === 0) {
@@ -64,7 +64,8 @@ function onPasteMessageReceived(msg) {
 
   // Validate destination folder is valid for file operations
   if (!window.MwdHelpers.validateFileOperation(pathAfterCopying)) {
-    toast.error(`Cannot paste into the target folder: ${pathAfterCopying}`);
+    const targetName = window.MwdHelpers.getFileName(pathAfterCopying);
+    toast.error(`Cannot paste into the target folder: ${targetName}`);
     isDialogOpen = false;
 
     return;
@@ -73,27 +74,23 @@ function onPasteMessageReceived(msg) {
   // Prevent pasting into the same folder as the first item
   const firstItemPath = clipboard.items[0] && clipboard.items[0].path;
   if (firstItemPath && destPath && firstItemPath.includes(destPath)) {
-    toast.error(`Cannot paste into the same folder you copied from: ${destPath}`);
+    const destName = window.MwdHelpers.getFileName(destPath);
+    toast.error(`Cannot paste into the same folder you copied from: ${destName}`);
     isDialogOpen = false;
     return;
   }
 
-  // Ask user for confirmation before pasting (ENGLISH, with File/Folder type)
-  let itemsDescription;
-  if (clipboard.items.length === 1) {
-    const item = clipboard.items[0];
-    const typeLabel = item.isFolder ? "Folder" : "File";
-    itemsDescription = `${typeLabel}: \"${item.name}\"`;
-  } else {
-    itemsDescription = `${clipboard.items.length} items`;
-  }
-  const actionText = clipboard.action === "cut" ? "move" : "copy";
+  // Ask user for confirmation before pasting (ENGLISH) — use global formatter
+  const itemsDescription =
+     window.MwdHelpers.formatItemsSummary(clipboard.items);
+
+  const actionText = clipboard.action === "cut" ? "Move" : "Copy";
   const folderName = window.MwdHelpers.getFileName(destPath) || destPath;
 
   const userConfirmed = confirm(
-    `Paste Confirmation`,
-    `Do you want to ${actionText} ${itemsDescription} to \"${folderName}\"?`,
-    "Paste"
+    "Paste Confirmation",
+    "Do you want to " + actionText + " " + itemsDescription + " to \"" + folderName + "\"?",
+    actionText
   );
   if (!userConfirmed) {
     return;
