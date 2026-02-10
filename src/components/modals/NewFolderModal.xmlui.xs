@@ -2,15 +2,15 @@
 // --- Handles incoming message to open new folder modal
 function handleMessageReceived(msg) {
   if (msg && msg.type === 'NewFolderModal:open') {
-    isFileOperationInProgress = false;
+    gIsFileOperationInProgress = false;
     isDialogOpen = true;
   }
 }
 
 // --- Handles modal close
 function handleClose() {
-  if (!isFileOperationInProgress) isDialogOpen = false;
-  return !isFileOperationInProgress;
+  if (!gIsFileOperationInProgress) isDialogOpen = false;
+  return !gIsFileOperationInProgress;
 }
 
 // --- Handles the submit action from the new folder modal
@@ -22,7 +22,7 @@ function onSubmitClick(name) {
     return;
   }
 
-  isFileOperationInProgress = true;
+  gIsFileOperationInProgress = true;
   try {
     Actions.callApi({
       url: "/CreateFile",
@@ -49,6 +49,6 @@ function onSubmitClick(name) {
     }
   } finally {
     isDialogOpen = false;
-    isFileOperationInProgress = false;
+    gIsFileOperationInProgress = false;
   }
 }

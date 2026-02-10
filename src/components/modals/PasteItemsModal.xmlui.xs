@@ -20,7 +20,7 @@ function onPasteComplete() {
 
     // Clear clipboard if action was 'cut' (move operation)
     if (clipboardData && clipboardData.action === "cut") {
-        clearFileClipboard();
+      gClearFileClipboard();
     }
 
     // Refresh files list after paste
@@ -36,10 +36,10 @@ function onPasteMessageReceived(msg) {
   if (!msg || msg.type !== "PasteItemsModal:open") return;
 
   // Ensure UI state
-  isFileOperationInProgress = false;
+  gIsFileOperationInProgress = false;
 
-  // Read clipboard directly from reactive global `fileClipboard`
-  const clipboard = fileClipboard;
+  // Read clipboard directly from reactive global `gFileClipboard`
+  const clipboard = gFileClipboard;
 
   // Validate clipboard
   if (!clipboard || !Array.isArray(clipboard.items) || clipboard.items.length === 0) {
@@ -101,6 +101,6 @@ function onPasteMessageReceived(msg) {
   isDialogOpen = true;
 
   // Auto-start the paste queue
-  isFileOperationInProgress = true;
+  gIsFileOperationInProgress = true;
   pasteQueue.enqueueItems(clipboard.items);
 }

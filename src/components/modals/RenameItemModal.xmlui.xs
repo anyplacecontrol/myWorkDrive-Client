@@ -1,7 +1,7 @@
 // --- Handles incoming message to open rename modal
 function handleMessageReceived(msg) {
   if (msg && msg.type === 'RenameItemModal:open') {
-    isFileOperationInProgress = false;
+      gIsFileOperationInProgress = false;
     const data = msg.payload || {};
     const item = data.item;
     // Validate path before opening dialog
@@ -17,7 +17,7 @@ function handleMessageReceived(msg) {
 // --- Handles modal close
 function handleClose() {
   if (!isFileOperationInProgress) isDialogOpen = false;
-  return !isFileOperationInProgress;
+    return !gIsFileOperationInProgress;
 }
 
 // --- Validates new name
@@ -70,7 +70,7 @@ function onSubmitClick(newName) {
   const item = itemToRename;
   const path = item.path;
   const isFolder = item.isFolder;
-  isFileOperationInProgress = true;
+    gIsFileOperationInProgress = true;
 
   try {
     doRename({
@@ -101,6 +101,6 @@ function onSubmitClick(newName) {
     }
   } finally {
     isDialogOpen = false;
-    isFileOperationInProgress = false;
+      gIsFileOperationInProgress = false;
   }
 }

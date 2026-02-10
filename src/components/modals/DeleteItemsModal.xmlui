@@ -36,7 +36,7 @@
       </property>
     </Queue>
 
-    <VStack gap="$space-4" when="{!isFileOperationInProgress}">
+    <VStack gap="$space-4" when="{!gIsFileOperationInProgress}">
       <Icon name="circle_delete" width="$space-12" height="$space-12" />
       <h2>
        {`Are you sure you want to delete ${window.MwdHelpers.formatItemsSummary(itemsToDelete)}?`}

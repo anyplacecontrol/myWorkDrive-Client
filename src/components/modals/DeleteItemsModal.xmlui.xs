@@ -1,7 +1,7 @@
 // --- Handles incoming message to open delete modal
 function handleMessageReceived(msg) {
   if (msg && msg.type === 'DeleteItemsModal:open') {
-    isFileOperationInProgress = false;
+    gIsFileOperationInProgress = false;
     failedItems = [];
     const incoming = msg.payload || {};
     const items = incoming.items || [];
@@ -19,8 +19,8 @@ function handleMessageReceived(msg) {
 
 // --- Handles modal close
 function handleClose() {
-  if (!isFileOperationInProgress) isDialogOpen = false;
-  return !isFileOperationInProgress;
+  if (!gIsFileOperationInProgress) isDialogOpen = false;
+  return !gIsFileOperationInProgress;
 }
 
 // --- Handles the delete button click
@@ -43,7 +43,7 @@ function onDeleteClick() {
 
   // Store items for later use in onDeleteComplete
   itemsToDelete = items;
-  isFileOperationInProgress = true;
+  gIsFileOperationInProgress = true;
   deleteQueue.enqueueItems(items);
 }
 
@@ -97,6 +97,6 @@ function onDeleteComplete() {
     window.publishTopic("FilesContainer:refresh");
   } finally {
     isDialogOpen = false;
-    isFileOperationInProgress = false;
+    gIsFileOperationInProgress = false;
   }
 }

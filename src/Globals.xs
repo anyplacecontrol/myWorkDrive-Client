@@ -1,16 +1,19 @@
 // true If current file operation is in progress,
 // must be set to false in the end of the operation
-var isFileOperationInProgress = false;
+var gIsFileOperationInProgress = false;
 
 // Global reactive clipboard for file copy/cut operations.
 // Use the provided setters/getters to keep usage consistent across modules.
-var fileClipboard = { items: [], action: null };
+var gFileClipboard = { items: [], action: null };
 
-function setFileClipboard(value) {
-	// assign to reactive var
-	fileClipboard = value;
+// Controls visibility of the folders tree.
+var gIsFoldersVisible = true;
+
+function gSetFileClipboard(value) {
+	gFileClipboard = value;
 }
-function clearFileClipboard() {
-	fileClipboard = { items: [], action: null };
+
+function gClearFileClipboard() {
+	gFileClipboard = { items: [], action: null };
 }
 

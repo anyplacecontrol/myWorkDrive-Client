@@ -52,15 +52,13 @@
           onClick="xsLogDialog.open()"
         />
         <Theme
-          textColor-Button="{ appState.value.isFoldersVisible ? '$fgColor-Toolbar--selected' : '$fgColor-Toolbar' }"
+          textColor-Button="{ gIsFoldersVisible ? '$fgColor-Toolbar--selected' : '$fgColor-Toolbar' }"
         >
           <Button
             label="{mediaSize.largeScreen ? 'Folders' : undefined}"
             icon="btn_folders"
             variant="ghost"
-            onClick="() => {
-              appState.update({ isFoldersVisible: !appState.value.isFoldersVisible });
-            }"
+            onClick="() => { gIsFoldersVisible = !gIsFoldersVisible; }"
           />
         </Theme>
         <Button
