@@ -4,8 +4,12 @@
   loggedInUser="{null}"
   scrollWholePage="false"
   paddingVertical="0"
-  var.rootDrive="{window.AppConfig.rootDrive}"
+  var.hasRedirected="{false}"
 >
+
+  <script>
+    import { getCurrentDrive } from "./shared.xs";
+  </script>
 
   <!-- Let's keep the sorting and view state here -->
   <AppState
@@ -19,9 +23,9 @@
           }}"
   />
   <AppState
-     id="fileClipboard"
+    id="fileClipboard"
      bucket="fileClipboard"
-     initialValue="{{ items: [], action: null }}" />
+     initialValue="{{ items : [], action: null }}" />
 
   <Theme space-4="0px">
     <AppHeader padding="0" height="$space-11">
@@ -43,6 +47,13 @@
 
     <!-- We have a single main page for browsing files -->
     <Page url="/my-files" padding="0">
+      <DataSource
+        id="sharesData"
+        url="/ListShares"
+        resultSelector="shares"
+        transformResult="{transformShares}"
+        onLoaded="{(data, isRefetch) => handleSharesLoaded(data, isRefetch)}"
+      />
       <HSplitter initialPrimarySize="260px">
 
         <template name="splitterTemplate">
@@ -53,6 +64,7 @@
         </template>
         <FoldersTree
           id="foldersTree"
+          shares="{sharesData.value}"
           when="{appState.value.isFoldersVisible}"
         />
         <FilesContainer

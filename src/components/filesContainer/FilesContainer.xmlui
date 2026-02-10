@@ -14,6 +14,7 @@
     <!-- Get the content of the folder (ignore the file property) -->
   <DataSource
     id="fileCatalogData"
+    when="{drive}"
     url=`/ListFolder?path={window.MwdHelpers.joinPath(drive, folder)}`
     transformResult="{(result) => transformResult(result)}"
   />

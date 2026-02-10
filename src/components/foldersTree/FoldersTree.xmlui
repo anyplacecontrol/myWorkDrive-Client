@@ -8,7 +8,7 @@
 -->
 
 <Component name="FoldersTree"
-  var.rootDrive="{window.AppConfig.rootDrive}"
+  var.rootNodes="{buildRootNodes($props.shares)}"
 >
   <script>
     import { navigateTo } from "../../shared.xs";
@@ -45,12 +45,7 @@
       dataFormat="hierarchy"
       overflowX="hidden"
       iconSize="$space-6"
-      data="{ [{
-              id: window.MwdHelpers.joinPath(rootDrive, '/'),
-              name: `Root`,
-              icon: `folder`,
-              dynamic: true,
-            }]}"
+      data="{rootNodes}"
       onLoadChildren="loadChildren"
       onSelectionDidChange="(event) => navigateTo(event.newNode)"
       onContextMenu="ev => handleTreeContextMenu(ev, $item, contextMenu)"

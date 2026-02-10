@@ -7,6 +7,19 @@ function handleMessageReceived(msg) {
   else if (msg.type === 'FoldersTree:collapse') handleCollapseRoot();
 }
 
+function buildRootNodes(shares) {
+  if (!shares || !Array.isArray(shares)) return [];
+
+  return shares
+    .filter((share) => !!(share && share.shareName))
+    .map((share) => ({
+      id: share.drivePath || (":sh:" + share.shareName + ":/"),
+      name: share.shareName,
+      icon: "folder",
+      dynamic: true,
+    }));
+}
+
 function treeNodeToFolderItem(node) {
   if (!node) return null;
   return {
@@ -116,9 +129,10 @@ function handleInsertFolder(payload) {
 }
 
 function handleCollapseRoot() {
-  const rootNodeId = rootDrive + "/";
+  const currentDrive = getCurrentDrive();
+  if (!currentDrive) return;
 
-  tree.markNodeUnloaded(rootNodeId);
-  delay(100);
-  tree.collapseNode(rootNodeId);
+  tree.markNodeUnloaded(currentDrive);
+  delay(300);
+  tree.collapseNode(currentDrive);
 }

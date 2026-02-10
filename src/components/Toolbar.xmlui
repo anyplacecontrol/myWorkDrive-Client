@@ -80,8 +80,10 @@
           icon="btn_up"
           variant="ghost"
           onClick="(event) => {
+            if (!drive || !folder || folder === '/') return;
             const currentFolder = window.MwdHelpers.joinPath(drive, folder);
-            navigateTo(MwdHelpers.getParentFolder(currentFolder) || '/');
+            const parentFolder = MwdHelpers.getParentFolder(currentFolder);
+            navigateTo(parentFolder);
           }"
         />
 

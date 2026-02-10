@@ -14,15 +14,7 @@
     width="100%"
     overflowX="hidden"
   >
-    <SafeLink
-      canShrink="true"
-      testId="file-catalog-breadcrumb-item-Root"
-      to="{{ }}"
-    >
-      <Text value="Root" maxLines="1" />
-    </SafeLink>
     <Fragment when="{drive}">
-      <Icon name="chevronright" size="sm" />
       <SafeLink
         canShrink="true"
         testId="file-catalog-breadcrumb-item-Drive"
