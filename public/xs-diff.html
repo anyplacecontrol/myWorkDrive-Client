@@ -7078,11 +7078,15 @@
             return;
           }
           // Stringify each entry separately to avoid cross-entry circular tracking
+          const skipKeys = new Set(['_targetInst', '_debugOwner', '_debugSource', 'stateNode', 'nativeEvent', 'view', 'target', 'currentTarget', 'relatedTarget', '__reactFiber$', '__reactProps$']);
           const jsonEntries = rawLogs.map(entry => {
             const seen = new WeakSet();
             return JSON.stringify(entry, (key, value) => {
               if (value instanceof Node || value instanceof Window) return undefined;
               if (typeof value === 'function') return undefined;
+              // Skip React internals and DOM-heavy fields that bloat the output
+              if (skipKeys.has(key)) return undefined;
+              if (key.startsWith('__react')) return undefined;
               if (typeof value === 'object' && value !== null) {
                 if (seen.has(value)) return '[circular]';
                 seen.add(value);
