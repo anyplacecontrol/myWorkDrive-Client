@@ -37,6 +37,7 @@ function handlePasteAction(row, selectedItems) {
 
 // Handler for sorting
 function handleWillSort(sortBy, direction) {
-  appState.update({ sortBy, sortDirection: direction });
+  gSortBy = sortBy;
+  gSortDirection = direction;
   return true;
 }

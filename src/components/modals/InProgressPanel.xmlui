@@ -4,7 +4,7 @@
     - message: The message to show next to the spinner.
 -->
 <Component name="InProgressPanel">
-  <HStack verticalAlignment="center" when="{isFileOperationInProgress}">
+  <HStack verticalAlignment="center" when="{gIsFileOperationInProgress}">
     <Spinner delay="0" />
     <Text>
       {$props.message}

@@ -19,11 +19,6 @@
     transformResult="{(result) => transformResult(result)}"
   />
 
-  <!--  sorting and view state here -->
-  <AppState
-    id="appState"
-    bucket="fileCatalogView"
-  />
 
   <!-- Selection state management using AppState -->
   <AppState

@@ -73,7 +73,6 @@ function copyOrCut(items, action) {
     items: list
   };
 
-  // Use global clipboard helper instead of AppState bucket
   gSetFileClipboard(payload);
   // Use a formatted summary computed from the items array
   const summary =  window.MwdHelpers.formatItemsSummary(list);

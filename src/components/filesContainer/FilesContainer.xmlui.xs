@@ -3,8 +3,8 @@ var folder = getCurrentFolder();
 
 var sortedFiles = MwdHelpers.sortFiles(
   fileCatalogData.value,
-  appState.value.sortBy,
-  appState.value.sortDirection
+  gSortBy,
+  gSortDirection
 );
 
 var isAnyFiles = drive ? (sortedFiles.length > 0 && !fileCatalogData.loading) : false;

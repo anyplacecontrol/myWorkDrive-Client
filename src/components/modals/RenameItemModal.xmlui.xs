@@ -16,8 +16,8 @@ function handleMessageReceived(msg) {
 
 // --- Handles modal close
 function handleClose() {
-  if (!isFileOperationInProgress) isDialogOpen = false;
-    return !gIsFileOperationInProgress;
+  if (!gIsFileOperationInProgress) isDialogOpen = false;
+  return !gIsFileOperationInProgress;
 }
 
 // --- Validates new name

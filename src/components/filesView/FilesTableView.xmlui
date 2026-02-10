@@ -6,14 +6,9 @@
   - `loading`: Whether the data is currently loading
   - `height`: The height of the component
 
-  Note: We pass an AppState bucket through the `appState` property to keep the
-  sorting state in sync with the parent component.
-    - `sortBy`: The field to sort by
-    - `sortDirection`: The direction to sort by
 -->
 <Component name="FilesTableView">
-  <!-- We obtain the view mode and sorting state from the AppState -->
-  <AppState id="appState" bucket="fileCatalogView" />
+
   <AppState id="selectionState" bucket="fileCatalogSelection" />
 
   <script>
@@ -31,8 +26,8 @@
     headerHeight="$space-10"
     paddingLeft="$space-6"
     paddingRight="$space-4"
-    sortBy="{appState.value.sortBy}"
-    sortDirection="{appState.value.sortDirection}"
+    sortBy="{gSortBy}"
+    sortDirection="{gSortDirection}"
     rowsSelectable="true"
     syncWithAppState="{ selectionState }"
     items="{$props.fileEntries}"

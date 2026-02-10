@@ -9,6 +9,11 @@ var gFileClipboard = { items: [], action: null };
 // Controls visibility of the folders tree.
 var gIsFoldersVisible = true;
 
+// View and sorting globals
+var gView = 'table';
+var gSortBy = 'name';
+var gSortDirection = 'ascending';
+
 function gSetFileClipboard(value) {
 	gFileClipboard = value;
 }

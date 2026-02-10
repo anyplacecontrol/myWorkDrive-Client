@@ -10,16 +10,6 @@
     import { getCurrentDrive } from "./shared.xs";
   </script>
 
-  <!-- Let's keep the sorting and view state here -->
-  <AppState
-    id="appState"
-    bucket="fileCatalogView"
-    initialValue="{{
-          view: 'table', //controls representation of files
-          sortBy: 'name', //controls sorting of files
-            sortDirection: 'ascending' //controls sorting direction
-          }}"
-  />
 
 
   <Theme space-4="0px">

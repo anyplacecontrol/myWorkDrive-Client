@@ -9,8 +9,8 @@ function onProcessQueuedItem(eventArgs) {
 
 // --- Handles modal close
 function handleClose() {
-  if (!isFileOperationInProgress) isDialogOpen = false;
-  return !isFileOperationInProgress;
+  if (!gIsFileOperationInProgress) isDialogOpen = false;
+  return !gIsFileOperationInProgress;
 }
 
 // --- Called when paste queue completes all items
@@ -27,7 +27,7 @@ function onPasteComplete() {
     window.publishTopic("FilesContainer:refresh");
   } finally {
     isDialogOpen = false;
-    isFileOperationInProgress = false;
+    gIsFileOperationInProgress = false;
   }
 }
 

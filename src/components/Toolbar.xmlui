@@ -10,10 +10,6 @@
     var folder = getCurrentFolder();
   </script>
 
-  <AppState
-    id="appState"
-    bucket="fileCatalogView"
-  />
 
   <ModalDialog
     id="xsLogDialog"
