@@ -80,6 +80,7 @@ export const MyWorkDriveTheme: ThemeDefinition = {
     "icon.circle_delete": "resources/circle-delete.svg",
     //file type icons
     "icon.folder": "resources/folder.svg",
+    "icon.shared_folder": "resources/shared-folder.svg",
     "icon.emptyfolder": "resources/folder.svg",
     "icon.xls": "resources/onedrive-regular-xls.svg",
     "icon.doc": "resources/onedrive-regular-doc.svg",

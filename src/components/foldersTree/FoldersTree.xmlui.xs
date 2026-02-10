@@ -15,7 +15,7 @@ function buildRootNodes(shares) {
     .map((share) => ({
       id: share.drivePath || (":sh:" + share.shareName + ":/"),
       name: share.shareName,
-      icon: "folder",
+      icon: "shared_folder",
       dynamic: true,
     }));
 }

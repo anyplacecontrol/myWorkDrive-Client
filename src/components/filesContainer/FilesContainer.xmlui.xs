@@ -7,7 +7,7 @@ var sortedFiles = MwdHelpers.sortFiles(
   appState.value.sortDirection
 );
 
-var isAnyFiles = sortedFiles.length > 0 && !fileCatalogData.loading;
+var isAnyFiles = drive ? (sortedFiles.length > 0 && !fileCatalogData.loading) : false;
 
 function handleTreeContextMenu(ev) {
   const targetPath = window.MwdHelpers.joinPath(drive, folder);

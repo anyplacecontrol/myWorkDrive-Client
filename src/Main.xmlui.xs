@@ -10,8 +10,6 @@ function transformShares(shares) {
 				shareName: share.shareName,
 				driveLetter: share.driveLetter || "",
 				downloadEnabled: !!share.downloadEnabled,
-				desktopClientEnabled: !!share.desktopClientEnabled,
-				webClientEnabled: !!share.webClientEnabled,
 				drivePath: ":sh:" + share.shareName + ":/",
 			};
 		});

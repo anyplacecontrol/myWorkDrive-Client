@@ -45,11 +45,12 @@
     </ContextMenu>
 
     <FilesContainerHeader
+      when="{drive}"
       isAnyFiles="{isAnyFiles}"
     />
 
     <EmptyDataView
-      when="{!isAnyFiles}"
+      when="{drive && !isAnyFiles}"
     />
 
     <!-- Display the files  -->

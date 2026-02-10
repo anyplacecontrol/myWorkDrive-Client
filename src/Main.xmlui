@@ -56,7 +56,7 @@
         listenTo="{[$queryParams.drive, sharesData.value]}"
         onDidChange="handleDriveOrSharesChange"
       />
-      <HSplitter initialPrimarySize="260px">
+      <HSplitter initialPrimarySize="260px" when="{appState.value.isFoldersVisible}">
 
         <template name="splitterTemplate">
           <Stack
@@ -67,12 +67,15 @@
         <FoldersTree
           id="foldersTree"
           shares="{sharesData.value}"
-          when="{appState.value.isFoldersVisible}"
         />
         <FilesContainer
           id="filesContainer"
         />
       </HSplitter>
+      <FilesContainer
+        id="filesContainer2"
+        when="{!appState.value.isFoldersVisible}"
+      />
 
     </Page>
   </Pages>
