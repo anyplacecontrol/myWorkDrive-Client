@@ -65,6 +65,27 @@ function doRename({ path, newName, isFolder, conflictBehavior }) {
   window.publishTopic('FilesContainer:refresh');
 }
 
+// --- Displays a confirmation dialog when there is a conflict
+function confirmConflict(title, message) {
+  return confirm({
+    title,
+    message,
+    buttons: [
+      {
+        label: "Keep both",
+        value: "rename",
+        themeColor: "primary",
+      },
+      {
+        label: "Replace",
+        value: "replace",
+        themeColor: "secondary",
+        variant: "outlined",
+      },
+    ],
+  });
+}
+
 // --- Handles the submit action from the rename modal
 function onSubmitClick(newName) {
   const item = itemToRename;
@@ -81,16 +102,11 @@ function onSubmitClick(newName) {
     });
   } catch (error) {
     if (error.statusCode === 409) {
-      const result = confirm({
-        title: (isFolder ? "Folder" : "File") + " " + newName + " already exists",
-        buttons: [
-          {
-            label: "Replace",
-            value: "replace",
-          },
-        ],
-      });
-      if (result === "replace") {
+      const result = confirmConflict(
+        "Conflict",
+        (isFolder ? "Folder" : "File") + " " + newName + " already exists\nChoose how to resolve the conflict."
+      );
+      if (result) {
         doRename({
           path,
           newName,

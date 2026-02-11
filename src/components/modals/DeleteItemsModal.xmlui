@@ -3,8 +3,7 @@
 -->
 <Component
   name="DeleteItemsModal"
-  var.failedItems="{[] }"
-  var.itemsToDelete="{[] }"
+  var.itemsToDelete="{[]}"
   var.isDialogOpen="{false}"
 >
   <MessageListener onMessageReceived="msg => handleMessageReceived(msg)" />

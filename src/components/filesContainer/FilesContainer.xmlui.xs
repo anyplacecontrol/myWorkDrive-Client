@@ -18,9 +18,9 @@ function transformResult(result) {
   const requestPath = window.MwdHelpers.joinPath(drive, folder);
   const filtered = MwdHelpers.filterListResults(result, requestPath);
   return filtered.map((item) => {
-    let item_ = JSON.parse(JSON.stringify(item));
-    item_.id = item.path;
-    item_.type = item.isFolder ? "Folder" : "File " + getFileExtension(item.path);
-    return item_;
+    return Object.assign({}, item, {
+      id: item.path,
+      type: item.isFolder ? "Folder" : "File " + getFileExtension(item.path)
+    });
   });
 }

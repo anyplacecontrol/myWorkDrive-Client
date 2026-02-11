@@ -3,8 +3,8 @@
 -->
 <Component
   name="PasteItemsModal"
+  var.itemsToPaste="{[]}"
   var.isDialogOpen="{false}"
-  var.clipboardData="{null}"
 >
   <script>
     import { getCurrentDrive, getCurrentFolder } from "../../shared.xs";
@@ -19,17 +19,12 @@
     onProcess="onProcessQueuedItem"
     onComplete="onPasteComplete"
     clearAfterFinish="true"
-  >
-    <property name="resultFeedback">
-      <Text
-        value=`{clipboardData && clipboardData.action === 'cut' ? 'Moved' : 'Copied'} {$completedItems.length} item(s)`
-      />
-    </property>
-  </Queue>
+  />
+
   <!--
     This modal dialog shows the progress of paste (copy/cut) operations.
 
-    Clipboard data is stored in the `clipboardData` variable.
+    Clipboard data is stored in the `gFileClipboard` variable.
   -->
 
   <ModalDialog
@@ -39,7 +34,7 @@
     onClose="handleClose"
   >
     <InProgressPanel
-      message="{ (clipboardData && clipboardData.action === 'cut' ? 'Moving' : 'Copying') + ' files... Remains: ' + pasteQueue.getQueueLength() + ' item(s)' }"
+      message="{ (gFileClipboard.action === 'cut' ? 'Moving' : 'Copying') + ' files... Remains: ' + pasteQueue.getQueueLength() + ' item(s)' }"
     />
 
   </ModalDialog>
