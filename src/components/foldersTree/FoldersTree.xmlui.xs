@@ -15,7 +15,7 @@ function buildRootNodes(shares) {
   return shares
     .filter((share) => !!(share && share.shareName))
     .map((share) => ({
-      id: share.drivePath || ":sh:" + share.shareName + ":/",
+      id: window.MwdHelpers.normalizeTreeNodeId(share.drivePath || ":sh:" + share.shareName + ":"),
       name: share.shareName,
       icon: "shared_folder",
       dynamic: true,
@@ -43,7 +43,7 @@ function mapFolderItemsToNodes(items) {
   return (items || [])
     .filter((item) => item.isFolder)
     .map((item) => ({
-      id: item.path,
+      id: window.MwdHelpers.normalizeTreeNodeId(item.path),
       name: item.name,
       icon: "folder",
       dynamic: true,
@@ -87,11 +87,13 @@ function handleRenameTreeNode(payload) {
   const { oldPath, newPath } = payload;
   if (!oldPath || !newPath) return;
 
-  const oldNode = tree.getNodeById(oldPath);
+  const normalizedOldPath = window.MwdHelpers.normalizeTreeNodeId(oldPath);
+  const oldNode = tree.getNodeById(normalizedOldPath);
   if (!oldNode) return;
 
-  const updatedNodeTree = updateNodeAndChildren(oldNode, oldPath, newPath);
-  tree.replaceNode(oldPath, updatedNodeTree);
+  const normalizedNewPath = window.MwdHelpers.normalizeTreeNodeId(newPath);
+  const updatedNodeTree = updateNodeAndChildren(oldNode, normalizedOldPath, normalizedNewPath);
+  tree.replaceNode(normalizedOldPath, updatedNodeTree);
 }
 
 // Handle deleting multiple folder nodes from the tree.
@@ -103,9 +105,11 @@ function handleDeleteFolders(payload) {
   }
 
   payload.paths.forEach((path) => {
-    const node = tree.getNodeById(path);
+    const normalizedPath = window.MwdHelpers.normalizeTreeNodeId(path);
+    const node = tree.getNodeById(normalizedPath);
     if (node) {
-      tree.removeNode(path);
+      console.log('----------------removed node', normalizedPath);
+      tree.removeNode(normalizedPath);
     }
   });
 }
@@ -116,41 +120,43 @@ function handleDeleteFolders(payload) {
 // - names: array of folder names to create as children
 function handleInsertFolder(payload) {
   if (!payload) return;
-
   const { parentFolder, names } = payload;
   if (!parentFolder) return;
-
-  const normalizedParent = parentFolder.endsWith("/") ? parentFolder : parentFolder + "/";
 
   const folderNames = Array.isArray(names) && names.length > 0 ? names : [];
   if (folderNames.length === 0) return;
 
-  const parentNode = tree.getNodeById(parentFolder);
+  const normalizedParentFolder = window.MwdHelpers.normalizeTreeNodeId(parentFolder);
+  const parentNode = tree.getNodeById(normalizedParentFolder);
   if (!parentNode) return;
 
+
   for (const n of folderNames) {
-    const path = normalizedParent + n;
-    if (tree.getNodeById(path)) {
+    const normalizedPath = window.MwdHelpers.joinPath(normalizedParentFolder, n);
+    if (tree.getNodeById(normalizedPath)) {
       //if node already exists, collapse it
-      collapseNode(path);
+      collapseNode(normalizedPath);
     } else {
+      console.log('----------------inserting node', normalizedPath);
       // Insert new node
       const newNode = {
-        id: path,
+        id: normalizedPath,
         name: n,
         icon: "folder",
         dynamic: true,
       };
-      tree.appendNode(parentFolder, newNode);
+      tree.appendNode(normalizedParentFolder, newNode);
     }
   }
 }
 
 function collapseNode(path) {
   if (!path) return;
-  tree.markNodeUnloaded(path);
+  const normalizedPath = window.MwdHelpers.normalizeTreeNodeId(path);
+  console.log('----------------collapsing node', normalizedPath);
+  tree.markNodeUnloaded(normalizedPath);
   delay(300);
-  tree.collapseNode(path);
+  tree.collapseNode(normalizedPath);
 }
 
 // Handle collapsing (marking unloaded and collapsing) multiple nodes.

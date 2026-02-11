@@ -38,17 +38,35 @@
         },
 
         // Join parent path and child name with /
+        // Always returns canonical format: drives end with /, folders don't
         joinPath: (parentPath, childName) => {
-          if (!parentPath) return childName || '/';
-          if (!childName) return parentPath || '/';
+          // Helper to normalize a path to canonical form
+          const normalize = (p) => {
+            if (!p) return '/';
+            // Remove all trailing slashes
+            const trimmed = p.replace(/\/+$/g, '');
+            // Check if this is a drive (format: :sh:name:)
+            const colonCount = (trimmed.match(/:/g) || []).length;
+            const isDrive = colonCount === 3 && trimmed.endsWith(':');
+            // Drives must end with /, folders must not
+            return isDrive ? trimmed + '/' : trimmed;
+          };
 
-          // Remove leading slash from childName
-          const cleanChild = childName.startsWith('/') ? childName.substring(1) : childName;
-
-          const res = parentPath.endsWith('/')
-            ? parentPath + cleanChild
-            : parentPath + '/' + cleanChild;
-          return res || '/';
+          // If both empty
+          if (!parentPath && !childName) return '/';
+          
+          // If only childName exists
+          if (!parentPath) return normalize(childName);
+          
+          // If only parentPath exists (childName empty or missing)
+          if (!childName) return normalize(parentPath);
+          
+          // Both exist - join them
+          const cleanChild = childName.replace(/^\/+/g, '').replace(/\/+$/g, '');
+          const parentNoTrailing = parentPath.replace(/\/+$/g, '');
+          
+          // Result is always a folder (not a drive), so no trailing slash
+          return parentNoTrailing + '/' + cleanChild;
         },
 
         // Validate if file operation is allowed
@@ -200,6 +218,14 @@
         // Set a property on the window object by name
         setWindowProperty: (name, value) => {
           window[name] = value;
+        },
+        // Normalize tree node ID to the canonical form:
+        // - For drives (e.g., :sh:Documents:): ensure it ends with /
+        // - For folders (e.g., :sh:Documents:/folder): ensure it does NOT end with /
+        // Simply delegates to joinPath with empty second argument
+        normalizeTreeNodeId: (path) => {
+          if (!path || typeof path !== 'string') return path;
+          return window.MwdHelpers.joinPath(path, '');
         },
         // (getter removed - use direct window access)
         // (array-push helper removed - use direct window access)
