@@ -57,7 +57,6 @@ function doDelete({ item, actionWhenNotEmpty }) {
   // For folders, add recursive deletion parameters if specified
   if (item.isFolder && actionWhenNotEmpty) {
     queryParams.actionWhenNotEmpty = actionWhenNotEmpty;
-    queryParams.listFailedItems = true;
   }
 
   Actions.callApi({
@@ -91,9 +90,7 @@ function onDeleteQueuedItem(eventArgs) {
 
     // Track failed item and show toast for non-417 errors
     failedItems.push(item);
-    if (error.statusCode !== 417) {
-      toast.error(`Error deleting "${item.name}".`);
-    }
+    toast.error(`Error deleting "${item.name}".`);
   }
 }
 // --- Called when delete queue completes all items
@@ -113,6 +110,10 @@ function onDeleteComplete() {
     if (deletedFolders.length > 0) {
       window.publishTopic("FoldersTree:delete", { paths: deletedPaths });
     }
+    // Notify FoldersTree to collapse any failed folders to refresh their state
+    if (failedPaths.length > 0) {
+      window.publishTopic("FoldersTree:collapse", { paths: failedPaths });
+    }
 
     // Refresh files list after deletion
     window.publishTopic("FilesContainer:refresh");
@@ -122,7 +123,7 @@ function onDeleteComplete() {
     const failedCount = failedItems.length;
 
     if (failedCount > 0) {
-      toast.success(`Deleted ${deletedCount} item(s), ${failedCount} failed.`);
+      toast.success(`Deleted ${deletedCount} item(s), ${failedCount} failed/skipped.`);
     } else {
       toast.success(`Deleted ${deletedCount} item(s).`);
     }

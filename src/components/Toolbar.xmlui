@@ -85,7 +85,10 @@
           label="{mediaSize.largeScreen ? 'Refresh' : undefined}"
           icon="btn_refresh"
           variant="ghost"
-          onClick="() => { window.publishTopic('FilesContainer:refresh'); window.publishTopic('FoldersTree:collapse'); }"
+          onClick="() => {
+            window.publishTopic('FilesContainer:refresh');
+            window.publishTopic('FoldersTree:collapse', { paths: [getCurrentDrive()] });
+          }"
         />
 
         <ContentSeparator

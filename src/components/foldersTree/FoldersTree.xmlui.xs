@@ -1,10 +1,9 @@
-
 // Handle incoming messages
 function handleMessageReceived(msg) {
-  if (msg.type === 'FoldersTree:rename') handleRenameTreeNode(msg.payload);
-  else if (msg.type === 'FoldersTree:insert') handleInsertFolder(msg.payload);
-  else if (msg.type === 'FoldersTree:delete') handleDeleteFolders(msg.payload);
-  else if (msg.type === 'FoldersTree:collapse') handleCollapseRoot();
+  if (msg.type === "FoldersTree:rename") handleRenameTreeNode(msg.payload);
+  else if (msg.type === "FoldersTree:insert") handleInsertFolder(msg.payload);
+  else if (msg.type === "FoldersTree:delete") handleDeleteFolders(msg.payload);
+  else if (msg.type === "FoldersTree:collapse") handleCollapseNodes(msg.payload);
 }
 
 function buildRootNodes(shares) {
@@ -13,7 +12,7 @@ function buildRootNodes(shares) {
   return shares
     .filter((share) => !!(share && share.shareName))
     .map((share) => ({
-      id: share.drivePath || (":sh:" + share.shareName + ":/"),
+      id: share.drivePath || ":sh:" + share.shareName + ":/",
       name: share.shareName,
       icon: "shared_folder",
       dynamic: true,
@@ -25,7 +24,7 @@ function treeNodeToFolderItem(node) {
   return {
     name: node.name,
     path: node.id,
-    isFolder: true
+    isFolder: true,
   };
 }
 
@@ -34,8 +33,7 @@ function handleTreeContextMenu(ev, node, contextMenu) {
   delay(300);
   const folderItem = treeNodeToFolderItem(node);
   const targetPath = node.id; // Use the node's id (path) as targetPath
-  if (folderItem && targetPath)
-    contextMenu.openAt(ev, { selectedItems: [folderItem], targetPath });
+  if (folderItem && targetPath) contextMenu.openAt(ev, { selectedItems: [folderItem], targetPath });
 }
 
 function mapFolderItemsToNodes(items) {
@@ -66,15 +64,13 @@ function loadChildren(node) {
 function updateNodeAndChildren(node, oldPathPrefix, newPathPrefix) {
   const updatedNode = {
     id: node.id.replace(oldPathPrefix, newPathPrefix),
-    name: node.id === oldPathPrefix
-      ? window.MwdHelpers.getFileName(newPathPrefix)
-      : node.name,
+    name: node.id === oldPathPrefix ? window.MwdHelpers.getFileName(newPathPrefix) : node.name,
     icon: node.icon,
     dynamic: true,
   };
 
   if (node.children && node.children.length > 0) {
-    updatedNode.children = node.children.map(child =>
+    updatedNode.children = node.children.map((child) =>
       updateNodeAndChildren(child, oldPathPrefix, newPathPrefix)
     );
   }
@@ -109,15 +105,15 @@ function handleDeleteFolders(payload) {
 function handleInsertFolder(payload) {
   if (!payload) return;
 
-  const {parentFolder, name} = payload;
+  const { parentFolder, name } = payload;
 
-  const normalizedParent = parentFolder.endsWith('/') ? parentFolder : parentFolder + '/';
+  const normalizedParent = parentFolder.endsWith("/") ? parentFolder : parentFolder + "/";
   const path = normalizedParent + name;
 
   const newNode = {
     id: path,
     name: name,
-    icon: 'folder',
+    icon: "folder",
     dynamic: true,
   };
 
@@ -128,11 +124,17 @@ function handleInsertFolder(payload) {
   }
 }
 
-function handleCollapseRoot() {
-  const currentDrive = getCurrentDrive();
-  if (!currentDrive) return;
+function handleCollapseNodes(payload) {
+  if (!payload) return;
 
-  tree.markNodeUnloaded(currentDrive);
-  delay(300);
-  tree.collapseNode(currentDrive);
+  const { paths } = payload;
+  if (!paths || !Array.isArray(paths)) return;
+
+  paths.forEach((path) => {
+    //const currentDrive = getCurrentDrive();
+    if (!path) return;
+    tree.markNodeUnloaded(path);
+    delay(300);
+    tree.collapseNode(path);
+  });
 }
