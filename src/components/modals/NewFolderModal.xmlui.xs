@@ -36,8 +36,8 @@ function onSubmitClick(name) {
     });
     toast.success(`"${name}" folder successfully created`);
 
-    // Update tree node after successful creation
-    window.publishTopic("FoldersTree:insert", { name, parentFolder });
+    // Update tree node after successful creation (send names array)
+    window.publishTopic("FoldersTree:insert", { parentFolder, names: [name] });
 
     // Refresh files list after creation
     window.publishTopic("FilesContainer:refresh");

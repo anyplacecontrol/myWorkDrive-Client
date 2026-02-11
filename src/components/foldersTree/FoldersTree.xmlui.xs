@@ -1,4 +1,7 @@
 // Handle incoming messages
+// Handle incoming pub/sub messages for folder tree operations.
+// `msg` shape: { type: string, payload: any }
+// Supported types and payloads are documented on each handler below.
 function handleMessageReceived(msg) {
   if (msg.type === "FoldersTree:rename") handleRenameTreeNode(msg.payload);
   else if (msg.type === "FoldersTree:insert") handleInsertFolder(msg.payload);
@@ -59,8 +62,6 @@ function loadChildren(node) {
   return mapFolderItemsToNodes(filtered);
 }
 
-// Message handling moved to BusHandler in markup
-
 function updateNodeAndChildren(node, oldPathPrefix, newPathPrefix) {
   const updatedNode = {
     id: node.id.replace(oldPathPrefix, newPathPrefix),
@@ -72,12 +73,16 @@ function updateNodeAndChildren(node, oldPathPrefix, newPathPrefix) {
   if (node.children && node.children.length > 0) {
     updatedNode.children = node.children.map((child) =>
       updateNodeAndChildren(child, oldPathPrefix, newPathPrefix)
-    );
+    )
   }
 
   return updatedNode;
 }
 
+// Handle renaming a folder node.
+// Payload: { oldPath: string, newPath: string }
+// - oldPath: current node id/path to rename
+// - newPath: new id/path to replace with
 function handleRenameTreeNode(payload) {
   const { oldPath, newPath } = payload;
   if (!oldPath || !newPath) return;
@@ -89,6 +94,9 @@ function handleRenameTreeNode(payload) {
   tree.replaceNode(oldPath, updatedNodeTree);
 }
 
+// Handle deleting multiple folder nodes from the tree.
+// Payload: { paths: string[] }
+// - paths: array of node ids/paths to remove from the tree
 function handleDeleteFolders(payload) {
   if (!payload || !payload.paths || !Array.isArray(payload.paths)) {
     return;
@@ -102,28 +110,52 @@ function handleDeleteFolders(payload) {
   });
 }
 
+// Handle inserting one or more folders under a parent node.
+// Payload: { parentFolder: string, names: string[] }
+// - parentFolder: id/path of the folder under which to insert
+// - names: array of folder names to create as children
 function handleInsertFolder(payload) {
   if (!payload) return;
 
-  const { parentFolder, name } = payload;
+  const { parentFolder, names } = payload;
+  if (!parentFolder) return;
 
   const normalizedParent = parentFolder.endsWith("/") ? parentFolder : parentFolder + "/";
-  const path = normalizedParent + name;
 
-  const newNode = {
-    id: path,
-    name: name,
-    icon: "folder",
-    dynamic: true,
-  };
+  const folderNames = Array.isArray(names) && names.length > 0 ? names : [];
+  if (folderNames.length === 0) return;
 
   const parentNode = tree.getNodeById(parentFolder);
-  if (parentNode) {
-    if (tree.getNodeById(path)) return;
-    tree.appendNode(parentFolder, newNode);
+  if (!parentNode) return;
+
+  for (const n of folderNames) {
+    const path = normalizedParent + n;
+    if (tree.getNodeById(path)) {
+      //if node already exists, collapse it
+      collapseNode(path);
+    } else {
+      // Insert new node
+      const newNode = {
+        id: path,
+        name: n,
+        icon: "folder",
+        dynamic: true,
+      };
+      tree.appendNode(parentFolder, newNode);
+    }
   }
 }
 
+function collapseNode(path) {
+  if (!path) return;
+  tree.markNodeUnloaded(path);
+  delay(300);
+  tree.collapseNode(path);
+}
+
+// Handle collapsing (marking unloaded and collapsing) multiple nodes.
+// Payload: { paths: string[] }
+// - paths: array of node ids/paths to collapse
 function handleCollapseNodes(payload) {
   if (!payload) return;
 
@@ -131,10 +163,6 @@ function handleCollapseNodes(payload) {
   if (!paths || !Array.isArray(paths)) return;
 
   paths.forEach((path) => {
-    //const currentDrive = getCurrentDrive();
-    if (!path) return;
-    tree.markNodeUnloaded(path);
-    delay(300);
-    tree.collapseNode(path);
+    collapseNode(path);
   });
 }

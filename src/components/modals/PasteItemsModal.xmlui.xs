@@ -1,7 +1,11 @@
 // --- Executes the paste operation for a single item
 function doPaste({ item, conflictBehavior }) {
-  const url = item.isFolder ? "/CopyFolder" : "/CopyFile";
-  Actions.callApi({
+  // Use Move endpoints for cut (move) operations, Copy endpoints for copy operations
+  const url = (gFileClipboard.action === "cut")
+    ? (item.isFolder ? "/MoveFolder" : "/MoveFile")
+    : (item.isFolder ? "/CopyFolder" : "/CopyFile");
+
+  const response = Actions.callApi({
     url,
     method: "post",
     body: {
@@ -10,6 +14,18 @@ function doPaste({ item, conflictBehavior }) {
       conflictBehavior: conflictBehavior || "fail",
     },
   });
+
+  // Update item if API returned new name/path (e.g., when renamed due to conflict)
+  if (response && response.name) {
+    const itemToUpdate = itemsToPaste.find((entry) => entry.path === item.path);
+    if (itemToUpdate) {
+      if (response.path) {
+        itemToUpdate.newPath = response.path; //overwrite with actual new path from API
+      }
+    }
+  }
+
+  return response;
 }
 
 // --- Displays a confirmation dialog when there is a conflict
@@ -60,13 +76,18 @@ function onProcessQueuedItem(eventArgs) {
     }
 
     if (!operationSucceeded) {
-      // Track failed item and show toast
-      const failedItem = itemsToPaste.find((entry) => entry.path === item.path);
-      if (failedItem) {
-        failedItem.isFailed = true;
+      const unsuccessfulItem = itemsToPaste.find((entry) => entry.path === item.path);
+
+      if (unsuccessfulItem && !showErrorToast) {
+        //skipped by user
+        unsuccessfulItem.isSkipped = true;
       }
+
       if (showErrorToast) {
-        toast.error(`Failed to ${item.action} "${item.name}"`);
+        //failed due to error
+         if (unsuccessfulItem)
+          unsuccessfulItem.isFailed = true;
+        toast.error(`Failed to ${gFileClipboard.action === "cut" ? "move" : "copy"} "${item.name}"`);
       }
     }
   }
@@ -81,34 +102,62 @@ function handleClose() {
 // --- Called when paste queue completes all items
 function onPasteComplete() {
   try {
-    const action = gFileClipboard.action === "cut" ? "moved" : "copied";
-
-    // Clear clipboard if action was 'cut' (move operation)
-    if (gFileClipboard.action === "cut") {
-      gClearFileClipboard();
-    }
-
     // Refresh files list after paste
     window.publishTopic("FilesContainer:refresh");
 
     const allItems = itemsToPaste || [];
     const failedItems = allItems.filter((item) => item.isFailed);
+    const skippedItems = allItems.filter((item) => item.isSkipped);
     const failedCount = failedItems.length;
-    const successCount = allItems.length - failedCount;
+    const skippedCount = skippedItems.length;
+    const successCount = allItems.length - failedCount - skippedCount;
 
-    if (failedCount > 0) {
-      toast.success(`Pasted ${successCount} item(s), ${failedCount} failed/skipped.`);
-    } else {
-      toast.success(`Pasted ${successCount} item(s).`);
+    // Build single toast message with optional parts (will be just the pasted count when no failures/skips)
+    const parts = [`Pasted ${successCount} item(s)`];
+    if (failedCount > 0) parts.push(`${failedCount} failed`);
+    if (skippedCount > 0) parts.push(`${skippedCount} skipped`);
+    toast.success(parts.join(", ") + ".");
+
+    const failedFolderPaths = failedItems
+      .filter((item) => item.isFolder)
+      .map((item) => item.path);
+
+    // Collapse failed Moved folders in tree (not skipped, only failed)
+    if (failedFolderPaths.length > 0 && gFileClipboard.action === "cut") {
+      window.publishTopic("FoldersTree:collapse", { paths: failedFolderPaths });
+    }
+
+    // Find successfully created new folders
+    const createdFolders = allItems.filter(
+      (item) => item.isFolder && !item.isFailed && !item.isSkipped
+    );
+
+    const createdPaths = createdFolders.map((folder) => folder.newPath);
+    const deletedPaths = createdFolders.map((folder) => folder.path);
+
+    //Delete Successfully moved folders from tree (only for cut operation)
+    if (gFileClipboard.action === "cut" && deletedPaths.length > 0) {
+      window.publishTopic("FoldersTree:delete", { paths: deletedPaths });
+    }
+
+    // Insert successfully created folders into tree
+    if (createdPaths.length > 0 ) {
+      const parentFolder = window.MwdHelpers.getParentFolder(createdPaths[0]);
+      const newNames = createdPaths.map((path) => window.MwdHelpers.getFileName(path));
+      window.publishTopic("FoldersTree:insert", { parentFolder, names: newNames });
     }
 
   } finally {
+    // Clear clipboard if action was 'cut' (move operation)
+    if (gFileClipboard.action === "cut") {
+      gClearFileClipboard();
+    }
     isDialogOpen = false;
     gIsFileOperationInProgress = false;
   }
 }
 
-// --- Handles message from MessageListener (moved to XS)
+
 function onPasteMessageReceived(msg) {
   if (!msg || msg.type !== "PasteItemsModal:open") return;
 
@@ -223,8 +272,8 @@ function onPasteMessageReceived(msg) {
   itemsToPaste = gFileClipboard.items.map((item) =>
     Object.assign({}, item, {
       newPath: window.MwdHelpers.joinPath(destPath, item.name),
-      action: gFileClipboard.action,
       isFailed: false,
+      isSkipped: false,
     })
   );
 

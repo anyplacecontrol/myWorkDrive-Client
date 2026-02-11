@@ -76,7 +76,7 @@
           onClick="(event) => {
             if (!drive || !folder || folder === '/') return;
             const currentFolder = window.MwdHelpers.joinPath(drive, folder);
-            const parentFolder = MwdHelpers.getParentFolder(currentFolder);
+            const parentFolder = window.MwdHelpers.getParentFolder(currentFolder);
             navigateTo(parentFolder);
           }"
         />

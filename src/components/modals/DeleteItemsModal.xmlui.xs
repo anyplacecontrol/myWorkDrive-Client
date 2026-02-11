@@ -15,7 +15,7 @@ function handleMessageReceived(msg) {
     }
 
     // Store items for later use in onDeleteComplete
-    itemsToDelete = items.map((item) => Object.assign({}, item, { isFailed: false }));
+    itemsToDelete = items.map((item) => Object.assign({}, item, { isFailed: false, isSkipped: false }));
     isDialogOpen = true;
   }
 }
@@ -77,18 +77,22 @@ function onDeleteQueuedItem(eventArgs) {
           // Fall through to error handling below
         }
       } else {
-        // User cancelled: mark failed but do not show toast
+        // User cancelled: mark skipped and do not show toast
         showErrorToast = false;
       }
     }
 
     if (!operationSucceeded) {
-      // Track failed item and show toast for non-417 errors
-      const failedItem = itemsToDelete.find((entry) => entry.path === item.path);
-      if (failedItem) {
-        failedItem.isFailed = true;
+      const unsuccessfulItem = itemsToDelete.find((entry) => entry.path === item.path);
+
+      if (unsuccessfulItem && !showErrorToast) {
+        // skipped by user
+        unsuccessfulItem.isSkipped = true;
       }
+
       if (showErrorToast) {
+        // failed due to error
+        if (unsuccessfulItem) unsuccessfulItem.isFailed = true;
         toast.error(`Error deleting "${item.name}".`);
       }
     }
@@ -99,11 +103,11 @@ function onDeleteComplete() {
   try {
     const allItems = itemsToDelete || [];
     const failedItems = allItems.filter((item) => item.isFailed);
-    const failedPaths = failedItems.map((item) => item.path);
+    const skippedItems = allItems.filter((item) => item.isSkipped);
 
-    // Find successfully deleted folders
+    // Find successfully deleted folders (both flags must be false)
     const deletedFolders = allItems.filter(
-      (item) => item.isFolder && !failedPaths.includes(item.path)
+      (item) => item.isFolder && !item.isFailed && !item.isSkipped
     );
 
     const deletedPaths = deletedFolders.map((folder) => folder.path);
@@ -112,23 +116,24 @@ function onDeleteComplete() {
     if (deletedFolders.length > 0) {
       window.publishTopic("FoldersTree:delete", { paths: deletedPaths });
     }
-    // Notify FoldersTree to collapse any failed folders to refresh their state
-    if (failedPaths.length > 0) {
-      window.publishTopic("FoldersTree:collapse", { paths: failedPaths });
+    // Notify FoldersTree to collapse any failed folders to refresh their state (only failed, not skipped)
+    const failedFolderPaths = failedItems.filter((item) => item.isFolder).map((item) => item.path);
+    if (failedFolderPaths.length > 0) {
+      window.publishTopic("FoldersTree:collapse", { paths: failedFolderPaths });
     }
 
     // Refresh files list after deletion
     window.publishTopic("FilesContainer:refresh");
 
-    // Show completion toast
-    const deletedCount = allItems.length - failedItems.length;
+    // Show completion toast with detailed parts
     const failedCount = failedItems.length;
+    const skippedCount = skippedItems.length;
+    const deletedCount = allItems.length - failedCount - skippedCount;
 
-    if (failedCount > 0) {
-      toast.success(`Deleted ${deletedCount} item(s), ${failedCount} failed/skipped.`);
-    } else {
-      toast.success(`Deleted ${deletedCount} item(s).`);
-    }
+    const parts = [`Deleted ${deletedCount} item(s)`];
+    if (failedCount > 0) parts.push(`${failedCount} failed`);
+    if (skippedCount > 0) parts.push(`${skippedCount} skipped`);
+    toast.success(parts.join(", ") + ".");
   } finally {
     isDialogOpen = false;
     gIsFileOperationInProgress = false;
