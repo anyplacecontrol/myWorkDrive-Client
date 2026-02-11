@@ -1,3 +1,11 @@
+function setFileClipboard(value) {
+	fileClipboard = value;
+}
+
+function clearFileClipboard() {
+	fileClipboard = { items: [], action: null };
+}
+
 function transformShares(shares) {
 	if (!shares || !Array.isArray(shares)) return [];
 

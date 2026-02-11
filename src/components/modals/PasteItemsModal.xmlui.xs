@@ -1,7 +1,7 @@
 // --- Executes the paste operation for a single item
 function doPaste({ item, conflictBehavior }) {
   // Use Move endpoints for cut (move) operations, Copy endpoints for copy operations
-  const url = (gFileClipboard.action === "cut")
+  const url = (fileClipboard.action === "cut")
     ? (item.isFolder ? "/MoveFolder" : "/MoveFile")
     : (item.isFolder ? "/CopyFolder" : "/CopyFile");
 
@@ -87,7 +87,7 @@ function onProcessQueuedItem(eventArgs) {
         //failed due to error
          if (unsuccessfulItem)
           unsuccessfulItem.isFailed = true;
-        toast.error(`Failed to ${gFileClipboard.action === "cut" ? "move" : "copy"} "${item.name}"`);
+        toast.error(`Failed to ${fileClipboard.action === "cut" ? "move" : "copy"} "${item.name}"`);
       }
     }
   }
@@ -95,8 +95,8 @@ function onProcessQueuedItem(eventArgs) {
 
 // --- Handles modal close
 function handleClose() {
-  if (!gIsFileOperationInProgress) isDialogOpen = false;
-  return !gIsFileOperationInProgress;
+  if (!isFileOperationInProgress) isDialogOpen = false;
+  return !isFileOperationInProgress;
 }
 
 // --- Called when paste queue completes all items
@@ -123,7 +123,7 @@ function onPasteComplete() {
       .map((item) => item.path);
 
     // Collapse failed Moved folders in tree (not skipped, only failed)
-    if (failedFolderPaths.length > 0 && gFileClipboard.action === "cut") {
+    if (failedFolderPaths.length > 0 && fileClipboard.action === "cut") {
       window.publishTopic("FoldersTree:collapse", { paths: failedFolderPaths });
     }
 
@@ -136,7 +136,7 @@ function onPasteComplete() {
     const deletedPaths = createdFolders.map((folder) => folder.path);
 
     //Delete Successfully moved folders from tree (only for cut operation)
-    if (gFileClipboard.action === "cut" && deletedPaths.length > 0) {
+    if (fileClipboard.action === "cut" && deletedPaths.length > 0) {
       window.publishTopic("FoldersTree:delete", { paths: deletedPaths });
     }
 
@@ -149,11 +149,11 @@ function onPasteComplete() {
 
   } finally {
     // Clear clipboard if action was 'cut' (move operation)
-    if (gFileClipboard.action === "cut") {
-      gClearFileClipboard();
+    if (fileClipboard.action === "cut") {
+      clearFileClipboard();
     }
     isDialogOpen = false;
-    gIsFileOperationInProgress = false;
+    isFileOperationInProgress = false;
   }
 }
 
@@ -162,18 +162,18 @@ function onPasteMessageReceived(msg) {
   if (!msg || msg.type !== "PasteItemsModal:open") return;
 
   // Ensure UI state
-  gIsFileOperationInProgress = false;
+  isFileOperationInProgress = false;
 
   // Validate clipboard
   if (
-    !gFileClipboard ||
-    !Array.isArray(gFileClipboard.items) ||
-    gFileClipboard.items.length === 0
+    !fileClipboard ||
+    !Array.isArray(fileClipboard.items) ||
+    fileClipboard.items.length === 0
   ) {
     toast.error("Nothing to paste");
     return;
   }
-  if (gFileClipboard.action !== "copy" && gFileClipboard.action !== "cut") {
+  if (fileClipboard.action !== "copy" && fileClipboard.action !== "cut") {
     toast.error("Invalid clipboard action");
     return;
   }
@@ -228,7 +228,7 @@ function onPasteMessageReceived(msg) {
   }
 
   // Prevent pasting a folder into its own subfolder (use segment-aware comparison)
-  const invalidSource = gFileClipboard.items.find(
+  const invalidSource = fileClipboard.items.find(
     (item) => item.path && destPath && pathIsParent(item.path, destPath)
   );
 
@@ -239,7 +239,7 @@ function onPasteMessageReceived(msg) {
   }
 
   // Prevent pasting into the same folder as the first item (segment-aware)
-  const firstItemPath = gFileClipboard.items[0] && gFileClipboard.items[0].path;
+  const firstItemPath = fileClipboard.items[0] && fileClipboard.items[0].path;
   if (firstItemPath && destPath) {
     const firstParent = getParentFolder(firstItemPath);
     if (firstParent && normalizePath(destPath) === firstParent) {
@@ -250,9 +250,9 @@ function onPasteMessageReceived(msg) {
   }
 
   // Ask user for confirmation before pasting (ENGLISH) — use global formatter
-  const itemsDescription = window.MwdHelpers.formatItemsSummary(gFileClipboard.items);
+  const itemsDescription = window.MwdHelpers.formatItemsSummary(fileClipboard.items);
 
-  const actionText = gFileClipboard.action === "cut" ? "Move" : "Copy";
+  const actionText = fileClipboard.action === "cut" ? "Move" : "Copy";
   const folderName = window.MwdHelpers.getFileName(destPath) || destPath;
 
   const userConfirmed = confirm(
@@ -268,8 +268,8 @@ function onPasteMessageReceived(msg) {
   isDialogOpen = true;
 
   // Auto-start the paste queue
-  gIsFileOperationInProgress = true;
-  itemsToPaste = gFileClipboard.items.map((item) =>
+  isFileOperationInProgress = true;
+  itemsToPaste = fileClipboard.items.map((item) =>
     Object.assign({}, item, {
       newPath: window.MwdHelpers.joinPath(destPath, item.name),
       isFailed: false,

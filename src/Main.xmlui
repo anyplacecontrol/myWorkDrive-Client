@@ -4,6 +4,12 @@
   loggedInUser="{null}"
   scrollWholePage="false"
   paddingVertical="0"
+  global.isFileOperationInProgress="{false}"
+  global.fileClipboard="{ { items: [], action: null } }"
+  global.isFoldersVisible="{true}"
+  global.view="{'table'}"
+  global.sortBy="{'name'}"
+  global.sortDirection="{'ascending'}"
 >
 
   <script>
@@ -42,7 +48,7 @@
         listenTo="{[$queryParams.drive, sharesData.value]}"
         onDidChange="handleDriveOrSharesChange"
       />
-      <HSplitter initialPrimarySize="260px" when="{gIsFoldersVisible}">
+      <HSplitter initialPrimarySize="260px" when="{isFoldersVisible}">
 
         <template name="splitterTemplate">
           <Stack
@@ -60,7 +66,7 @@
       </HSplitter>
         <FilesContainer
           id="filesContainer2"
-          when="{!gIsFoldersVisible}"
+          when="{!isFoldersVisible}"
         />
 
     </Page>

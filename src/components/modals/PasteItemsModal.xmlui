@@ -24,7 +24,7 @@
   <!--
     This modal dialog shows the progress of paste (copy/cut) operations.
 
-    Clipboard data is stored in the `gFileClipboard` variable.
+    Clipboard data is stored in the `fileClipboard` variable.
   -->
 
   <ModalDialog
@@ -34,7 +34,7 @@
     onClose="handleClose"
   >
     <InProgressPanel
-      message="{ (gFileClipboard.action === 'cut' ? 'Moving' : 'Copying') + ' files... Remains: ' + pasteQueue.getQueueLength() + ' item(s)' }"
+      message="{ (fileClipboard.action === 'cut' ? 'Moving' : 'Copying') + ' files... Remains: ' + pasteQueue.getQueueLength() + ' item(s)' }"
     />
 
   </ModalDialog>

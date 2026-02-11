@@ -36,8 +36,8 @@ function handlePasteAction(row, selectedItems) {
 }
 
 // Handler for sorting
-function handleWillSort(sortBy, direction) {
-  gSortBy = sortBy;
-  gSortDirection = direction;
+function handleWillSort(newSortBy, newDirection) {
+  sortBy = newSortBy;
+  sortDirection = newDirection;
   return true;
 }

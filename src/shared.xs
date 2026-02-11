@@ -73,7 +73,7 @@ function copyOrCut(items, action) {
     items: list
   };
 
-  gSetFileClipboard(payload);
+  setFileClipboard(payload);
   // Use a formatted summary computed from the items array
   const summary =  window.MwdHelpers.formatItemsSummary(list);
   const actionText = payload.action === "copy" ? "Copied " : "Cut ";

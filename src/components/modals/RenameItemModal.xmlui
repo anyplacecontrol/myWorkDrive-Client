@@ -22,7 +22,7 @@
 
     <!-- The form that allows the user to rename the item. -->
     <Form
-      when="{!gIsFileOperationInProgress}"
+      when="{!isFileOperationInProgress}"
       id="renameForm"
       data="{{ name: itemToRename.name }}"
       saveLabel="Rename"

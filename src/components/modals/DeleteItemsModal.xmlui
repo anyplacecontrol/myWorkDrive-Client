@@ -27,7 +27,7 @@
       clearAfterFinish="true"
     />
 
-    <VStack gap="$space-4" when="{!gIsFileOperationInProgress}">
+    <VStack gap="$space-4" when="{!isFileOperationInProgress}">
       <Icon name="circle_delete" width="$space-12" height="$space-12" />
       <h2>
        {`Are you sure you want to delete ${window.MwdHelpers.formatItemsSummary(itemsToDelete)}?`}
