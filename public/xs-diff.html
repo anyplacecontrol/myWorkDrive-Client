@@ -778,10 +778,14 @@
 
       function saveEntriesToStorage(entries) {
         try {
-          // Keep only the most recent entries and strip large fields for localStorage
+          // Keep only the most recent entries and strip large fields for localStorage.
+          // Preserve all fields on interaction and API events — they're critical for
+          // Playwright test generation and semantic trace comparison.
+          const criticalKinds = new Set(["interaction", "navigate", "api:start", "api:complete", "api:error"]);
           const toStore = entries.slice(-500).map(e => {
+            if (criticalKinds.has(e.kind)) return e;
             const { text, diffPretty, diffJson, eventArgs, ...rest } = e;
-            return rest; // Strip large fields to save space
+            return rest;
           });
           localStorage.setItem(STORAGE_KEY, JSON.stringify(toStore));
         } catch (e) {
