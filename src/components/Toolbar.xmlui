@@ -73,8 +73,8 @@
           icon="btn_up"
           variant="ghost"
           onClick="(event) => {
-            if (!drive || !folder || folder === '/') return;
-            const currentFolder = window.MwdHelpers.joinPath(drive, folder);
+            if (!$queryParams.drive || !$queryParams.folder || $queryParams.folder === '/') return;
+            const currentFolder = window.MwdHelpers.joinPath($queryParams.drive, $queryParams.folder);
             const parentFolder = window.MwdHelpers.getParentFolder(currentFolder);
             navigateTo(parentFolder);
           }"
@@ -86,7 +86,7 @@
           variant="ghost"
           onClick="() => {
             window.publishTopic('FilesContainer:refresh');
-            window.publishTopic('FoldersTree:collapse', { paths: [getCurrentDrive()] });
+            window.publishTopic('FoldersTree:collapse', { paths: [$queryParams.drive] });
           }"
         />
 

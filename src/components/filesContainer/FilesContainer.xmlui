@@ -3,7 +3,6 @@
 -->
 <Component name="FilesContainer"
 >
-
   <MessageListener onMessageReceived="(msg) => {
     if (msg.type === 'FilesContainer:refresh') fileCatalogData.refetch();
   }"/>
@@ -38,19 +37,19 @@
     </ContextMenu>
 
     <FilesContainerHeader
-      when="{drive}"
-      isAnyFiles="{isAnyFiles}"
+      when="{$queryParams.drive}"
+      isAnyFiles="{isAnyFiles()}"
     />
 
     <EmptyDataView
-      when="{drive && !isAnyFiles}"
+      when="{$queryParams.drive && !isAnyFiles()}"
     />
 
     <!-- Display the files  -->
     <!-- Use the table or tiles view according to the current app state -->
     <FilesTableView
-      when="{isAnyFiles}"
-      fileEntries="{sortedFiles}"
+      when="{isAnyFiles()}"
+      fileEntries="{getSortedFiles()}"
       loading="{fileCatalogData.loading}"
       height="*"
     />

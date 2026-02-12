@@ -11,9 +11,6 @@
 >
   <script>
     import { navigateTo } from "../../shared.xs";
-    import { buildRootNodes, loadChildren, mapFolderItemsToNodes } from  "../../FoldersTree.xs";
-
-    var rootNodes =buildRootNodes($props.shares);
   </script>
 
   <MessageListener onMessageReceived="msg => handleMessageReceived(msg)"/>
@@ -47,7 +44,7 @@
       dataFormat="hierarchy"
       overflowX="hidden"
       iconSize="$space-6"
-      data="{rootNodes}"
+      data="{getRootNodes()}"
       onLoadChildren="loadChildren"
       onSelectionDidChange="(event) => navigateTo(event.newNode)"
       onContextMenu="ev => handleTreeContextMenu(ev, $item, contextMenu)"

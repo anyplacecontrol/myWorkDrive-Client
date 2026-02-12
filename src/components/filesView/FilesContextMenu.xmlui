@@ -10,7 +10,7 @@
   name="FilesContextMenu"
 >
   <script>
-  import { downloadFile, copyOrCut, paste } from "../../shared.xs";
+    import { downloadFile, copyOrCut, paste } from "../../shared.xs";
   </script>
 
   <AppState id="selectionState" bucket="fileCatalogSelection" />

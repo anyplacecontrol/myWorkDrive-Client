@@ -12,12 +12,6 @@
   global.sortDirection="{'ascending'}"
 >
 
-  <script>
-    import { getCurrentDrive } from "./shared.xs";
-  </script>
-
-
-
   <Theme space-4="0px">
     <AppHeader padding="0" height="$space-11">
       <Toolbar />
@@ -60,23 +54,18 @@
           id="foldersTree"
           shares="{sharesData.value}"
         />
-        <!--
         <FilesContainer
           id="filesContainer"
         />
-        -->
       </HSplitter>
-      <!--
         <FilesContainer
           id="filesContainer2"
           when="{!isFoldersVisible}"
         />
-      -->
-
     </Page>
   </Pages>
 
-  <!-- Global modals -->
+ <!-- Global modals -->
   <Theme
     paddingHorizontal-Button-sm="$space-5"
     paddingVertical-Button-sm="$space-3"
@@ -84,9 +73,10 @@
     borderRadius-Button="6px"
   >
     <RenameItemModal />
-    <DeleteItemsModal />
     <NewFolderModal />
+    <DeleteItemsModal />
     <PasteItemsModal />
   </Theme>
+
 
 </App>

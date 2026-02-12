@@ -17,7 +17,6 @@ function navigateTo(pathOrItem) {
 
   const targetUrl = MwdHelpers.buildNavigationUrl(path);
 
-  console.log(`[my] Navigating to: ${targetUrl}`); // Debug log to verify URL construction
   if (targetUrl) {
     Actions.navigate(targetUrl);
   }
