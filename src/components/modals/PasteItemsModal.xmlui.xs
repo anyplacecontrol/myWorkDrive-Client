@@ -183,8 +183,8 @@ function onPasteMessageReceived(msg) {
   if (msg.targetPath) {
     destPath = msg.targetPath;
   } else {
-    const drive = getCurrentDrive();
-    const folder = getCurrentFolder();
+    const drive = $queryParams.drive || '';
+    const folder = $queryParams.folder || '';
     destPath = window.MwdHelpers.joinPath(drive, folder);
   }
   const pathAfterCopying = window.MwdHelpers.joinPath(destPath, "someFile");

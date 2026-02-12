@@ -2,12 +2,14 @@
 // Handle incoming pub/sub messages for folder tree operations.
 // `msg` shape: { type: string, payload: any }
 // Supported types and payloads are documented on each handler below.
+
 function handleMessageReceived(msg) {
   if (msg.type === "FoldersTree:rename") handleRenameTreeNode(msg.payload);
   else if (msg.type === "FoldersTree:insert") handleInsertFolder(msg.payload);
   else if (msg.type === "FoldersTree:delete") handleDeleteFolders(msg.payload);
   else if (msg.type === "FoldersTree:collapse") handleCollapseNodes(msg.payload);
 }
+
 
 function buildRootNodes(shares) {
   if (!shares || !Array.isArray(shares)) return [];
@@ -40,14 +42,14 @@ function handleTreeContextMenu(ev, node, contextMenu) {
 }
 
 function mapFolderItemsToNodes(items) {
-  return (items || [])
-    .filter((item) => item.isFolder)
-    .map((item) => ({
-      id: window.MwdHelpers.normalizeTreeNodeId(item.path),
-      name: item.name,
-      icon: "folder",
-      dynamic: true,
-    }));
+   return (items || [])
+     .filter((item) => item.isFolder)
+     .map((item) => ({
+       id: window.MwdHelpers.normalizeTreeNodeId(item.path),
+       name: item.name,
+       icon: "folder",
+       dynamic: true,
+     }));
 }
 
 function loadChildren(node) {
@@ -57,9 +59,9 @@ function loadChildren(node) {
     invalidates: [],
   });
 
-  const items = Array.isArray(response) ? response : [];
-  const filtered = window.MwdHelpers.filterListResults(items, node.id);
-  return mapFolderItemsToNodes(filtered);
+   const items = Array.isArray(response) ? response : [];
+   const filtered = window.MwdHelpers.filterListResults(items, node.id);
+   return mapFolderItemsToNodes(filtered);
 }
 
 function updateNodeAndChildren(node, oldPathPrefix, newPathPrefix) {

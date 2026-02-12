@@ -5,9 +5,7 @@
 <Component name="Toolbar"
 >
   <script>
-    import { navigateTo, getCurrentDrive, getCurrentFolder } from "../shared.xs";
-    var drive = getCurrentDrive();
-    var folder = getCurrentFolder();
+    import { navigateTo } from "../shared.xs";
   </script>
 
 

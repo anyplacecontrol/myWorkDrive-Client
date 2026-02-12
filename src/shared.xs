@@ -17,19 +17,11 @@ function navigateTo(pathOrItem) {
 
   const targetUrl = MwdHelpers.buildNavigationUrl(path);
 
+  console.log(`[my] Navigating to: ${targetUrl}`); // Debug log to verify URL construction
   if (targetUrl) {
     Actions.navigate(targetUrl);
   }
 }
-
-function getCurrentDrive() {
-  return defaultTo($queryParams.drive, window.AppConfig.rootDrive);
-}
-
-function getCurrentFolder() {
-  return $queryParams.folder || '' //defaultTo($queryParams.folder, '/');
-}
-
 
 function downloadFile(file) {
   if (!file || !file.path) return;

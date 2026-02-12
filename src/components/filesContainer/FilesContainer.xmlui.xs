@@ -1,5 +1,5 @@
-var drive = getCurrentDrive();
-var folder = getCurrentFolder();
+var drive = $queryParams.drive || '';
+var folder = $queryParams.folder || '';
 
 var sortedFiles = MwdHelpers.sortFiles(
   fileCatalogData.value,

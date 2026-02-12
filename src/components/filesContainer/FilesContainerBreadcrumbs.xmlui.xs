@@ -1,5 +1,5 @@
-    var drive = getCurrentDrive();
-    var folder = getCurrentFolder();
+var drive = $queryParams.drive || '';
+var folder = $queryParams.folder || '';
 
     var decoded = decodeURIComponent(folder);
     var isWindows = /\\/.test(decoded);

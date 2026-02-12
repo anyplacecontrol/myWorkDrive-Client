@@ -4,10 +4,6 @@
 <Component
   name="FilesContainerBreadcrumbs"
 >
-  <script>
-    import { getCurrentDrive, getCurrentFolder } from "../../shared.xs";
-  </script>
-
   <HStack
     gap="$gap-tight"
     verticalAlignment="center"

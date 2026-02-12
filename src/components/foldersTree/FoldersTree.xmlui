@@ -8,10 +8,12 @@
 -->
 
 <Component name="FoldersTree"
-  var.rootNodes="{buildRootNodes($props.shares)}"
 >
   <script>
     import { navigateTo } from "../../shared.xs";
+    import { buildRootNodes, loadChildren, mapFolderItemsToNodes } from  "../../FoldersTree.xs";
+
+    var rootNodes =buildRootNodes($props.shares);
   </script>
 
   <MessageListener onMessageReceived="msg => handleMessageReceived(msg)"/>
@@ -20,6 +22,7 @@
   <ContextMenu id="contextMenu" menuWidth="220px">
     <FilesContextMenu />
   </ContextMenu>
+
 
   <!-- Panel with fixed toolbar (46px) and scrollable tree area below -->
   <VStack
@@ -34,9 +37,8 @@
     <Text color="$textColor--disabled" paddingLeft="$space-1">
       My Folders
     </Text>
-    <!-- Tree container: fills remaining space and scrolls independently
-    onNodeDidCollapse="onNodeCollapse"
-    -->
+
+    <!-- Tree container -->
     <Tree
       id="tree"
       spinnerDelay="250"

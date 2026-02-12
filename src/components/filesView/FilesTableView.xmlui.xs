@@ -22,15 +22,15 @@ function reselectAndOpenMenu(ev, item) {
 }
 
 function computeTargetPath() {
-  const drive = getCurrentDrive();
-  const folder = getCurrentFolder();
+  const drive =  $queryParams.drive || '';
+  const folder = $queryParams.folder || '';
   return window.MwdHelpers.joinPath(drive, folder);
 }
 
 // Handler for paste action from keyboard shortcut
 function handlePasteAction(row, selectedItems) {
-  const drive = getCurrentDrive();
-  const folder = getCurrentFolder();
+  const drive = $queryParams.drive || '';
+  const folder = $queryParams.folder || '';
   const targetPath = window.MwdHelpers.joinPath(drive, folder);
   window.publishTopic('PasteItemsModal:open', { targetPath });
 }

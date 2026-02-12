@@ -60,14 +60,18 @@
           id="foldersTree"
           shares="{sharesData.value}"
         />
+        <!--
         <FilesContainer
           id="filesContainer"
         />
+        -->
       </HSplitter>
+      <!--
         <FilesContainer
           id="filesContainer2"
           when="{!isFoldersVisible}"
         />
+      -->
 
     </Page>
   </Pages>

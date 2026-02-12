@@ -6,9 +6,6 @@
   var.itemsToPaste="{[]}"
   var.isDialogOpen="{false}"
 >
-  <script>
-    import { getCurrentDrive, getCurrentFolder } from "../../shared.xs";
-  </script>
 
   <MessageListener onMessageReceived="msg => onPasteMessageReceived(msg)" />
 

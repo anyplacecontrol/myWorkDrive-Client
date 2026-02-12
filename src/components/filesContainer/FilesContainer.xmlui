@@ -3,9 +3,6 @@
 -->
 <Component name="FilesContainer"
 >
-  <script>
-    import { getCurrentDrive, getCurrentFolder } from "../../shared.xs";
-  </script>
 
   <MessageListener onMessageReceived="(msg) => {
     if (msg.type === 'FilesContainer:refresh') fileCatalogData.refetch();
@@ -14,8 +11,8 @@
     <!-- Get the content of the folder (ignore the file property) -->
   <DataSource
     id="fileCatalogData"
-    when="{drive}"
-    url=`/ListFolder?path={window.MwdHelpers.joinPath(drive, folder)}`
+    when="{$queryParams.drive}"
+    url=`/ListFolder?path={window.MwdHelpers.joinPath($queryParams.drive || '', $queryParams.folder || '')}`
     transformResult="{(result) => transformResult(result)}"
   />
 
