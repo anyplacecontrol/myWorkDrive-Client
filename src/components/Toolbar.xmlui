@@ -71,6 +71,7 @@
         />
         <Button
           label="{mediaSize.largeScreen ? 'Up one level' : undefined}"
+          contextualLabel="Up one level"
           icon="btn_up"
           variant="ghost"
           onClick="(event) => {
