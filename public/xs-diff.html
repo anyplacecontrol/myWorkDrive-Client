@@ -7056,10 +7056,11 @@
         } else if (format === "html") {
           downloadFile(`xs-diff-${timestamp}.html`, generateHtmlExport(processed), "text/html");
         } else if (format === "json") {
-          // Export all entries (live _xsLogs merged with localStorage) for Playwright test generation.
-          // Using getAllEntries() ensures interaction events aren't lost when the rolling
-          // _xsLogs buffer (xsLogMax) is overwritten by periodic polling events.
-          const rawLogs = getAllEntries().sort((a, b) => (a.perfTs || a.ts || 0) - (b.perfTs || b.ts || 0));
+          // Export live _xsLogs only (not localStorage) for Playwright test generation.
+          // The engine's splicePreservingInteractions() already preserves interaction and
+          // API events from buffer eviction, so localStorage merge is unnecessary and
+          // would contaminate exports with stale events from previous sessions.
+          const rawLogs = ((window.parent && window.parent._xsLogs) || []).slice().sort((a, b) => (a.perfTs || a.ts || 0) - (b.perfTs || b.ts || 0));
           console.log(`Exporting ${rawLogs.length} entries as JSON for Playwright`);
           console.log(`Interaction entries: ${rawLogs.filter(e=>e.kind === 'interaction').length}`);
           if (rawLogs.length === 0) {
