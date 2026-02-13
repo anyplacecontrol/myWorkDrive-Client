@@ -1,0 +1,2544 @@
+[
+  {
+    "ts": 1770959333882,
+    "perfTs": 1883.0999999940395,
+    "traceId": "startup-mlkfgmud",
+    "kind": "component:vars:init",
+    "uid": "Toolbar",
+    "eventName": "folder",
+    "componentType": "Container",
+    "componentLabel": "Toolbar",
+    "ownerFileId": "/src/components/Toolbar.xmlui",
+    "ownerSource": {
+      "start": 97,
+      "end": 5146
+    },
+    "file": "/src/components/Toolbar.xmlui",
+    "changes": [
+      {
+        "key": "folder",
+        "after": "",
+        "changeKind": "init"
+      }
+    ],
+    "diff": [
+      {
+        "path": "folder",
+        "type": "add",
+        "after": "",
+        "beforeJson": "undefined",
+        "afterJson": "\"\"",
+        "diffPretty": "folder: undefined → \"\""
+      }
+    ],
+    "diffPretty": "file: /src/components/Toolbar.xmlui\nfolder: undefined → \"\""
+  },
+  {
+    "ts": 1770959333882,
+    "perfTs": 1883.9000000059605,
+    "traceId": "startup-mlkfgmud",
+    "kind": "component:vars:init",
+    "uid": "Toolbar",
+    "eventName": "folder",
+    "componentType": "Container",
+    "componentLabel": "Toolbar",
+    "ownerFileId": "/src/components/Toolbar.xmlui",
+    "ownerSource": {
+      "start": 97,
+      "end": 5146
+    },
+    "file": "/src/components/Toolbar.xmlui",
+    "changes": [
+      {
+        "key": "folder",
+        "after": "",
+        "changeKind": "init"
+      }
+    ],
+    "diff": [
+      {
+        "path": "folder",
+        "type": "add",
+        "after": "",
+        "beforeJson": "undefined",
+        "afterJson": "\"\"",
+        "diffPretty": "folder: undefined → \"\""
+      }
+    ],
+    "diffPretty": "file: /src/components/Toolbar.xmlui\nfolder: undefined → \"\""
+  },
+  {
+    "ts": 1770959333885,
+    "perfTs": 1886.4000000059605,
+    "traceId": "startup-mlkfgmud",
+    "text": "[\n  \"handler:start\",\n  {\n    \"uid\": \"\",\n    \"eventName\": \"didChange\",\n    \"componentType\": \"ChangeListener\",\n    \"componentLabel\": \"\",\n    \"args\": [\n      {\n        \"newValue\": [\n          null,\n          null\n        ]\n      }\n    ],\n    \"ownerFileId\": \"/src/Main.xmlui\",\n    \"ownerSource\": {\n      \"start\": 1221,\n      \"end\": 1360\n    },\n    \"handlerCode\": \"handleDriveOrSharesChange\"\n  }\n]",
+    "kind": "handler:start",
+    "eventName": "didChange",
+    "componentType": "ChangeListener",
+    "componentLabel": "",
+    "ownerFileId": "/src/Main.xmlui",
+    "ownerSource": {
+      "start": 1221,
+      "end": 1360
+    },
+    "handlerCode": "handleDriveOrSharesChange",
+    "eventArgs": [
+      {
+        "newValue": [
+          null,
+          null
+        ]
+      }
+    ]
+  },
+  {
+    "ts": 1770959333885,
+    "perfTs": 1887,
+    "traceId": "startup-mlkfgmud",
+    "kind": "component:vars:init",
+    "uid": "FoldersTree",
+    "eventName": "rootNodes",
+    "componentType": "Container",
+    "componentLabel": "FoldersTree",
+    "ownerFileId": "/src/components/foldersTree/FoldersTree.xmlui",
+    "ownerSource": {
+      "start": 328,
+      "end": 1749
+    },
+    "file": "/src/components/foldersTree/FoldersTree.xmlui",
+    "changes": [
+      {
+        "key": "rootNodes",
+        "after": [],
+        "changeKind": "init"
+      }
+    ],
+    "diff": [
+      {
+        "path": "rootNodes",
+        "type": "add",
+        "after": [],
+        "beforeJson": "undefined",
+        "afterJson": "[]",
+        "diffPretty": "rootNodes: undefined → []"
+      }
+    ],
+    "diffPretty": "file: /src/components/foldersTree/FoldersTree.xmlui\nrootNodes: undefined → []"
+  },
+  {
+    "ts": 1770959333886,
+    "perfTs": 1887.300000011921,
+    "traceId": "startup-mlkfgmud",
+    "kind": "component:vars:init",
+    "uid": "FilesContainer",
+    "eventName": "folder, sortedFiles, isAnyFiles",
+    "componentType": "Container",
+    "componentLabel": "FilesContainer",
+    "ownerFileId": "/src/components/filesContainer/FilesContainer.xmlui",
+    "ownerSource": {
+      "start": 120,
+      "end": 1572
+    },
+    "file": "/src/components/filesContainer/FilesContainer.xmlui",
+    "changes": [
+      {
+        "key": "folder",
+        "after": "",
+        "changeKind": "init"
+      },
+      {
+        "key": "sortedFiles",
+        "after": [],
+        "changeKind": "init"
+      },
+      {
+        "key": "isAnyFiles",
+        "after": false,
+        "changeKind": "init"
+      }
+    ],
+    "diff": [
+      {
+        "path": "folder",
+        "type": "add",
+        "after": "",
+        "beforeJson": "undefined",
+        "afterJson": "\"\"",
+        "diffPretty": "folder: undefined → \"\""
+      },
+      {
+        "path": "sortedFiles",
+        "type": "add",
+        "after": [],
+        "beforeJson": "undefined",
+        "afterJson": "[]",
+        "diffPretty": "sortedFiles: undefined → []"
+      },
+      {
+        "path": "isAnyFiles",
+        "type": "add",
+        "after": false,
+        "beforeJson": "undefined",
+        "afterJson": "false",
+        "diffPretty": "isAnyFiles: undefined → false"
+      }
+    ],
+    "diffPretty": "file: /src/components/filesContainer/FilesContainer.xmlui\nfolder: undefined → \"\"\nsortedFiles: undefined → []\nisAnyFiles: undefined → false"
+  },
+  {
+    "ts": 1770959333886,
+    "perfTs": 1887.5999999940395,
+    "traceId": "startup-mlkfgmud",
+    "kind": "component:vars:init",
+    "uid": "RenameItemModal",
+    "eventName": "itemToRename, isDialogOpen",
+    "componentType": "Container",
+    "componentLabel": "RenameItemModal",
+    "ownerFileId": "/src/components/modals/RenameItemModal.xmlui",
+    "ownerSource": {
+      "start": 186,
+      "end": 1342
+    },
+    "file": "/src/components/modals/RenameItemModal.xmlui",
+    "changes": [
+      {
+        "key": "itemToRename",
+        "after": null,
+        "changeKind": "init"
+      },
+      {
+        "key": "isDialogOpen",
+        "after": false,
+        "changeKind": "init"
+      }
+    ],
+    "diff": [
+      {
+        "path": "itemToRename",
+        "type": "add",
+        "after": null,
+        "beforeJson": "undefined",
+        "afterJson": "null",
+        "diffPretty": "itemToRename: undefined → null"
+      },
+      {
+        "path": "isDialogOpen",
+        "type": "add",
+        "after": false,
+        "beforeJson": "undefined",
+        "afterJson": "false",
+        "diffPretty": "isDialogOpen: undefined → false"
+      }
+    ],
+    "diffPretty": "file: /src/components/modals/RenameItemModal.xmlui\nitemToRename: undefined → null\nisDialogOpen: undefined → false"
+  },
+  {
+    "ts": 1770959333886,
+    "perfTs": 1887.9000000059605,
+    "traceId": "startup-mlkfgmud",
+    "kind": "component:vars:init",
+    "uid": "DeleteItemsModal",
+    "eventName": "itemsToDelete, isDialogOpen",
+    "componentType": "Container",
+    "componentLabel": "DeleteItemsModal",
+    "ownerFileId": "/src/components/modals/DeleteItemsModal.xmlui",
+    "ownerSource": {
+      "start": 184,
+      "end": 1587
+    },
+    "file": "/src/components/modals/DeleteItemsModal.xmlui",
+    "changes": [
+      {
+        "key": "itemsToDelete",
+        "after": [],
+        "changeKind": "init"
+      },
+      {
+        "key": "isDialogOpen",
+        "after": false,
+        "changeKind": "init"
+      }
+    ],
+    "diff": [
+      {
+        "path": "itemsToDelete",
+        "type": "add",
+        "after": [],
+        "beforeJson": "undefined",
+        "afterJson": "[]",
+        "diffPretty": "itemsToDelete: undefined → []"
+      },
+      {
+        "path": "isDialogOpen",
+        "type": "add",
+        "after": false,
+        "beforeJson": "undefined",
+        "afterJson": "false",
+        "diffPretty": "isDialogOpen: undefined → false"
+      }
+    ],
+    "diffPretty": "file: /src/components/modals/DeleteItemsModal.xmlui\nitemsToDelete: undefined → []\nisDialogOpen: undefined → false"
+  },
+  {
+    "ts": 1770959333886,
+    "perfTs": 1887.9000000059605,
+    "traceId": "startup-mlkfgmud",
+    "kind": "component:vars:init",
+    "uid": "NewFolderModal",
+    "eventName": "isDialogOpen",
+    "componentType": "Container",
+    "componentLabel": "NewFolderModal",
+    "ownerFileId": "/src/components/modals/NewFolderModal.xmlui",
+    "ownerSource": {
+      "start": 157,
+      "end": 1212
+    },
+    "file": "/src/components/modals/NewFolderModal.xmlui",
+    "changes": [
+      {
+        "key": "isDialogOpen",
+        "after": false,
+        "changeKind": "init"
+      }
+    ],
+    "diff": [
+      {
+        "path": "isDialogOpen",
+        "type": "add",
+        "after": false,
+        "beforeJson": "undefined",
+        "afterJson": "false",
+        "diffPretty": "isDialogOpen: undefined → false"
+      }
+    ],
+    "diffPretty": "file: /src/components/modals/NewFolderModal.xmlui\nisDialogOpen: undefined → false"
+  },
+  {
+    "ts": 1770959333887,
+    "perfTs": 1888.0999999940395,
+    "traceId": "startup-mlkfgmud",
+    "kind": "component:vars:init",
+    "uid": "PasteItemsModal",
+    "eventName": "itemsToPaste, isDialogOpen",
+    "componentType": "Container",
+    "componentLabel": "PasteItemsModal",
+    "ownerFileId": "/src/components/modals/PasteItemsModal.xmlui",
+    "ownerSource": {
+      "start": 186,
+      "end": 1013
+    },
+    "file": "/src/components/modals/PasteItemsModal.xmlui",
+    "changes": [
+      {
+        "key": "itemsToPaste",
+        "after": [],
+        "changeKind": "init"
+      },
+      {
+        "key": "isDialogOpen",
+        "after": false,
+        "changeKind": "init"
+      }
+    ],
+    "diff": [
+      {
+        "path": "itemsToPaste",
+        "type": "add",
+        "after": [],
+        "beforeJson": "undefined",
+        "afterJson": "[]",
+        "diffPretty": "itemsToPaste: undefined → []"
+      },
+      {
+        "path": "isDialogOpen",
+        "type": "add",
+        "after": false,
+        "beforeJson": "undefined",
+        "afterJson": "false",
+        "diffPretty": "isDialogOpen: undefined → false"
+      }
+    ],
+    "diffPretty": "file: /src/components/modals/PasteItemsModal.xmlui\nitemsToPaste: undefined → []\nisDialogOpen: undefined → false"
+  },
+  {
+    "ts": 1770959333887,
+    "perfTs": 1888.300000011921,
+    "traceId": "startup-mlkfgmud",
+    "kind": "component:vars:init",
+    "uid": "Main",
+    "eventName": "hasRedirected",
+    "componentType": "Container",
+    "componentLabel": "Main",
+    "ownerFileId": "/src/Main.xmlui",
+    "ownerSource": {
+      "start": 0,
+      "end": 2217
+    },
+    "file": "/src/Main.xmlui",
+    "changes": [
+      {
+        "key": "hasRedirected",
+        "after": false,
+        "changeKind": "init"
+      }
+    ],
+    "diff": [
+      {
+        "path": "hasRedirected",
+        "type": "add",
+        "after": false,
+        "beforeJson": "undefined",
+        "afterJson": "false",
+        "diffPretty": "hasRedirected: undefined → false"
+      }
+    ],
+    "diffPretty": "file: /src/Main.xmlui\nhasRedirected: undefined → false"
+  },
+  {
+    "ts": 1770959333929,
+    "perfTs": 1888.699999988079,
+    "kind": "state:changes",
+    "eventName": "AppState:fileCatalogSelection",
+    "uid": "fileCatalogSelection",
+    "traceId": "startup-mlkfgmud",
+    "diffPretty": "path: AppState:fileCatalogSelection\n- undefined\n+ {\n+   \"selectedItems\": []\n+ }",
+    "diffJson": [
+      {
+        "path": "AppState:fileCatalogSelection",
+        "type": "update",
+        "after": {
+          "selectedItems": []
+        },
+        "beforeJson": "undefined",
+        "afterJson": "{\n  \"selectedItems\": []\n}",
+        "diffText": "path: AppState:fileCatalogSelection\n- undefined\n+ {\n  \"selectedItems\": []\n}",
+        "diffPretty": "path: AppState:fileCatalogSelection\n- undefined\n+ {\n+   \"selectedItems\": []\n+ }"
+      }
+    ]
+  },
+  {
+    "ts": 1770959333973,
+    "perfTs": 1974.0999999940395,
+    "traceId": "startup-mlkfgmud",
+    "text": "[\n  \"handler:complete\",\n  {\n    \"uid\": \"\",\n    \"eventName\": \"didChange\",\n    \"componentType\": \"ChangeListener\",\n    \"componentLabel\": \"\",\n    \"duration\": 88,\n    \"startPerfTs\": 1885.699999988079,\n    \"ownerFileId\": \"/src/Main.xmlui\",\n    \"ownerSource\": {\n      \"start\": 1221,\n      \"end\": 1360\n    },\n    \"handlerCode\": \"handleDriveOrSharesChange\",\n    \"traceId\": \"startup-mlkfgmud\"\n  }\n]",
+    "kind": "handler:complete",
+    "eventName": "didChange",
+    "componentType": "ChangeListener",
+    "componentLabel": "",
+    "ownerFileId": "/src/Main.xmlui",
+    "ownerSource": {
+      "start": 1221,
+      "end": 1360
+    },
+    "duration": 88,
+    "startPerfTs": 1885.699999988079,
+    "handlerCode": "handleDriveOrSharesChange"
+  },
+  {
+    "ts": 1770959334151,
+    "perfTs": 2152.5999999940395,
+    "traceId": "startup-mlkfgmud",
+    "kind": "api:start",
+    "url": "/ListShares",
+    "method": "GET",
+    "instanceId": "ds-9l5yyc-mlkfgng6"
+  },
+  {
+    "ts": 1770959334199,
+    "perfTs": 2200.5,
+    "traceId": "startup-mlkfgmud",
+    "kind": "api:complete",
+    "url": "/ListShares",
+    "method": "GET",
+    "instanceId": "ds-9l5yyc-mlkfgng6",
+    "result": {
+      "useMultipleDriveLetters": false,
+      "shares": [
+        {
+          "shareName": "Documents",
+          "driveLetter": "D:",
+          "downloadEnabled": true,
+          "desktopClientEnabled": true,
+          "webClientEnabled": true
+        },
+        {
+          "shareName": "Pictures",
+          "driveLetter": "P:",
+          "downloadEnabled": true,
+          "desktopClientEnabled": true,
+          "webClientEnabled": true
+        },
+        {
+          "shareName": "Projects",
+          "driveLetter": "R:",
+          "downloadEnabled": true,
+          "desktopClientEnabled": true,
+          "webClientEnabled": true
+        }
+      ]
+    }
+  },
+  {
+    "ts": 1770959334203,
+    "perfTs": 2204.199999988079,
+    "traceId": "startup-mlkfgmud",
+    "instanceId": "ds-9l5yyc-mlkfgng6",
+    "dataSourceUrl": "/ListShares",
+    "ownerUid": "sharesData",
+    "ownerFileId": "/src/Main.xmlui",
+    "ownerSource": {
+      "start": 1068,
+      "end": 1221
+    },
+    "text": "[\n  \"state:changes\",\n  {\n    \"uid\": \"sharesData\",\n    \"eventName\": \"DataSource:sharesData\",\n    \"instanceId\": \"ds-9l5yyc-mlkfgng6\",\n    \"diff\": [\n      {\n        \"path\": \"DataSource:sharesData\",\n        \"type\": \"update\",\n        \"after\": [\n          {\n            \"shareName\": \"Documents\",\n            \"driveLetter\": \"D:\",\n            \"downloadEnabled\": true,\n            \"drivePath\": \":sh:Documents:/\"\n          },\n          {\n            \"shareName\": \"Pictures\",\n            \"driveLetter\": \"P:\",\n            \"downloadEnabled\": true,\n            \"drivePath\": \":sh:Pictures:/\"\n          },\n          {\n            \"shareName\": \"Projects\",\n            \"driveLetter\": \"R:\",\n            \"downloadEnabled\": true,\n            \"drivePath\": \":sh:Projects:/\"\n          }\n        ],\n        \"beforeJson\": \"undefined\",\n        \"afterJson\": \"[\\n  {\\n    \\\"shareName\\\": \\\"Documents\\\",\\n    \\\"driveLetter\\\": \\\"D:\\\",\\n    \\\"downloadEnabled\\\": true,\\n    \\\"drivePath\\\": \\\":sh:Documents:/\\\"\\n  },\\n  {\\n    \\\"shareName\\\": \\\"Pictures\\\",\\n    \\\"driveLetter\\\": \\\"P:\\\",\\n    \\\"downloadEnabled\\\": true,\\n    \\\"drivePath\\\": \\\":sh:Pictures:/\\\"\\n  },\\n  {\\n    \\\"shareName\\\": \\\"Projects\\\",\\n    \\\"driveLetter\\\": \\\"R:\\\",\\n    \\\"downloadEnabled\\\": true,\\n    \\\"drivePath\\\": \\\":sh:Projects:/\\\"\\n  }\\n]\",\n        \"diffText\": \"path: DataSource:sharesData\\n- undefined\\n+ [\\n  {\\n    \\\"shareName\\\": \\\"Documents\\\",\\n    \\\"driveLetter\\\": \\\"D:\\\",\\n    \\\"downloadEnabled\\\": true,\\n    \\\"drivePath\\\": \\\":sh:Documents:/\\\"\\n  },\\n  {\\n    \\\"shareName\\\": \\\"Pictures\\\",\\n    \\\"driveLetter\\\": \\\"P:\\\",\\n    \\\"downloadEnabled\\\": true,\\n    \\\"drivePath\\\": \\\":sh:Pictures:/\\\"\\n  },\\n  {\\n    \\\"shareName\\\": \\\"Projects\\\",\\n    \\\"driveLetter\\\": \\\"R:\\\",\\n    \\\"downloadEnabled\\\": true,\\n    \\\"drivePath\\\": \\\":sh:Projects:/\\\"\\n  }\\n]\",\n        \"diffPretty\": \"path: DataSource:sharesData\\n- undefined\\n+ [\\n+   {\\n+     \\\"shareName\\\": \\\"Documents\\\",\\n+     \\\"driveLetter\\\": \\\"D:\\\",\\n+     \\\"downloadEnabled\\\": true,\\n+     \\\"drivePath\\\": \\\":sh:Documents:/\\\"\\n+   },\\n+   {\\n+     \\\"shareName\\\": \\\"Pictures\\\",\\n+     \\\"driveLetter\\\": \\\"P:\\\",\\n+     \\\"downloadEnabled\\\": true,\\n+     \\\"drivePath\\\": \\\":sh:Pictures:/\\\"\\n+   },\\n+   {\\n+     \\\"shareName\\\": \\\"Projects\\\",\\n+     \\\"driveLetter\\\": \\\"R:\\\",\\n+     \\\"downloadEnabled\\\": true,\\n+     \\\"drivePath\\\": \\\":sh:Projects:/\\\"\\n+   }\\n+ ]\"\n      }\n    ]\n  }\n]",
+    "kind": "state:changes",
+    "eventName": "DataSource:sharesData",
+    "uid": "sharesData",
+    "componentType": "DataSource",
+    "diffPretty": "path: DataSource:sharesData\n- undefined\n+ [\n+   {\n+     \"shareName\": \"Documents\",\n+     \"driveLetter\": \"D:\",\n+     \"downloadEnabled\": true,\n+     \"drivePath\": \":sh:Documents:/\"\n+   },\n+   {\n+     \"shareName\": \"Pictures\",\n+     \"driveLetter\": \"P:\",\n+     \"downloadEnabled\": true,\n+     \"drivePath\": \":sh:Pictures:/\"\n+   },\n+   {\n+     \"shareName\": \"Projects\",\n+     \"driveLetter\": \"R:\",\n+     \"downloadEnabled\": true,\n+     \"drivePath\": \":sh:Projects:/\"\n+   }\n+ ]",
+    "diffJson": [
+      {
+        "path": "DataSource:sharesData",
+        "type": "update",
+        "after": [
+          {
+            "shareName": "Documents",
+            "driveLetter": "D:",
+            "downloadEnabled": true,
+            "drivePath": ":sh:Documents:/"
+          },
+          {
+            "shareName": "Pictures",
+            "driveLetter": "P:",
+            "downloadEnabled": true,
+            "drivePath": ":sh:Pictures:/"
+          },
+          {
+            "shareName": "Projects",
+            "driveLetter": "R:",
+            "downloadEnabled": true,
+            "drivePath": ":sh:Projects:/"
+          }
+        ],
+        "beforeJson": "undefined",
+        "afterJson": "[\n  {\n    \"shareName\": \"Documents\",\n    \"driveLetter\": \"D:\",\n    \"downloadEnabled\": true,\n    \"drivePath\": \":sh:Documents:/\"\n  },\n  {\n    \"shareName\": \"Pictures\",\n    \"driveLetter\": \"P:\",\n    \"downloadEnabled\": true,\n    \"drivePath\": \":sh:Pictures:/\"\n  },\n  {\n    \"shareName\": \"Projects\",\n    \"driveLetter\": \"R:\",\n    \"downloadEnabled\": true,\n    \"drivePath\": \":sh:Projects:/\"\n  }\n]",
+        "diffText": "path: DataSource:sharesData\n- undefined\n+ [\n  {\n    \"shareName\": \"Documents\",\n    \"driveLetter\": \"D:\",\n    \"downloadEnabled\": true,\n    \"drivePath\": \":sh:Documents:/\"\n  },\n  {\n    \"shareName\": \"Pictures\",\n    \"driveLetter\": \"P:\",\n    \"downloadEnabled\": true,\n    \"drivePath\": \":sh:Pictures:/\"\n  },\n  {\n    \"shareName\": \"Projects\",\n    \"driveLetter\": \"R:\",\n    \"downloadEnabled\": true,\n    \"drivePath\": \":sh:Projects:/\"\n  }\n]",
+        "diffPretty": "path: DataSource:sharesData\n- undefined\n+ [\n+   {\n+     \"shareName\": \"Documents\",\n+     \"driveLetter\": \"D:\",\n+     \"downloadEnabled\": true,\n+     \"drivePath\": \":sh:Documents:/\"\n+   },\n+   {\n+     \"shareName\": \"Pictures\",\n+     \"driveLetter\": \"P:\",\n+     \"downloadEnabled\": true,\n+     \"drivePath\": \":sh:Pictures:/\"\n+   },\n+   {\n+     \"shareName\": \"Projects\",\n+     \"driveLetter\": \"R:\",\n+     \"downloadEnabled\": true,\n+     \"drivePath\": \":sh:Projects:/\"\n+   }\n+ ]"
+      }
+    ]
+  },
+  {
+    "ts": 1770959334232,
+    "perfTs": 2234,
+    "traceId": "startup-mlkfgmud",
+    "text": "[\n  \"handler:start\",\n  {\n    \"uid\": \"\",\n    \"eventName\": \"didChange\",\n    \"componentType\": \"ChangeListener\",\n    \"componentLabel\": \"\",\n    \"args\": [\n      {\n        \"prevValue\": [\n          null,\n          null\n        ],\n        \"newValue\": [\n          null,\n          [\n            {\n              \"shareName\": \"Documents\",\n              \"driveLetter\": \"D:\",\n              \"downloadEnabled\": true,\n              \"drivePath\": \":sh:Documents:/\"\n            },\n            {\n              \"shareName\": \"Pictures\",\n              \"driveLetter\": \"P:\",\n              \"downloadEnabled\": true,\n              \"drivePath\": \":sh:Pictures:/\"\n            },\n            {\n              \"shareName\": \"Projects\",\n              \"driveLetter\": \"R:\",\n              \"downloadEnabled\": true,\n              \"drivePath\": \":sh:Projects:/\"\n            }\n          ]\n        ]\n      }\n    ],\n    \"ownerFileId\": \"/src/Main.xmlui\",\n    \"ownerSource\": {\n      \"start\": 1221,\n      \"end\": 1360\n    },\n    \"handlerCode\": \"handleDriveOrSharesChange\"\n  }\n]",
+    "kind": "handler:start",
+    "eventName": "didChange",
+    "componentType": "ChangeListener",
+    "componentLabel": "",
+    "ownerFileId": "/src/Main.xmlui",
+    "ownerSource": {
+      "start": 1221,
+      "end": 1360
+    },
+    "handlerCode": "handleDriveOrSharesChange",
+    "eventArgs": [
+      {
+        "prevValue": [
+          null,
+          null
+        ],
+        "newValue": [
+          null,
+          [
+            {
+              "shareName": "Documents",
+              "driveLetter": "D:",
+              "downloadEnabled": true,
+              "drivePath": ":sh:Documents:/"
+            },
+            {
+              "shareName": "Pictures",
+              "driveLetter": "P:",
+              "downloadEnabled": true,
+              "drivePath": ":sh:Pictures:/"
+            },
+            {
+              "shareName": "Projects",
+              "driveLetter": "R:",
+              "downloadEnabled": true,
+              "drivePath": ":sh:Projects:/"
+            }
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "ts": 1770959334233,
+    "perfTs": 2234.4000000059605,
+    "traceId": "startup-mlkfgmud",
+    "kind": "component:vars:change",
+    "uid": "FoldersTree",
+    "eventName": "rootNodes",
+    "componentType": "Container",
+    "componentLabel": "FoldersTree",
+    "ownerFileId": "/src/components/foldersTree/FoldersTree.xmlui",
+    "ownerSource": {
+      "start": 328,
+      "end": 1749
+    },
+    "file": "/src/components/foldersTree/FoldersTree.xmlui",
+    "changes": [
+      {
+        "key": "rootNodes",
+        "before": [],
+        "after": [
+          {
+            "id": ":sh:Documents:/",
+            "name": "Documents",
+            "icon": "shared_folder",
+            "dynamic": true
+          },
+          {
+            "id": ":sh:Pictures:/",
+            "name": "Pictures",
+            "icon": "shared_folder",
+            "dynamic": true
+          },
+          {
+            "id": ":sh:Projects:/",
+            "name": "Projects",
+            "icon": "shared_folder",
+            "dynamic": true
+          }
+        ],
+        "changeKind": "change"
+      }
+    ],
+    "diff": [
+      {
+        "path": "rootNodes",
+        "type": "update",
+        "before": [],
+        "after": [
+          {
+            "id": ":sh:Documents:/",
+            "name": "Documents",
+            "icon": "shared_folder",
+            "dynamic": true
+          },
+          {
+            "id": ":sh:Pictures:/",
+            "name": "Pictures",
+            "icon": "shared_folder",
+            "dynamic": true
+          },
+          {
+            "id": ":sh:Projects:/",
+            "name": "Projects",
+            "icon": "shared_folder",
+            "dynamic": true
+          }
+        ],
+        "beforeJson": "[]",
+        "afterJson": "[\n  {\n    \"id\": \":sh:Documents:/\",\n    \"name\": \"Documents\",\n    \"icon\": \"shared_folder\",\n    \"dynamic\": true\n  },\n  {\n    \"id\": \":sh:Pictures:/\",\n    \"name\": \"Pictures\",\n    \"icon\": \"shared_folder\",\n    \"dynamic\": true\n  },\n  {\n    \"id\": \":sh:Projects:/\",\n    \"name\": \"Projects\",\n    \"icon\": \"shared_folder\",\n    \"dynamic\": true\n  }\n]",
+        "diffPretty": "rootNodes: [] → [\n  {\n    \"id\": \":sh:Documents:/\",\n    \"name\": \"Documents\",\n    \"icon\": \"shared_folder\",\n    \"dynamic\": true\n  },\n  {\n    \"id\": \":sh:Pictures:/\",\n    \"name\": \"Pictures\",\n    \"icon\": \"shared_folder\",\n    \"dynamic\": true\n  },\n  {\n    \"id\": \":sh:Projects:/\",\n    \"name\": \"Projects\",\n    \"icon\": \"shared_folder\",\n    \"dynamic\": true\n  }\n]"
+      }
+    ],
+    "diffPretty": "file: /src/components/foldersTree/FoldersTree.xmlui\nrootNodes: [] → [\n  {\n    \"id\": \":sh:Documents:/\",\n    \"name\": \"Documents\",\n    \"icon\": \"shared_folder\",\n    \"dynamic\": true\n  },\n  {\n    \"id\": \":sh:Pictures:/\",\n    \"name\": \"Pictures\",\n    \"icon\": \"shared_folder\",\n    \"dynamic\": true\n  },\n  {\n    \"id\": \":sh:Projects:/\",\n    \"name\": \"Projects\",\n    \"icon\": \"shared_folder\",\n    \"dynamic\": true\n  }\n]"
+  },
+  {
+    "ts": 1770959334237,
+    "perfTs": 2238.5,
+    "traceId": "startup-mlkfgmud",
+    "text": "[\n  \"state:changes\",\n  {\n    \"uid\": \"\",\n    \"eventName\": \"didChange\",\n    \"componentType\": \"ChangeListener\",\n    \"componentLabel\": \"\",\n    \"changes\": [\n      {\n        \"path\": \"hasRedirected\",\n        \"action\": \"set\",\n        \"previousValue\": false,\n        \"newValue\": true\n      }\n    ],\n    \"diff\": [\n      {\n        \"path\": \"hasRedirected\",\n        \"type\": \"update\",\n        \"before\": false,\n        \"after\": true,\n        \"beforeJson\": \"false\",\n        \"afterJson\": \"true\",\n        \"diffText\": \"path: hasRedirected\\n- false\\n+ true\",\n        \"diffPretty\": \"path: hasRedirected\\n- false\\n+ true\"\n      }\n    ]\n  }\n]",
+    "kind": "state:changes",
+    "eventName": "didChange",
+    "componentType": "ChangeListener",
+    "componentLabel": "",
+    "diffPretty": "path: hasRedirected\n- false\n+ true",
+    "diffJson": [
+      {
+        "path": "hasRedirected",
+        "type": "update",
+        "before": false,
+        "after": true,
+        "beforeJson": "false",
+        "afterJson": "true",
+        "diffText": "path: hasRedirected\n- false\n+ true",
+        "diffPretty": "path: hasRedirected\n- false\n+ true"
+      }
+    ]
+  },
+  {
+    "ts": 1770959334286,
+    "perfTs": 2287.0999999940395,
+    "traceId": "startup-mlkfgmud",
+    "kind": "navigate",
+    "from": "/my-files",
+    "to": "/my-files?drive=%3Ash%3ADocuments%3A%2F"
+  },
+  {
+    "ts": 1770959334287,
+    "perfTs": 2288.5999999940395,
+    "traceId": "startup-mlkfgmud",
+    "text": "[\n  \"handler:complete\",\n  {\n    \"uid\": \"\",\n    \"eventName\": \"didChange\",\n    \"componentType\": \"ChangeListener\",\n    \"componentLabel\": \"\",\n    \"duration\": 54.80000001192093,\n    \"startPerfTs\": 2233.5999999940395,\n    \"ownerFileId\": \"/src/Main.xmlui\",\n    \"ownerSource\": {\n      \"start\": 1221,\n      \"end\": 1360\n    },\n    \"handlerCode\": \"handleDriveOrSharesChange\",\n    \"traceId\": \"startup-mlkfgmud\"\n  }\n]",
+    "kind": "handler:complete",
+    "eventName": "didChange",
+    "componentType": "ChangeListener",
+    "componentLabel": "",
+    "ownerFileId": "/src/Main.xmlui",
+    "ownerSource": {
+      "start": 1221,
+      "end": 1360
+    },
+    "duration": 54.80000001192093,
+    "startPerfTs": 2233.5999999940395,
+    "handlerCode": "handleDriveOrSharesChange"
+  },
+  {
+    "ts": 1770959334335,
+    "perfTs": 2336.199999988079,
+    "traceId": "startup-mlkfgmud",
+    "kind": "component:vars:change",
+    "uid": "Toolbar",
+    "eventName": "drive",
+    "componentType": "Container",
+    "componentLabel": "Toolbar",
+    "ownerFileId": "/src/components/Toolbar.xmlui",
+    "ownerSource": {
+      "start": 97,
+      "end": 5146
+    },
+    "file": "/src/components/Toolbar.xmlui",
+    "changes": [
+      {
+        "key": "drive",
+        "after": ":sh:Documents:/",
+        "changeKind": "change"
+      }
+    ],
+    "diff": [
+      {
+        "path": "drive",
+        "type": "update",
+        "after": ":sh:Documents:/",
+        "beforeJson": "undefined",
+        "afterJson": "\":sh:Documents:/\"",
+        "diffPretty": "drive: undefined → \":sh:Documents:/\""
+      }
+    ],
+    "diffPretty": "file: /src/components/Toolbar.xmlui\ndrive: undefined → \":sh:Documents:/\""
+  },
+  {
+    "ts": 1770959334335,
+    "perfTs": 2336.5999999940395,
+    "traceId": "startup-mlkfgmud",
+    "kind": "component:vars:change",
+    "uid": "Toolbar",
+    "eventName": "drive",
+    "componentType": "Container",
+    "componentLabel": "Toolbar",
+    "ownerFileId": "/src/components/Toolbar.xmlui",
+    "ownerSource": {
+      "start": 97,
+      "end": 5146
+    },
+    "file": "/src/components/Toolbar.xmlui",
+    "changes": [
+      {
+        "key": "drive",
+        "after": ":sh:Documents:/",
+        "changeKind": "change"
+      }
+    ],
+    "diff": [
+      {
+        "path": "drive",
+        "type": "update",
+        "after": ":sh:Documents:/",
+        "beforeJson": "undefined",
+        "afterJson": "\":sh:Documents:/\"",
+        "diffPretty": "drive: undefined → \":sh:Documents:/\""
+      }
+    ],
+    "diffPretty": "file: /src/components/Toolbar.xmlui\ndrive: undefined → \":sh:Documents:/\""
+  },
+  {
+    "ts": 1770959334339,
+    "perfTs": 2340.4000000059605,
+    "traceId": "startup-mlkfgmud",
+    "text": "[\n  \"handler:start\",\n  {\n    \"uid\": \"\",\n    \"eventName\": \"didChange\",\n    \"componentType\": \"ChangeListener\",\n    \"componentLabel\": \"\",\n    \"args\": [\n      {\n        \"prevValue\": [\n          null,\n          [\n            {\n              \"shareName\": \"Documents\",\n              \"driveLetter\": \"D:\",\n              \"downloadEnabled\": true,\n              \"drivePath\": \":sh:Documents:/\"\n            },\n            {\n              \"shareName\": \"Pictures\",\n              \"driveLetter\": \"P:\",\n              \"downloadEnabled\": true,\n              \"drivePath\": \":sh:Pictures:/\"\n            },\n            {\n              \"shareName\": \"Projects\",\n              \"driveLetter\": \"R:\",\n              \"downloadEnabled\": true,\n              \"drivePath\": \":sh:Projects:/\"\n            }\n          ]\n        ],\n        \"newValue\": [\n          \":sh:Documents:/\",\n          \"[Circular]\"\n        ]\n      }\n    ],\n    \"ownerFileId\": \"/src/Main.xmlui\",\n    \"ownerSource\": {\n      \"start\": 1221,\n      \"end\": 1360\n    },\n    \"handlerCode\": \"handleDriveOrSharesChange\"\n  }\n]",
+    "kind": "handler:start",
+    "eventName": "didChange",
+    "componentType": "ChangeListener",
+    "componentLabel": "",
+    "ownerFileId": "/src/Main.xmlui",
+    "ownerSource": {
+      "start": 1221,
+      "end": 1360
+    },
+    "handlerCode": "handleDriveOrSharesChange",
+    "eventArgs": [
+      {
+        "prevValue": [
+          null,
+          [
+            {
+              "shareName": "Documents",
+              "driveLetter": "D:",
+              "downloadEnabled": true,
+              "drivePath": ":sh:Documents:/"
+            },
+            {
+              "shareName": "Pictures",
+              "driveLetter": "P:",
+              "downloadEnabled": true,
+              "drivePath": ":sh:Pictures:/"
+            },
+            {
+              "shareName": "Projects",
+              "driveLetter": "R:",
+              "downloadEnabled": true,
+              "drivePath": ":sh:Projects:/"
+            }
+          ]
+        ],
+        "newValue": [
+          ":sh:Documents:/",
+          [
+            {
+              "shareName": "Documents",
+              "driveLetter": "D:",
+              "downloadEnabled": true,
+              "drivePath": ":sh:Documents:/"
+            },
+            {
+              "shareName": "Pictures",
+              "driveLetter": "P:",
+              "downloadEnabled": true,
+              "drivePath": ":sh:Pictures:/"
+            },
+            {
+              "shareName": "Projects",
+              "driveLetter": "R:",
+              "downloadEnabled": true,
+              "drivePath": ":sh:Projects:/"
+            }
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "ts": 1770959334339,
+    "perfTs": 2340.699999988079,
+    "traceId": "startup-mlkfgmud",
+    "kind": "api:start",
+    "url": "/ListFolder",
+    "method": "GET",
+    "instanceId": "ds-42y2ma-mlkfgntr"
+  },
+  {
+    "ts": 1770959334340,
+    "perfTs": 2341.5999999940395,
+    "traceId": "startup-mlkfgmud",
+    "kind": "component:vars:init",
+    "uid": "FilesContainerBreadcrumbs",
+    "eventName": "drive, folder, decoded, isWindows, crumbs, driveName",
+    "componentType": "Container",
+    "componentLabel": "FilesContainerBreadcrumbs",
+    "ownerFileId": "/src/components/filesContainer/FilesContainerBreadcrumbs.xmlui",
+    "ownerSource": {
+      "start": 129,
+      "end": 1143
+    },
+    "file": "/src/components/filesContainer/FilesContainerBreadcrumbs.xmlui",
+    "changes": [
+      {
+        "key": "drive",
+        "after": ":sh:Documents:/",
+        "changeKind": "init"
+      },
+      {
+        "key": "folder",
+        "after": "",
+        "changeKind": "init"
+      },
+      {
+        "key": "decoded",
+        "after": "",
+        "changeKind": "init"
+      },
+      {
+        "key": "isWindows",
+        "after": false,
+        "changeKind": "init"
+      },
+      {
+        "key": "crumbs",
+        "after": [],
+        "changeKind": "init"
+      },
+      {
+        "key": "driveName",
+        "after": "Documents",
+        "changeKind": "init"
+      }
+    ],
+    "diff": [
+      {
+        "path": "drive",
+        "type": "add",
+        "after": ":sh:Documents:/",
+        "beforeJson": "undefined",
+        "afterJson": "\":sh:Documents:/\"",
+        "diffPretty": "drive: undefined → \":sh:Documents:/\""
+      },
+      {
+        "path": "folder",
+        "type": "add",
+        "after": "",
+        "beforeJson": "undefined",
+        "afterJson": "\"\"",
+        "diffPretty": "folder: undefined → \"\""
+      },
+      {
+        "path": "decoded",
+        "type": "add",
+        "after": "",
+        "beforeJson": "undefined",
+        "afterJson": "\"\"",
+        "diffPretty": "decoded: undefined → \"\""
+      },
+      {
+        "path": "isWindows",
+        "type": "add",
+        "after": false,
+        "beforeJson": "undefined",
+        "afterJson": "false",
+        "diffPretty": "isWindows: undefined → false"
+      },
+      {
+        "path": "crumbs",
+        "type": "add",
+        "after": [],
+        "beforeJson": "undefined",
+        "afterJson": "[]",
+        "diffPretty": "crumbs: undefined → []"
+      },
+      {
+        "path": "driveName",
+        "type": "add",
+        "after": "Documents",
+        "beforeJson": "undefined",
+        "afterJson": "\"Documents\"",
+        "diffPretty": "driveName: undefined → \"Documents\""
+      }
+    ],
+    "diffPretty": "file: /src/components/filesContainer/FilesContainerBreadcrumbs.xmlui\ndrive: undefined → \":sh:Documents:/\"\nfolder: undefined → \"\"\ndecoded: undefined → \"\"\nisWindows: undefined → false\ncrumbs: undefined → []\ndriveName: undefined → \"Documents\""
+  },
+  {
+    "ts": 1770959334340,
+    "perfTs": 2341.9000000059605,
+    "traceId": "startup-mlkfgmud",
+    "kind": "component:vars:change",
+    "uid": "FilesContainer",
+    "eventName": "drive",
+    "componentType": "Container",
+    "componentLabel": "FilesContainer",
+    "ownerFileId": "/src/components/filesContainer/FilesContainer.xmlui",
+    "ownerSource": {
+      "start": 120,
+      "end": 1572
+    },
+    "file": "/src/components/filesContainer/FilesContainer.xmlui",
+    "changes": [
+      {
+        "key": "drive",
+        "after": ":sh:Documents:/",
+        "changeKind": "change"
+      }
+    ],
+    "diff": [
+      {
+        "path": "drive",
+        "type": "update",
+        "after": ":sh:Documents:/",
+        "beforeJson": "undefined",
+        "afterJson": "\":sh:Documents:/\"",
+        "diffPretty": "drive: undefined → \":sh:Documents:/\""
+      }
+    ],
+    "diffPretty": "file: /src/components/filesContainer/FilesContainer.xmlui\ndrive: undefined → \":sh:Documents:/\""
+  },
+  {
+    "ts": 1770959334350,
+    "perfTs": 2351.0999999940395,
+    "traceId": "startup-mlkfgmud",
+    "text": "[\n  \"state:changes\",\n  {\n    \"uid\": \"\",\n    \"eventName\": \"didChange\",\n    \"componentType\": \"ChangeListener\",\n    \"componentLabel\": \"\",\n    \"changes\": [\n      {\n        \"path\": \"hasRedirected\",\n        \"action\": \"set\",\n        \"previousValue\": true,\n        \"newValue\": false\n      }\n    ],\n    \"diff\": [\n      {\n        \"path\": \"hasRedirected\",\n        \"type\": \"update\",\n        \"before\": true,\n        \"after\": false,\n        \"beforeJson\": \"true\",\n        \"afterJson\": \"false\",\n        \"diffText\": \"path: hasRedirected\\n- true\\n+ false\",\n        \"diffPretty\": \"path: hasRedirected\\n- true\\n+ false\"\n      }\n    ]\n  }\n]",
+    "kind": "state:changes",
+    "eventName": "didChange",
+    "componentType": "ChangeListener",
+    "componentLabel": "",
+    "diffPretty": "path: hasRedirected\n- true\n+ false",
+    "diffJson": [
+      {
+        "path": "hasRedirected",
+        "type": "update",
+        "before": true,
+        "after": false,
+        "beforeJson": "true",
+        "afterJson": "false",
+        "diffText": "path: hasRedirected\n- true\n+ false",
+        "diffPretty": "path: hasRedirected\n- true\n+ false"
+      }
+    ]
+  },
+  {
+    "ts": 1770959334385,
+    "perfTs": 2386.4000000059605,
+    "traceId": "startup-mlkfgmud",
+    "text": "[\n  \"handler:complete\",\n  {\n    \"uid\": \"\",\n    \"eventName\": \"didChange\",\n    \"componentType\": \"ChangeListener\",\n    \"componentLabel\": \"\",\n    \"duration\": 46.099999994039536,\n    \"startPerfTs\": 2340.0999999940395,\n    \"ownerFileId\": \"/src/Main.xmlui\",\n    \"ownerSource\": {\n      \"start\": 1221,\n      \"end\": 1360\n    },\n    \"handlerCode\": \"handleDriveOrSharesChange\",\n    \"traceId\": \"startup-mlkfgmud\"\n  }\n]",
+    "kind": "handler:complete",
+    "eventName": "didChange",
+    "componentType": "ChangeListener",
+    "componentLabel": "",
+    "ownerFileId": "/src/Main.xmlui",
+    "ownerSource": {
+      "start": 1221,
+      "end": 1360
+    },
+    "duration": 46.099999994039536,
+    "startPerfTs": 2340.0999999940395,
+    "handlerCode": "handleDriveOrSharesChange"
+  },
+  {
+    "ts": 1770959334392,
+    "perfTs": 2393.4000000059605,
+    "traceId": "startup-mlkfgmud",
+    "kind": "api:complete",
+    "url": "/ListFolder",
+    "method": "GET",
+    "instanceId": "ds-42y2ma-mlkfgntr",
+    "result": [
+      {
+        "name": "xs-diff-20260127T035521.html",
+        "path": ":sh:Documents:/xs-diff-20260127T035521.html",
+        "created": "2026-02-13T04:54:28.0307063Z",
+        "modified": "2026-02-13T04:54:28.0307063Z",
+        "attributes": 128
+      },
+      {
+        "name": "tempfolder",
+        "path": ":sh:Documents:/tempfolder",
+        "created": "2026-02-13T04:59:15.8350813Z",
+        "modified": "2026-02-13T05:08:47.5895688Z",
+        "attributes": 16,
+        "isFolder": true
+      },
+      {
+        "name": "test.xlsx",
+        "path": ":sh:Documents:/test.xlsx",
+        "created": "2026-02-13T04:54:28.0305794Z",
+        "modified": "2026-02-13T04:54:28.0305794Z",
+        "attributes": 128
+      },
+      {
+        "name": "foo",
+        "path": ":sh:Documents:/foo",
+        "created": "2026-02-13T04:54:28.0298515Z",
+        "modified": "2026-02-13T05:08:37.8251984Z",
+        "attributes": 16,
+        "isFolder": true
+      }
+    ]
+  },
+  {
+    "ts": 1770959334395,
+    "perfTs": 2396.0999999940395,
+    "traceId": "startup-mlkfgmud",
+    "instanceId": "ds-42y2ma-mlkfgntr",
+    "dataSourceUrl": "/ListFolder?path={window.MwdHelpers.joinPath(drive, folder)}",
+    "ownerUid": "fileCatalogData",
+    "ownerFileId": "/src/components/filesContainer/FilesContainer.xmlui",
+    "ownerSource": {
+      "start": 347,
+      "end": 612
+    },
+    "text": "[\n  \"state:changes\",\n  {\n    \"uid\": \"fileCatalogData\",\n    \"eventName\": \"DataSource:fileCatalogData\",\n    \"instanceId\": \"ds-42y2ma-mlkfgntr\",\n    \"diff\": [\n      {\n        \"path\": \"DataSource:fileCatalogData\",\n        \"type\": \"update\",\n        \"after\": [\n          {\n            \"name\": \"xs-diff-20260127T035521.html\",\n            \"path\": \":sh:Documents:/xs-diff-20260127T035521.html\",\n            \"created\": \"2026-02-13T04:54:28.0307063Z\",\n            \"modified\": \"2026-02-13T04:54:28.0307063Z\",\n            \"attributes\": 128,\n            \"id\": \":sh:Documents:/xs-diff-20260127T035521.html\",\n            \"type\": \"File html\"\n          },\n          {\n            \"name\": \"tempfolder\",\n            \"path\": \":sh:Documents:/tempfolder\",\n            \"created\": \"2026-02-13T04:59:15.8350813Z\",\n            \"modified\": \"2026-02-13T05:08:47.5895688Z\",\n            \"attributes\": 16,\n            \"isFolder\": true,\n            \"id\": \":sh:Documents:/tempfolder\",\n            \"type\": \"Folder\"\n          },\n          {\n            \"name\": \"test.xlsx\",\n            \"path\": \":sh:Documents:/test.xlsx\",\n            \"created\": \"2026-02-13T04:54:28.0305794Z\",\n            \"modified\": \"2026-02-13T04:54:28.0305794Z\",\n            \"attributes\": 128,\n            \"id\": \":sh:Documents:/test.xlsx\",\n            \"type\": \"File xlsx\"\n          },\n          {\n            \"name\": \"foo\",\n            \"path\": \":sh:Documents:/foo\",\n            \"created\": \"2026-02-13T04:54:28.0298515Z\",\n            \"modified\": \"2026-02-13T05:08:37.8251984Z\",\n            \"attributes\": 16,\n            \"isFolder\": true,\n            \"id\": \":sh:Documents:/foo\",\n            \"type\": \"Folder\"\n          }\n        ],\n        \"beforeJson\": \"undefined\",\n        \"afterJson\": \"[\\n  {\\n    \\\"name\\\": \\\"xs-diff-20260127T035521.html\\\",\\n    \\\"path\\\": \\\":sh:Documents:/xs-diff-20260127T035521.html\\\",\\n    \\\"created\\\": \\\"2026-02-13T04:54:28.0307063Z\\\",\\n    \\\"modified\\\": \\\"2026-02-13T04:54:28.0307063Z\\\",\\n    \\\"attributes\\\": 128,\\n    \\\"id\\\": \\\":sh:Documents:/xs-diff-20260127T035521.html\\\",\\n    \\\"type\\\": \\\"File html\\\"\\n  },\\n  {\\n    \\\"name\\\": \\\"tempfolder\\\",\\n    \\\"path\\\": \\\":sh:Documents:/tempfolder\\\",\\n    \\\"created\\\": \\\"2026-02-13T04:59:15.8350813Z\\\",\\n    \\\"modified\\\": \\\"2026-02-13T05:08:47.5895688Z\\\",\\n    \\\"attributes\\\": 16,\\n    \\\"isFolder\\\": true,\\n    \\\"id\\\": \\\":sh:Documents:/tempfolder\\\",\\n    \\\"type\\\": \\\"Folder\\\"\\n  },\\n  {\\n    \\\"name\\\": \\\"test.xlsx\\\",\\n    \\\"path\\\": \\\":sh:Documents:/test.xlsx\\\",\\n    \\\"created\\\": \\\"2026-02-13T04:54:28.0305794Z\\\",\\n    \\\"modified\\\": \\\"2026-02-13T04:54:28.0305794Z\\\",\\n    \\\"attributes\\\": 128,\\n    \\\"id\\\": \\\":sh:Documents:/test.xlsx\\\",\\n    \\\"type\\\": \\\"File xlsx\\\"\\n  },\\n  {\\n    \\\"name\\\": \\\"foo\\\",\\n    \\\"path\\\": \\\":sh:Documents:/foo\\\",\\n    \\\"created\\\": \\\"2026-02-13T04:54:28.0298515Z\\\",\\n    \\\"modified\\\": \\\"2026-02-13T05:08:37.8251984Z\\\",\\n    \\\"attributes\\\": 16,\\n    \\\"isFolder\\\": true,\\n    \\\"id\\\": \\\":sh:Documents:/foo\\\",\\n    \\\"type\\\": \\\"Folder\\\"\\n  }\\n]\",\n        \"diffText\": \"path: DataSource:fileCatalogData\\n- undefined\\n+ [\\n  {\\n    \\\"name\\\": \\\"xs-diff-20260127T035521.html\\\",\\n    \\\"path\\\": \\\":sh:Documents:/xs-diff-20260127T035521.html\\\",\\n    \\\"created\\\": \\\"2026-02-13T04:54:28.0307063Z\\\",\\n    \\\"modified\\\": \\\"2026-02-13T04:54:28.0307063Z\\\",\\n    \\\"attributes\\\": 128,\\n    \\\"id\\\": \\\":sh:Documents:/xs-diff-20260127T035521.html\\\",\\n    \\\"type\\\": \\\"File html\\\"\\n  },\\n  {\\n    \\\"name\\\": \\\"tempfolder\\\",\\n    \\\"path\\\": \\\":sh:Documents:/tempfolder\\\",\\n    \\\"created\\\": \\\"2026-02-13T04:59:15.8350813Z\\\",\\n    \\\"modified\\\": \\\"2026-02-13T05:08:47.5895688Z\\\",\\n    \\\"attributes\\\": 16,\\n    \\\"isFolder\\\": true,\\n    \\\"id\\\": \\\":sh:Documents:/tempfolder\\\",\\n    \\\"type\\\": \\\"Folder\\\"\\n  },\\n  {\\n    \\\"name\\\": \\\"test.xlsx\\\",\\n    \\\"path\\\": \\\":sh:Documents:/test.xlsx\\\",\\n    \\\"created\\\": \\\"2026-02-13T04:54:28.0305794Z\\\",\\n    \\\"modified\\\": \\\"2026-02-13T04:54:28.0305794Z\\\",\\n    \\\"attributes\\\": 128,\\n    \\\"id\\\": \\\":sh:Documents:/test.xlsx\\\",\\n    \\\"type\\\": \\\"File xlsx\\\"\\n  },\\n  {\\n    \\\"name\\\": \\\"foo\\\",\\n    \\\"path\\\": \\\":sh:Documents:/foo\\\",\\n    \\\"created\\\": \\\"2026-02-13T04:54:28.0298515Z\\\",\\n    \\\"modified\\\": \\\"2026-02-13T05:08:37.8251984Z\\\",\\n    \\\"attributes\\\": 16,\\n    \\\"isFolder\\\": true,\\n    \\\"id\\\": \\\":sh:Documents:/foo\\\",\\n    \\\"type\\\": \\\"Folder\\\"\\n  }\\n]\",\n        \"diffPretty\": \"path: DataSource:fileCatalogData\\n- undefined\\n+ [\\n+   {\\n+     \\\"name\\\": \\\"xs-diff-20260127T035521.html\\\",\\n+     \\\"path\\\": \\\":sh:Documents:/xs-diff-20260127T035521.html\\\",\\n+     \\\"created\\\": \\\"2026-02-13T04:54:28.0307063Z\\\",\\n+     \\\"modified\\\": \\\"2026-02-13T04:54:28.0307063Z\\\",\\n+     \\\"attributes\\\": 128,\\n+     \\\"id\\\": \\\":sh:Documents:/xs-diff-20260127T035521.html\\\",\\n+     \\\"type\\\": \\\"File html\\\"\\n+   },\\n+   {\\n+     \\\"name\\\": \\\"tempfolder\\\",\\n+     \\\"path\\\": \\\":sh:Documents:/tempfolder\\\",\\n+     \\\"created\\\": \\\"2026-02-13T04:59:15.8350813Z\\\",\\n+     \\\"modified\\\": \\\"2026-02-13T05:08:47.5895688Z\\\",\\n+     \\\"attributes\\\": 16,\\n+     \\\"isFolder\\\": true,\\n+     \\\"id\\\": \\\":sh:Documents:/tempfolder\\\",\\n+     \\\"type\\\": \\\"Folder\\\"\\n+   },\\n+   {\\n+     \\\"name\\\": \\\"test.xlsx\\\",\\n+     \\\"path\\\": \\\":sh:Documents:/test.xlsx\\\",\\n+     \\\"created\\\": \\\"2026-02-13T04:54:28.0305794Z\\\",\\n+     \\\"modified\\\": \\\"2026-02-13T04:54:28.0305794Z\\\",\\n+     \\\"attributes\\\": 128,\\n+     \\\"id\\\": \\\":sh:Documents:/test.xlsx\\\",\\n+     \\\"type\\\": \\\"File xlsx\\\"\\n+   },\\n+   {\\n+     \\\"name\\\": \\\"foo\\\",\\n+     \\\"path\\\": \\\":sh:Documents:/foo\\\",\\n+     \\\"created\\\": \\\"2026-02-13T04:54:28.0298515Z\\\",\\n+     \\\"modified\\\": \\\"2026-02-13T05:08:37.8251984Z\\\",\\n+     \\\"attributes\\\": 16,\\n+     \\\"isFolder\\\": true,\\n+     \\\"id\\\": \\\":sh:Documents:/foo\\\",\\n+     \\\"type\\\": \\\"Folder\\\"\\n+   }\\n+ ]\"\n      }\n    ]\n  }\n]",
+    "kind": "state:changes",
+    "eventName": "DataSource:fileCatalogData",
+    "uid": "fileCatalogData",
+    "componentType": "DataSource",
+    "diffPretty": "path: DataSource:fileCatalogData\n- undefined\n+ [\n+   {\n+     \"name\": \"xs-diff-20260127T035521.html\",\n+     \"path\": \":sh:Documents:/xs-diff-20260127T035521.html\",\n+     \"created\": \"2026-02-13T04:54:28.0307063Z\",\n+     \"modified\": \"2026-02-13T04:54:28.0307063Z\",\n+     \"attributes\": 128,\n+     \"id\": \":sh:Documents:/xs-diff-20260127T035521.html\",\n+     \"type\": \"File html\"\n+   },\n+   {\n+     \"name\": \"tempfolder\",\n+     \"path\": \":sh:Documents:/tempfolder\",\n+     \"created\": \"2026-02-13T04:59:15.8350813Z\",\n+     \"modified\": \"2026-02-13T05:08:47.5895688Z\",\n+     \"attributes\": 16,\n+     \"isFolder\": true,\n+     \"id\": \":sh:Documents:/tempfolder\",\n+     \"type\": \"Folder\"\n+   },\n+   {\n+     \"name\": \"test.xlsx\",\n+     \"path\": \":sh:Documents:/test.xlsx\",\n+     \"created\": \"2026-02-13T04:54:28.0305794Z\",\n+     \"modified\": \"2026-02-13T04:54:28.0305794Z\",\n+     \"attributes\": 128,\n+     \"id\": \":sh:Documents:/test.xlsx\",\n+     \"type\": \"File xlsx\"\n+   },\n+   {\n+     \"name\": \"foo\",\n+     \"path\": \":sh:Documents:/foo\",\n+     \"created\": \"2026-02-13T04:54:28.0298515Z\",\n+     \"modified\": \"2026-02-13T05:08:37.8251984Z\",\n+     \"attributes\": 16,\n+     \"isFolder\": true,\n+     \"id\": \":sh:Documents:/foo\",\n+     \"type\": \"Folder\"\n+   }\n+ ]",
+    "diffJson": [
+      {
+        "path": "DataSource:fileCatalogData",
+        "type": "update",
+        "after": [
+          {
+            "name": "xs-diff-20260127T035521.html",
+            "path": ":sh:Documents:/xs-diff-20260127T035521.html",
+            "created": "2026-02-13T04:54:28.0307063Z",
+            "modified": "2026-02-13T04:54:28.0307063Z",
+            "attributes": 128,
+            "id": ":sh:Documents:/xs-diff-20260127T035521.html",
+            "type": "File html"
+          },
+          {
+            "name": "tempfolder",
+            "path": ":sh:Documents:/tempfolder",
+            "created": "2026-02-13T04:59:15.8350813Z",
+            "modified": "2026-02-13T05:08:47.5895688Z",
+            "attributes": 16,
+            "isFolder": true,
+            "id": ":sh:Documents:/tempfolder",
+            "type": "Folder"
+          },
+          {
+            "name": "test.xlsx",
+            "path": ":sh:Documents:/test.xlsx",
+            "created": "2026-02-13T04:54:28.0305794Z",
+            "modified": "2026-02-13T04:54:28.0305794Z",
+            "attributes": 128,
+            "id": ":sh:Documents:/test.xlsx",
+            "type": "File xlsx"
+          },
+          {
+            "name": "foo",
+            "path": ":sh:Documents:/foo",
+            "created": "2026-02-13T04:54:28.0298515Z",
+            "modified": "2026-02-13T05:08:37.8251984Z",
+            "attributes": 16,
+            "isFolder": true,
+            "id": ":sh:Documents:/foo",
+            "type": "Folder"
+          }
+        ],
+        "beforeJson": "undefined",
+        "afterJson": "[\n  {\n    \"name\": \"xs-diff-20260127T035521.html\",\n    \"path\": \":sh:Documents:/xs-diff-20260127T035521.html\",\n    \"created\": \"2026-02-13T04:54:28.0307063Z\",\n    \"modified\": \"2026-02-13T04:54:28.0307063Z\",\n    \"attributes\": 128,\n    \"id\": \":sh:Documents:/xs-diff-20260127T035521.html\",\n    \"type\": \"File html\"\n  },\n  {\n    \"name\": \"tempfolder\",\n    \"path\": \":sh:Documents:/tempfolder\",\n    \"created\": \"2026-02-13T04:59:15.8350813Z\",\n    \"modified\": \"2026-02-13T05:08:47.5895688Z\",\n    \"attributes\": 16,\n    \"isFolder\": true,\n    \"id\": \":sh:Documents:/tempfolder\",\n    \"type\": \"Folder\"\n  },\n  {\n    \"name\": \"test.xlsx\",\n    \"path\": \":sh:Documents:/test.xlsx\",\n    \"created\": \"2026-02-13T04:54:28.0305794Z\",\n    \"modified\": \"2026-02-13T04:54:28.0305794Z\",\n    \"attributes\": 128,\n    \"id\": \":sh:Documents:/test.xlsx\",\n    \"type\": \"File xlsx\"\n  },\n  {\n    \"name\": \"foo\",\n    \"path\": \":sh:Documents:/foo\",\n    \"created\": \"2026-02-13T04:54:28.0298515Z\",\n    \"modified\": \"2026-02-13T05:08:37.8251984Z\",\n    \"attributes\": 16,\n    \"isFolder\": true,\n    \"id\": \":sh:Documents:/foo\",\n    \"type\": \"Folder\"\n  }\n]",
+        "diffText": "path: DataSource:fileCatalogData\n- undefined\n+ [\n  {\n    \"name\": \"xs-diff-20260127T035521.html\",\n    \"path\": \":sh:Documents:/xs-diff-20260127T035521.html\",\n    \"created\": \"2026-02-13T04:54:28.0307063Z\",\n    \"modified\": \"2026-02-13T04:54:28.0307063Z\",\n    \"attributes\": 128,\n    \"id\": \":sh:Documents:/xs-diff-20260127T035521.html\",\n    \"type\": \"File html\"\n  },\n  {\n    \"name\": \"tempfolder\",\n    \"path\": \":sh:Documents:/tempfolder\",\n    \"created\": \"2026-02-13T04:59:15.8350813Z\",\n    \"modified\": \"2026-02-13T05:08:47.5895688Z\",\n    \"attributes\": 16,\n    \"isFolder\": true,\n    \"id\": \":sh:Documents:/tempfolder\",\n    \"type\": \"Folder\"\n  },\n  {\n    \"name\": \"test.xlsx\",\n    \"path\": \":sh:Documents:/test.xlsx\",\n    \"created\": \"2026-02-13T04:54:28.0305794Z\",\n    \"modified\": \"2026-02-13T04:54:28.0305794Z\",\n    \"attributes\": 128,\n    \"id\": \":sh:Documents:/test.xlsx\",\n    \"type\": \"File xlsx\"\n  },\n  {\n    \"name\": \"foo\",\n    \"path\": \":sh:Documents:/foo\",\n    \"created\": \"2026-02-13T04:54:28.0298515Z\",\n    \"modified\": \"2026-02-13T05:08:37.8251984Z\",\n    \"attributes\": 16,\n    \"isFolder\": true,\n    \"id\": \":sh:Documents:/foo\",\n    \"type\": \"Folder\"\n  }\n]",
+        "diffPretty": "path: DataSource:fileCatalogData\n- undefined\n+ [\n+   {\n+     \"name\": \"xs-diff-20260127T035521.html\",\n+     \"path\": \":sh:Documents:/xs-diff-20260127T035521.html\",\n+     \"created\": \"2026-02-13T04:54:28.0307063Z\",\n+     \"modified\": \"2026-02-13T04:54:28.0307063Z\",\n+     \"attributes\": 128,\n+     \"id\": \":sh:Documents:/xs-diff-20260127T035521.html\",\n+     \"type\": \"File html\"\n+   },\n+   {\n+     \"name\": \"tempfolder\",\n+     \"path\": \":sh:Documents:/tempfolder\",\n+     \"created\": \"2026-02-13T04:59:15.8350813Z\",\n+     \"modified\": \"2026-02-13T05:08:47.5895688Z\",\n+     \"attributes\": 16,\n+     \"isFolder\": true,\n+     \"id\": \":sh:Documents:/tempfolder\",\n+     \"type\": \"Folder\"\n+   },\n+   {\n+     \"name\": \"test.xlsx\",\n+     \"path\": \":sh:Documents:/test.xlsx\",\n+     \"created\": \"2026-02-13T04:54:28.0305794Z\",\n+     \"modified\": \"2026-02-13T04:54:28.0305794Z\",\n+     \"attributes\": 128,\n+     \"id\": \":sh:Documents:/test.xlsx\",\n+     \"type\": \"File xlsx\"\n+   },\n+   {\n+     \"name\": \"foo\",\n+     \"path\": \":sh:Documents:/foo\",\n+     \"created\": \"2026-02-13T04:54:28.0298515Z\",\n+     \"modified\": \"2026-02-13T05:08:37.8251984Z\",\n+     \"attributes\": 16,\n+     \"isFolder\": true,\n+     \"id\": \":sh:Documents:/foo\",\n+     \"type\": \"Folder\"\n+   }\n+ ]"
+      }
+    ]
+  },
+  {
+    "ts": 1770959334442,
+    "perfTs": 2443.199999988079,
+    "traceId": "vars-FilesContainer",
+    "kind": "component:vars:change",
+    "uid": "FilesContainer",
+    "eventName": "sortedFiles, isAnyFiles",
+    "componentType": "Container",
+    "componentLabel": "FilesContainer",
+    "ownerFileId": "/src/components/filesContainer/FilesContainer.xmlui",
+    "ownerSource": {
+      "start": 120,
+      "end": 1572
+    },
+    "file": "/src/components/filesContainer/FilesContainer.xmlui",
+    "changes": [
+      {
+        "key": "sortedFiles",
+        "before": [],
+        "after": [
+          {
+            "name": "foo",
+            "path": ":sh:Documents:/foo",
+            "created": "2026-02-13T04:54:28.0298515Z",
+            "modified": "2026-02-13T05:08:37.8251984Z",
+            "attributes": 16,
+            "isFolder": true,
+            "id": ":sh:Documents:/foo",
+            "type": "Folder"
+          },
+          {
+            "name": "tempfolder",
+            "path": ":sh:Documents:/tempfolder",
+            "created": "2026-02-13T04:59:15.8350813Z",
+            "modified": "2026-02-13T05:08:47.5895688Z",
+            "attributes": 16,
+            "isFolder": true,
+            "id": ":sh:Documents:/tempfolder",
+            "type": "Folder"
+          },
+          {
+            "name": "test.xlsx",
+            "path": ":sh:Documents:/test.xlsx",
+            "created": "2026-02-13T04:54:28.0305794Z",
+            "modified": "2026-02-13T04:54:28.0305794Z",
+            "attributes": 128,
+            "id": ":sh:Documents:/test.xlsx",
+            "type": "File xlsx"
+          },
+          {
+            "name": "xs-diff-20260127T035521.html",
+            "path": ":sh:Documents:/xs-diff-20260127T035521.html",
+            "created": "2026-02-13T04:54:28.0307063Z",
+            "modified": "2026-02-13T04:54:28.0307063Z",
+            "attributes": 128,
+            "id": ":sh:Documents:/xs-diff-20260127T035521.html",
+            "type": "File html"
+          }
+        ],
+        "changeKind": "change"
+      },
+      {
+        "key": "isAnyFiles",
+        "before": false,
+        "after": true,
+        "changeKind": "change"
+      }
+    ],
+    "diff": [
+      {
+        "path": "sortedFiles",
+        "type": "update",
+        "before": [],
+        "after": [
+          {
+            "name": "foo",
+            "path": ":sh:Documents:/foo",
+            "created": "2026-02-13T04:54:28.0298515Z",
+            "modified": "2026-02-13T05:08:37.8251984Z",
+            "attributes": 16,
+            "isFolder": true,
+            "id": ":sh:Documents:/foo",
+            "type": "Folder"
+          },
+          {
+            "name": "tempfolder",
+            "path": ":sh:Documents:/tempfolder",
+            "created": "2026-02-13T04:59:15.8350813Z",
+            "modified": "2026-02-13T05:08:47.5895688Z",
+            "attributes": 16,
+            "isFolder": true,
+            "id": ":sh:Documents:/tempfolder",
+            "type": "Folder"
+          },
+          {
+            "name": "test.xlsx",
+            "path": ":sh:Documents:/test.xlsx",
+            "created": "2026-02-13T04:54:28.0305794Z",
+            "modified": "2026-02-13T04:54:28.0305794Z",
+            "attributes": 128,
+            "id": ":sh:Documents:/test.xlsx",
+            "type": "File xlsx"
+          },
+          {
+            "name": "xs-diff-20260127T035521.html",
+            "path": ":sh:Documents:/xs-diff-20260127T035521.html",
+            "created": "2026-02-13T04:54:28.0307063Z",
+            "modified": "2026-02-13T04:54:28.0307063Z",
+            "attributes": 128,
+            "id": ":sh:Documents:/xs-diff-20260127T035521.html",
+            "type": "File html"
+          }
+        ],
+        "beforeJson": "[]",
+        "afterJson": "[\n  {\n    \"name\": \"foo\",\n    \"path\": \":sh:Documents:/foo\",\n    \"created\": \"2026-02-13T04:54:28.0298515Z\",\n    \"modified\": \"2026-02-13T05:08:37.8251984Z\",\n    \"attributes\": 16,\n    \"isFolder\": true,\n    \"id\": \":sh:Documents:/foo\",\n    \"type\": \"Folder\"\n  },\n  {\n    \"name\": \"tempfolder\",\n    \"path\": \":sh:Documents:/tempfolder\",\n    \"created\": \"2026-02-13T04:59:15.8350813Z\",\n    \"modified\": \"2026-02-13T05:08:47.5895688Z\",\n    \"attributes\": 16,\n    \"isFolder\": true,\n    \"id\": \":sh:Documents:/tempfolder\",\n    \"type\": \"Folder\"\n  },\n  {\n    \"name\": \"test.xlsx\",\n    \"path\": \":sh:Documents:/test.xlsx\",\n    \"created\": \"2026-02-13T04:54:28.0305794Z\",\n    \"modified\": \"2026-02-13T04:54:28.0305794Z\",\n    \"attributes\": 128,\n    \"id\": \":sh:Documents:/test.xlsx\",\n    \"type\": \"File xlsx\"\n  },\n  {\n    \"name\": \"xs-diff-20260127T035521.html\",\n    \"path\": \":sh:Documents:/xs-diff-20260127T035521.html\",\n    \"created\": \"2026-02-13T04:54:28.0307063Z\",\n    \"modified\": \"2026-02-13T04:54:28.0307063Z\",\n    \"attributes\": 128,\n    \"id\": \":sh:Documents:/xs-diff-20260127T035521.html\",\n    \"type\": \"File html\"\n  }\n]",
+        "diffPretty": "sortedFiles: [] → [\n  {\n    \"name\": \"foo\",\n    \"path\": \":sh:Documents:/foo\",\n    \"created\": \"2026-02-13T04:54:28.0298515Z\",\n    \"modified\": \"2026-02-13T05:08:37.8251984Z\",\n    \"attributes\": 16,\n    \"isFolder\": true,\n    \"id\": \":sh:Documents:/foo\",\n    \"type\": \"Folder\"\n  },\n  {\n    \"name\": \"tempfolder\",\n    \"path\": \":sh:Documents:/tempfolder\",\n    \"created\": \"2026-02-13T04:59:15.8350813Z\",\n    \"modified\": \"2026-02-13T05:08:47.5895688Z\",\n    \"attributes\": 16,\n    \"isFolder\": true,\n    \"id\": \":sh:Documents:/tempfolder\",\n    \"type\": \"Folder\"\n  },\n  {\n    \"name\": \"test.xlsx\",\n    \"path\": \":sh:Documents:/test.xlsx\",\n    \"created\": \"2026-02-13T04:54:28.0305794Z\",\n    \"modified\": \"2026-02-13T04:54:28.0305794Z\",\n    \"attributes\": 128,\n    \"id\": \":sh:Documents:/test.xlsx\",\n    \"type\": \"File xlsx\"\n  },\n  {\n    \"name\": \"xs-diff-20260127T035521.html\",\n    \"path\": \":sh:Documents:/xs-diff-20260127T035521.html\",\n    \"created\": \"2026-02-13T04:54:28.0307063Z\",\n    \"modified\": \"2026-02-13T04:54:28.0307063Z\",\n    \"attributes\": 128,\n    \"id\": \":sh:Documents:/xs-diff-20260127T035521.html\",\n    \"type\": \"File html\"\n  }\n]"
+      },
+      {
+        "path": "isAnyFiles",
+        "type": "update",
+        "before": false,
+        "after": true,
+        "beforeJson": "false",
+        "afterJson": "true",
+        "diffPretty": "isAnyFiles: false → true"
+      }
+    ],
+    "diffPretty": "file: /src/components/filesContainer/FilesContainer.xmlui\nsortedFiles: [] → [\n  {\n    \"name\": \"foo\",\n    \"path\": \":sh:Documents:/foo\",\n    \"created\": \"2026-02-13T04:54:28.0298515Z\",\n    \"modified\": \"2026-02-13T05:08:37.8251984Z\",\n    \"attributes\": 16,\n    \"isFolder\": true,\n    \"id\": \":sh:Documents:/foo\",\n    \"type\": \"Folder\"\n  },\n  {\n    \"name\": \"tempfolder\",\n    \"path\": \":sh:Documents:/tempfolder\",\n    \"created\": \"2026-02-13T04:59:15.8350813Z\",\n    \"modified\": \"2026-02-13T05:08:47.5895688Z\",\n    \"attributes\": 16,\n    \"isFolder\": true,\n    \"id\": \":sh:Documents:/tempfolder\",\n    \"type\": \"Folder\"\n  },\n  {\n    \"name\": \"test.xlsx\",\n    \"path\": \":sh:Documents:/test.xlsx\",\n    \"created\": \"2026-02-13T04:54:28.0305794Z\",\n    \"modified\": \"2026-02-13T04:54:28.0305794Z\",\n    \"attributes\": 128,\n    \"id\": \":sh:Documents:/test.xlsx\",\n    \"type\": \"File xlsx\"\n  },\n  {\n    \"name\": \"xs-diff-20260127T035521.html\",\n    \"path\": \":sh:Documents:/xs-diff-20260127T035521.html\",\n    \"created\": \"2026-02-13T04:54:28.0307063Z\",\n    \"modified\": \"2026-02-13T04:54:28.0307063Z\",\n    \"attributes\": 128,\n    \"id\": \":sh:Documents:/xs-diff-20260127T035521.html\",\n    \"type\": \"File html\"\n  }\n]\nisAnyFiles: false → true"
+  },
+  {
+    "ts": 1770959334621,
+    "perfTs": 2622.800000011921,
+    "eventTs": 2619.800000011921,
+    "kind": "interaction",
+    "eventName": "click",
+    "uid": "filesTable",
+    "traceId": "i-mlkfgo2l-bmfy8i",
+    "componentType": "Table",
+    "componentLabel": "Table",
+    "interaction": "click",
+    "ariaRole": "row",
+    "ariaName": "foo",
+    "detail": {
+      "componentId": "filesTable",
+      "targetTag": "TD",
+      "testIdsInPath": [
+        "filesTable",
+        "fileUploadDialog"
+      ],
+      "text": "NameSizeTypeDate modifiedfooFolder2/12/2026 9:08 PMtempfolderFolder2/12/2026 …",
+      "ariaRole": "row",
+      "ariaName": "foo",
+      "button": 0
+    },
+    "text": "{\n  \"componentId\": \"filesTable\",\n  \"targetTag\": \"TD\",\n  \"testIdsInPath\": [\n    \"filesTable\",\n    \"fileUploadDialog\"\n  ],\n  \"text\": \"NameSizeTypeDate modifiedfooFolder2/12/2026 9:08 PMtempfolderFolder2/12/2026 …\",\n  \"ariaRole\": \"row\",\n  \"ariaName\": \"foo\",\n  \"button\": 0\n}"
+  },
+  {
+    "ts": 1770959334639,
+    "perfTs": 2640.5,
+    "eventTs": 2619.9000000059605,
+    "kind": "interaction",
+    "eventName": "click",
+    "uid": "filesTable",
+    "traceId": "i-mlkfgo33-szqgop",
+    "componentType": "Table",
+    "componentLabel": "Table",
+    "interaction": "click",
+    "ariaRole": "row",
+    "ariaName": "foo",
+    "detail": {
+      "componentId": "filesTable",
+      "targetTag": "TD",
+      "testIdsInPath": [
+        "filesTable",
+        "fileUploadDialog"
+      ],
+      "text": "NameSizeTypeDate modifiedfooFolder2/12/2026 9:08 PMtempfolderFolder2/12/2026 …",
+      "ariaRole": "row",
+      "ariaName": "foo",
+      "button": 0
+    },
+    "text": "{\n  \"componentId\": \"filesTable\",\n  \"targetTag\": \"TD\",\n  \"testIdsInPath\": [\n    \"filesTable\",\n    \"fileUploadDialog\"\n  ],\n  \"text\": \"NameSizeTypeDate modifiedfooFolder2/12/2026 9:08 PMtempfolderFolder2/12/2026 …\",\n  \"ariaRole\": \"row\",\n  \"ariaName\": \"foo\",\n  \"button\": 0\n}"
+  },
+  {
+    "ts": 1770959334654,
+    "perfTs": 2655.0999999940395,
+    "eventTs": 2655,
+    "kind": "interaction",
+    "eventName": "dblclick",
+    "uid": "filesTable",
+    "traceId": "i-mlkfgo3i-uj8n8q",
+    "componentType": "Table",
+    "componentLabel": "Table",
+    "interaction": "dblclick",
+    "ariaRole": "row",
+    "ariaName": "foo",
+    "detail": {
+      "componentId": "filesTable",
+      "targetTag": "TD",
+      "testIdsInPath": [
+        "filesTable",
+        "fileUploadDialog"
+      ],
+      "text": "NameSizeTypeDate modifiedfooFolder2/12/2026 9:08 PMtempfolderFolder2/12/2026 …",
+      "ariaRole": "row",
+      "ariaName": "foo",
+      "button": 0
+    },
+    "text": "{\n  \"componentId\": \"filesTable\",\n  \"targetTag\": \"TD\",\n  \"testIdsInPath\": [\n    \"filesTable\",\n    \"fileUploadDialog\"\n  ],\n  \"text\": \"NameSizeTypeDate modifiedfooFolder2/12/2026 9:08 PMtempfolderFolder2/12/2026 …\",\n  \"ariaRole\": \"row\",\n  \"ariaName\": \"foo\",\n  \"button\": 0\n}"
+  },
+  {
+    "ts": 1770959334656,
+    "perfTs": 2657.0999999940395,
+    "traceId": "i-mlkfgo3i-uj8n8q",
+    "text": "[\n  \"handler:start\",\n  {\n    \"uid\": \"filesTable\",\n    \"eventName\": \"rowDoubleClick\",\n    \"componentType\": \"Table\",\n    \"componentLabel\": \"filesTable\",\n    \"args\": [\n      {\n        \"name\": \"foo\",\n        \"path\": \":sh:Documents:/foo\",\n        \"created\": \"2026-02-13T04:54:28.0298515Z\",\n        \"modified\": \"2026-02-13T05:08:37.8251984Z\",\n        \"attributes\": 16,\n        \"isFolder\": true,\n        \"id\": \":sh:Documents:/foo\",\n        \"type\": \"Folder\",\n        \"order\": 1\n      }\n    ],\n    \"ownerFileId\": \"/src/components/filesView/FilesTableView.xmlui\",\n    \"ownerSource\": {\n      \"start\": 562,\n      \"end\": 3038\n    },\n    \"handlerCode\": \"(item)=>onItemDoubleClick(item)\"\n  }\n]",
+    "kind": "handler:start",
+    "eventName": "rowDoubleClick",
+    "componentType": "Table",
+    "componentLabel": "filesTable",
+    "uid": "filesTable",
+    "ownerFileId": "/src/components/filesView/FilesTableView.xmlui",
+    "ownerSource": {
+      "start": 562,
+      "end": 3038
+    },
+    "handlerCode": "(item)=>onItemDoubleClick(item)",
+    "eventArgs": [
+      {
+        "name": "foo",
+        "path": ":sh:Documents:/foo",
+        "created": "2026-02-13T04:54:28.0298515Z",
+        "modified": "2026-02-13T05:08:37.8251984Z",
+        "attributes": 16,
+        "isFolder": true,
+        "id": ":sh:Documents:/foo",
+        "type": "Folder",
+        "order": 1
+      }
+    ]
+  },
+  {
+    "ts": 1770959334667,
+    "perfTs": 2668.800000011921,
+    "traceId": "i-mlkfgo3i-uj8n8q",
+    "kind": "navigate",
+    "from": "/my-files",
+    "to": "/my-files?drive=%3Ash%3ADocuments%3A%2F&folder=foo"
+  },
+  {
+    "ts": 1770959334709,
+    "perfTs": 2710.199999988079,
+    "traceId": "i-mlkfgo3i-uj8n8q",
+    "kind": "component:vars:change",
+    "uid": "Toolbar",
+    "eventName": "folder",
+    "componentType": "Container",
+    "componentLabel": "Toolbar",
+    "ownerFileId": "/src/components/Toolbar.xmlui",
+    "ownerSource": {
+      "start": 97,
+      "end": 5146
+    },
+    "file": "/src/components/Toolbar.xmlui",
+    "changes": [
+      {
+        "key": "folder",
+        "before": "",
+        "after": "foo",
+        "changeKind": "change"
+      }
+    ],
+    "diff": [
+      {
+        "path": "folder",
+        "type": "update",
+        "before": "",
+        "after": "foo",
+        "beforeJson": "\"\"",
+        "afterJson": "\"foo\"",
+        "diffPretty": "folder: \"\" → \"foo\""
+      }
+    ],
+    "diffPretty": "file: /src/components/Toolbar.xmlui\nfolder: \"\" → \"foo\""
+  },
+  {
+    "ts": 1770959334709,
+    "perfTs": 2710.5999999940395,
+    "traceId": "i-mlkfgo3i-uj8n8q",
+    "kind": "component:vars:change",
+    "uid": "Toolbar",
+    "eventName": "folder",
+    "componentType": "Container",
+    "componentLabel": "Toolbar",
+    "ownerFileId": "/src/components/Toolbar.xmlui",
+    "ownerSource": {
+      "start": 97,
+      "end": 5146
+    },
+    "file": "/src/components/Toolbar.xmlui",
+    "changes": [
+      {
+        "key": "folder",
+        "before": "",
+        "after": "foo",
+        "changeKind": "change"
+      }
+    ],
+    "diff": [
+      {
+        "path": "folder",
+        "type": "update",
+        "before": "",
+        "after": "foo",
+        "beforeJson": "\"\"",
+        "afterJson": "\"foo\"",
+        "diffPretty": "folder: \"\" → \"foo\""
+      }
+    ],
+    "diffPretty": "file: /src/components/Toolbar.xmlui\nfolder: \"\" → \"foo\""
+  },
+  {
+    "ts": 1770959334710,
+    "perfTs": 2711.0999999940395,
+    "traceId": "i-mlkfgo3i-uj8n8q",
+    "kind": "api:start",
+    "url": "/ListFolder",
+    "method": "GET",
+    "instanceId": "ds-42y2ma-mlkfgntr"
+  },
+  {
+    "ts": 1770959334710,
+    "perfTs": 2711.800000011921,
+    "traceId": "i-mlkfgo3i-uj8n8q",
+    "kind": "component:vars:change",
+    "uid": "FilesContainerBreadcrumbs",
+    "eventName": "folder, decoded, crumbs",
+    "componentType": "Container",
+    "componentLabel": "FilesContainerBreadcrumbs",
+    "ownerFileId": "/src/components/filesContainer/FilesContainerBreadcrumbs.xmlui",
+    "ownerSource": {
+      "start": 129,
+      "end": 1143
+    },
+    "file": "/src/components/filesContainer/FilesContainerBreadcrumbs.xmlui",
+    "changes": [
+      {
+        "key": "folder",
+        "before": "",
+        "after": "foo",
+        "changeKind": "change"
+      },
+      {
+        "key": "decoded",
+        "before": "",
+        "after": "foo",
+        "changeKind": "change"
+      },
+      {
+        "key": "crumbs",
+        "before": [],
+        "after": [
+          {
+            "name": "foo",
+            "folder": "foo"
+          }
+        ],
+        "changeKind": "change"
+      }
+    ],
+    "diff": [
+      {
+        "path": "folder",
+        "type": "update",
+        "before": "",
+        "after": "foo",
+        "beforeJson": "\"\"",
+        "afterJson": "\"foo\"",
+        "diffPretty": "folder: \"\" → \"foo\""
+      },
+      {
+        "path": "decoded",
+        "type": "update",
+        "before": "",
+        "after": "foo",
+        "beforeJson": "\"\"",
+        "afterJson": "\"foo\"",
+        "diffPretty": "decoded: \"\" → \"foo\""
+      },
+      {
+        "path": "crumbs",
+        "type": "update",
+        "before": [],
+        "after": [
+          {
+            "name": "foo",
+            "folder": "foo"
+          }
+        ],
+        "beforeJson": "[]",
+        "afterJson": "[\n  {\n    \"name\": \"foo\",\n    \"folder\": \"foo\"\n  }\n]",
+        "diffPretty": "crumbs: [] → [\n  {\n    \"name\": \"foo\",\n    \"folder\": \"foo\"\n  }\n]"
+      }
+    ],
+    "diffPretty": "file: /src/components/filesContainer/FilesContainerBreadcrumbs.xmlui\nfolder: \"\" → \"foo\"\ndecoded: \"\" → \"foo\"\ncrumbs: [] → [\n  {\n    \"name\": \"foo\",\n    \"folder\": \"foo\"\n  }\n]"
+  },
+  {
+    "ts": 1770959334711,
+    "perfTs": 2712.300000011921,
+    "traceId": "i-mlkfgo3i-uj8n8q",
+    "kind": "component:vars:change",
+    "uid": "FilesContainer",
+    "eventName": "folder",
+    "componentType": "Container",
+    "componentLabel": "FilesContainer",
+    "ownerFileId": "/src/components/filesContainer/FilesContainer.xmlui",
+    "ownerSource": {
+      "start": 120,
+      "end": 1572
+    },
+    "file": "/src/components/filesContainer/FilesContainer.xmlui",
+    "changes": [
+      {
+        "key": "folder",
+        "before": "",
+        "after": "foo",
+        "changeKind": "change"
+      }
+    ],
+    "diff": [
+      {
+        "path": "folder",
+        "type": "update",
+        "before": "",
+        "after": "foo",
+        "beforeJson": "\"\"",
+        "afterJson": "\"foo\"",
+        "diffPretty": "folder: \"\" → \"foo\""
+      }
+    ],
+    "diffPretty": "file: /src/components/filesContainer/FilesContainer.xmlui\nfolder: \"\" → \"foo\""
+  },
+  {
+    "ts": 1770959334754,
+    "perfTs": 2756,
+    "traceId": "i-mlkfgo3i-uj8n8q",
+    "text": "[\n  \"handler:complete\",\n  {\n    \"uid\": \"filesTable\",\n    \"eventName\": \"rowDoubleClick\",\n    \"componentType\": \"Table\",\n    \"componentLabel\": \"filesTable\",\n    \"duration\": 98.89999997615814,\n    \"startPerfTs\": 2656.800000011921,\n    \"ownerFileId\": \"/src/components/filesView/FilesTableView.xmlui\",\n    \"ownerSource\": {\n      \"start\": 562,\n      \"end\": 3038\n    },\n    \"handlerCode\": \"(item)=>onItemDoubleClick(item)\",\n    \"traceId\": \"i-mlkfgo3i-uj8n8q\"\n  }\n]",
+    "kind": "handler:complete",
+    "eventName": "rowDoubleClick",
+    "componentType": "Table",
+    "componentLabel": "filesTable",
+    "uid": "filesTable",
+    "ownerFileId": "/src/components/filesView/FilesTableView.xmlui",
+    "ownerSource": {
+      "start": 562,
+      "end": 3038
+    },
+    "duration": 98.89999997615814,
+    "startPerfTs": 2656.800000011921,
+    "handlerCode": "(item)=>onItemDoubleClick(item)"
+  },
+  {
+    "ts": 1770959334831,
+    "perfTs": 2625.4000000059605,
+    "kind": "state:changes",
+    "eventName": "AppState:fileCatalogSelection",
+    "uid": "fileCatalogSelection",
+    "traceId": "i-mlkfgo2l-bmfy8i",
+    "diffPretty": "path: AppState:fileCatalogSelection\n- {\n-   \"selectedItems\": []\n- }\n+ {\n+   \"selectedItems\": [],\n+   \"selectedIds\": [\n+     \":sh:Documents:/foo\"\n+   ]\n+ }",
+    "diffJson": [
+      {
+        "path": "AppState:fileCatalogSelection",
+        "type": "update",
+        "before": {
+          "selectedItems": []
+        },
+        "after": {
+          "selectedItems": [],
+          "selectedIds": [
+            ":sh:Documents:/foo"
+          ]
+        },
+        "beforeJson": "{\n  \"selectedItems\": []\n}",
+        "afterJson": "{\n  \"selectedItems\": [],\n  \"selectedIds\": [\n    \":sh:Documents:/foo\"\n  ]\n}",
+        "diffText": "path: AppState:fileCatalogSelection\n- {\n  \"selectedItems\": []\n}\n+ {\n  \"selectedItems\": [],\n  \"selectedIds\": [\n    \":sh:Documents:/foo\"\n  ]\n}",
+        "diffPretty": "path: AppState:fileCatalogSelection\n- {\n-   \"selectedItems\": []\n- }\n+ {\n+   \"selectedItems\": [],\n+   \"selectedIds\": [\n+     \":sh:Documents:/foo\"\n+   ]\n+ }"
+      }
+    ]
+  },
+  {
+    "ts": 1770959334840,
+    "perfTs": 2841.4000000059605,
+    "traceId": "i-mlkfgo3i-uj8n8q",
+    "kind": "api:complete",
+    "url": "/ListFolder",
+    "method": "GET",
+    "instanceId": "ds-42y2ma-mlkfgntr",
+    "result": [
+      {
+        "name": ".gitkeep",
+        "path": ":sh:Documents:/foo/.gitkeep",
+        "created": "2026-02-13T04:54:28.0300541Z",
+        "modified": "2026-02-13T04:54:28.0300541Z",
+        "attributes": 2
+      },
+      {
+        "name": "bar",
+        "path": ":sh:Documents:/foo/bar",
+        "created": "2026-02-13T04:54:28.030171Z",
+        "modified": "2026-02-13T04:54:28.0303361Z",
+        "attributes": 16,
+        "isFolder": true
+      },
+      {
+        "name": "hello.txt",
+        "path": ":sh:Documents:/foo/hello.txt",
+        "created": "2026-02-13T04:54:28.0304545Z",
+        "modified": "2026-02-13T04:54:28.0304545Z",
+        "attributes": 128
+      }
+    ]
+  },
+  {
+    "ts": 1770959334842,
+    "perfTs": 2843,
+    "traceId": "i-mlkfgo3i-uj8n8q",
+    "instanceId": "ds-42y2ma-mlkfgntr",
+    "dataSourceUrl": "/ListFolder?path={window.MwdHelpers.joinPath(drive, folder)}",
+    "ownerUid": "fileCatalogData",
+    "ownerFileId": "/src/components/filesContainer/FilesContainer.xmlui",
+    "ownerSource": {
+      "start": 347,
+      "end": 612
+    },
+    "text": "[\n  \"state:changes\",\n  {\n    \"uid\": \"fileCatalogData\",\n    \"eventName\": \"DataSource:fileCatalogData\",\n    \"instanceId\": \"ds-42y2ma-mlkfgntr\",\n    \"diff\": [\n      {\n        \"path\": \"DataSource:fileCatalogData\",\n        \"type\": \"update\",\n        \"before\": [\n          {\n            \"name\": \"xs-diff-20260127T035521.html\",\n            \"path\": \":sh:Documents:/xs-diff-20260127T035521.html\",\n            \"created\": \"2026-02-13T04:54:28.0307063Z\",\n            \"modified\": \"2026-02-13T04:54:28.0307063Z\",\n            \"attributes\": 128,\n            \"id\": \":sh:Documents:/xs-diff-20260127T035521.html\",\n            \"type\": \"File html\"\n          },\n          {\n            \"name\": \"tempfolder\",\n            \"path\": \":sh:Documents:/tempfolder\",\n            \"created\": \"2026-02-13T04:59:15.8350813Z\",\n            \"modified\": \"2026-02-13T05:08:47.5895688Z\",\n            \"attributes\": 16,\n            \"isFolder\": true,\n            \"id\": \":sh:Documents:/tempfolder\",\n            \"type\": \"Folder\"\n          },\n          {\n            \"name\": \"test.xlsx\",\n            \"path\": \":sh:Documents:/test.xlsx\",\n            \"created\": \"2026-02-13T04:54:28.0305794Z\",\n            \"modified\": \"2026-02-13T04:54:28.0305794Z\",\n            \"attributes\": 128,\n            \"id\": \":sh:Documents:/test.xlsx\",\n            \"type\": \"File xlsx\"\n          },\n          {\n            \"name\": \"foo\",\n            \"path\": \":sh:Documents:/foo\",\n            \"created\": \"2026-02-13T04:54:28.0298515Z\",\n            \"modified\": \"2026-02-13T05:08:37.8251984Z\",\n            \"attributes\": 16,\n            \"isFolder\": true,\n            \"id\": \":sh:Documents:/foo\",\n            \"type\": \"Folder\"\n          }\n        ],\n        \"after\": [\n          {\n            \"name\": \".gitkeep\",\n            \"path\": \":sh:Documents:/foo/.gitkeep\",\n            \"created\": \"2026-02-13T04:54:28.0300541Z\",\n            \"modified\": \"2026-02-13T04:54:28.0300541Z\",\n            \"attributes\": 2,\n            \"id\": \":sh:Documents:/foo/.gitkeep\",\n            \"type\": \"File gitkeep\"\n          },\n          {\n            \"name\": \"bar\",\n            \"path\": \":sh:Documents:/foo/bar\",\n            \"created\": \"2026-02-13T04:54:28.030171Z\",\n            \"modified\": \"2026-02-13T04:54:28.0303361Z\",\n            \"attributes\": 16,\n            \"isFolder\": true,\n            \"id\": \":sh:Documents:/foo/bar\",\n            \"type\": \"Folder\"\n          },\n          {\n            \"name\": \"hello.txt\",\n            \"path\": \":sh:Documents:/foo/hello.txt\",\n            \"created\": \"2026-02-13T04:54:28.0304545Z\",\n            \"modified\": \"2026-02-13T04:54:28.0304545Z\",\n            \"attributes\": 128,\n            \"id\": \":sh:Documents:/foo/hello.txt\",\n            \"type\": \"File txt\"\n          }\n        ],\n        \"beforeJson\": \"[\\n  {\\n    \\\"name\\\": \\\"xs-diff-20260127T035521.html\\\",\\n    \\\"path\\\": \\\":sh:Documents:/xs-diff-20260127T035521.html\\\",\\n    \\\"created\\\": \\\"2026-02-13T04:54:28.0307063Z\\\",\\n    \\\"modified\\\": \\\"2026-02-13T04:54:28.0307063Z\\\",\\n    \\\"attributes\\\": 128,\\n    \\\"id\\\": \\\":sh:Documents:/xs-diff-20260127T035521.html\\\",\\n    \\\"type\\\": \\\"File html\\\"\\n  },\\n  {\\n    \\\"name\\\": \\\"tempfolder\\\",\\n    \\\"path\\\": \\\":sh:Documents:/tempfolder\\\",\\n    \\\"created\\\": \\\"2026-02-13T04:59:15.8350813Z\\\",\\n    \\\"modified\\\": \\\"2026-02-13T05:08:47.5895688Z\\\",\\n    \\\"attributes\\\": 16,\\n    \\\"isFolder\\\": true,\\n    \\\"id\\\": \\\":sh:Documents:/tempfolder\\\",\\n    \\\"type\\\": \\\"Folder\\\"\\n  },\\n  {\\n    \\\"name\\\": \\\"test.xlsx\\\",\\n    \\\"path\\\": \\\":sh:Documents:/test.xlsx\\\",\\n    \\\"created\\\": \\\"2026-02-13T04:54:28.0305794Z\\\",\\n    \\\"modified\\\": \\\"2026-02-13T04:54:28.0305794Z\\\",\\n    \\\"attributes\\\": 128,\\n    \\\"id\\\": \\\":sh:Documents:/test.xlsx\\\",\\n    \\\"type\\\": \\\"File xlsx\\\"\\n  },\\n  {\\n    \\\"name\\\": \\\"foo\\\",\\n    \\\"path\\\": \\\":sh:Documents:/foo\\\",\\n    \\\"created\\\": \\\"2026-02-13T04:54:28.0298515Z\\\",\\n    \\\"modified\\\": \\\"2026-02-13T05:08:37.8251984Z\\\",\\n    \\\"attributes\\\": 16,\\n    \\\"isFolder\\\": true,\\n    \\\"id\\\": \\\":sh:Documents:/foo\\\",\\n    \\\"type\\\": \\\"Folder\\\"\\n  }\\n]\",\n        \"afterJson\": \"[\\n  {\\n    \\\"name\\\": \\\".gitkeep\\\",\\n    \\\"path\\\": \\\":sh:Documents:/foo/.gitkeep\\\",\\n    \\\"created\\\": \\\"2026-02-13T04:54:28.0300541Z\\\",\\n    \\\"modified\\\": \\\"2026-02-13T04:54:28.0300541Z\\\",\\n    \\\"attributes\\\": 2,\\n    \\\"id\\\": \\\":sh:Documents:/foo/.gitkeep\\\",\\n    \\\"type\\\": \\\"File gitkeep\\\"\\n  },\\n  {\\n    \\\"name\\\": \\\"bar\\\",\\n    \\\"path\\\": \\\":sh:Documents:/foo/bar\\\",\\n    \\\"created\\\": \\\"2026-02-13T04:54:28.030171Z\\\",\\n    \\\"modified\\\": \\\"2026-02-13T04:54:28.0303361Z\\\",\\n    \\\"attributes\\\": 16,\\n    \\\"isFolder\\\": true,\\n    \\\"id\\\": \\\":sh:Documents:/foo/bar\\\",\\n    \\\"type\\\": \\\"Folder\\\"\\n  },\\n  {\\n    \\\"name\\\": \\\"hello.txt\\\",\\n    \\\"path\\\": \\\":sh:Documents:/foo/hello.txt\\\",\\n    \\\"created\\\": \\\"2026-02-13T04:54:28.0304545Z\\\",\\n    \\\"modified\\\": \\\"2026-02-13T04:54:28.0304545Z\\\",\\n    \\\"attributes\\\": 128,\\n    \\\"id\\\": \\\":sh:Documents:/foo/hello.txt\\\",\\n    \\\"type\\\": \\\"File txt\\\"\\n  }\\n]\",\n        \"diffText\": \"path: DataSource:fileCatalogData\\n- [\\n  {\\n    \\\"name\\\": \\\"xs-diff-20260127T035521.html\\\",\\n    \\\"path\\\": \\\":sh:Documents:/xs-diff-20260127T035521.html\\\",\\n    \\\"created\\\": \\\"2026-02-13T04:54:28.0307063Z\\\",\\n    \\\"modified\\\": \\\"2026-02-13T04:54:28.0307063Z\\\",\\n    \\\"attributes\\\": 128,\\n    \\\"id\\\": \\\":sh:Documents:/xs-diff-20260127T035521.html\\\",\\n    \\\"type\\\": \\\"File html\\\"\\n  },\\n  {\\n    \\\"name\\\": \\\"tempfolder\\\",\\n    \\\"path\\\": \\\":sh:Documents:/tempfolder\\\",\\n    \\\"created\\\": \\\"2026-02-13T04:59:15.8350813Z\\\",\\n    \\\"modified\\\": \\\"2026-02-13T05:08:47.5895688Z\\\",\\n    \\\"attributes\\\": 16,\\n    \\\"isFolder\\\": true,\\n    \\\"id\\\": \\\":sh:Documents:/tempfolder\\\",\\n    \\\"type\\\": \\\"Folder\\\"\\n  },\\n  {\\n    \\\"name\\\": \\\"test.xlsx\\\",\\n    \\\"path\\\": \\\":sh:Documents:/test.xlsx\\\",\\n    \\\"created\\\": \\\"2026-02-13T04:54:28.0305794Z\\\",\\n    \\\"modified\\\": \\\"2026-02-13T04:54:28.0305794Z\\\",\\n    \\\"attributes\\\": 128,\\n    \\\"id\\\": \\\":sh:Documents:/test.xlsx\\\",\\n    \\\"type\\\": \\\"File xlsx\\\"\\n  },\\n  {\\n    \\\"name\\\": \\\"foo\\\",\\n    \\\"path\\\": \\\":sh:Documents:/foo\\\",\\n    \\\"created\\\": \\\"2026-02-13T04:54:28.0298515Z\\\",\\n    \\\"modified\\\": \\\"2026-02-13T05:08:37.8251984Z\\\",\\n    \\\"attributes\\\": 16,\\n    \\\"isFolder\\\": true,\\n    \\\"id\\\": \\\":sh:Documents:/foo\\\",\\n    \\\"type\\\": \\\"Folder\\\"\\n  }\\n]\\n+ [\\n  {\\n    \\\"name\\\": \\\".gitkeep\\\",\\n    \\\"path\\\": \\\":sh:Documents:/foo/.gitkeep\\\",\\n    \\\"created\\\": \\\"2026-02-13T04:54:28.0300541Z\\\",\\n    \\\"modified\\\": \\\"2026-02-13T04:54:28.0300541Z\\\",\\n    \\\"attributes\\\": 2,\\n    \\\"id\\\": \\\":sh:Documents:/foo/.gitkeep\\\",\\n    \\\"type\\\": \\\"File gitkeep\\\"\\n  },\\n  {\\n    \\\"name\\\": \\\"bar\\\",\\n    \\\"path\\\": \\\":sh:Documents:/foo/bar\\\",\\n    \\\"created\\\": \\\"2026-02-13T04:54:28.030171Z\\\",\\n    \\\"modified\\\": \\\"2026-02-13T04:54:28.0303361Z\\\",\\n    \\\"attributes\\\": 16,\\n    \\\"isFolder\\\": true,\\n    \\\"id\\\": \\\":sh:Documents:/foo/bar\\\",\\n    \\\"type\\\": \\\"Folder\\\"\\n  },\\n  {\\n    \\\"name\\\": \\\"hello.txt\\\",\\n    \\\"path\\\": \\\":sh:Documents:/foo/hello.txt\\\",\\n    \\\"created\\\": \\\"2026-02-13T04:54:28.0304545Z\\\",\\n    \\\"modified\\\": \\\"2026-02-13T04:54:28.0304545Z\\\",\\n    \\\"attributes\\\": 128,\\n    \\\"id\\\": \\\":sh:Documents:/foo/hello.txt\\\",\\n    \\\"type\\\": \\\"File txt\\\"\\n  }\\n]\",\n        \"diffPretty\": \"path: DataSource:fileCatalogData\\n- [\\n-   {\\n-     \\\"name\\\": \\\"xs-diff-20260127T035521.html\\\",\\n-     \\\"path\\\": \\\":sh:Documents:/xs-diff-20260127T035521.html\\\",\\n-     \\\"created\\\": \\\"2026-02-13T04:54:28.0307063Z\\\",\\n-     \\\"modified\\\": \\\"2026-02-13T04:54:28.0307063Z\\\",\\n-     \\\"attributes\\\": 128,\\n-     \\\"id\\\": \\\":sh:Documents:/xs-diff-20260127T035521.html\\\",\\n-     \\\"type\\\": \\\"File html\\\"\\n-   },\\n-   {\\n-     \\\"name\\\": \\\"tempfolder\\\",\\n-     \\\"path\\\": \\\":sh:Documents:/tempfolder\\\",\\n-     \\\"created\\\": \\\"2026-02-13T04:59:15.8350813Z\\\",\\n-     \\\"modified\\\": \\\"2026-02-13T05:08:47.5895688Z\\\",\\n-     \\\"attributes\\\": 16,\\n-     \\\"isFolder\\\": true,\\n-     \\\"id\\\": \\\":sh:Documents:/tempfolder\\\",\\n-     \\\"type\\\": \\\"Folder\\\"\\n-   },\\n-   {\\n-     \\\"name\\\": \\\"test.xlsx\\\",\\n-     \\\"path\\\": \\\":sh:Documents:/test.xlsx\\\",\\n-     \\\"created\\\": \\\"2026-02-13T04:54:28.0305794Z\\\",\\n-     \\\"modified\\\": \\\"2026-02-13T04:54:28.0305794Z\\\",\\n-     \\\"attributes\\\": 128,\\n-     \\\"id\\\": \\\":sh:Documents:/test.xlsx\\\",\\n-     \\\"type\\\": \\\"File xlsx\\\"\\n-   },\\n-   {\\n-     \\\"name\\\": \\\"foo\\\",\\n-     \\\"path\\\": \\\":sh:Documents:/foo\\\",\\n-     \\\"created\\\": \\\"2026-02-13T04:54:28.0298515Z\\\",\\n-     \\\"modified\\\": \\\"2026-02-13T05:08:37.8251984Z\\\",\\n-     \\\"attributes\\\": 16,\\n-     \\\"isFolder\\\": true,\\n-     \\\"id\\\": \\\":sh:Documents:/foo\\\",\\n-     \\\"type\\\": \\\"Folder\\\"\\n-   }\\n- ]\\n+ [\\n+   {\\n+     \\\"name\\\": \\\".gitkeep\\\",\\n+     \\\"path\\\": \\\":sh:Documents:/foo/.gitkeep\\\",\\n+     \\\"created\\\": \\\"2026-02-13T04:54:28.0300541Z\\\",\\n+     \\\"modified\\\": \\\"2026-02-13T04:54:28.0300541Z\\\",\\n+     \\\"attributes\\\": 2,\\n+     \\\"id\\\": \\\":sh:Documents:/foo/.gitkeep\\\",\\n+     \\\"type\\\": \\\"File gitkeep\\\"\\n+   },\\n+   {\\n+     \\\"name\\\": \\\"bar\\\",\\n+     \\\"path\\\": \\\":sh:Documents:/foo/bar\\\",\\n+     \\\"created\\\": \\\"2026-02-13T04:54:28.030171Z\\\",\\n+     \\\"modified\\\": \\\"2026-02-13T04:54:28.0303361Z\\\",\\n+     \\\"attributes\\\": 16,\\n+     \\\"isFolder\\\": true,\\n+     \\\"id\\\": \\\":sh:Documents:/foo/bar\\\",\\n+     \\\"type\\\": \\\"Folder\\\"\\n+   },\\n+   {\\n+     \\\"name\\\": \\\"hello.txt\\\",\\n+     \\\"path\\\": \\\":sh:Documents:/foo/hello.txt\\\",\\n+     \\\"created\\\": \\\"2026-02-13T04:54:28.0304545Z\\\",\\n+     \\\"modified\\\": \\\"2026-02-13T04:54:28.0304545Z\\\",\\n+     \\\"attributes\\\": 128,\\n+     \\\"id\\\": \\\":sh:Documents:/foo/hello.txt\\\",\\n+     \\\"type\\\": \\\"File txt\\\"\\n+   }\\n+ ]\"\n      }\n    ]\n  }\n]",
+    "kind": "state:changes",
+    "eventName": "DataSource:fileCatalogData",
+    "uid": "fileCatalogData",
+    "componentType": "DataSource",
+    "diffPretty": "path: DataSource:fileCatalogData\n- [\n-   {\n-     \"name\": \"xs-diff-20260127T035521.html\",\n-     \"path\": \":sh:Documents:/xs-diff-20260127T035521.html\",\n-     \"created\": \"2026-02-13T04:54:28.0307063Z\",\n-     \"modified\": \"2026-02-13T04:54:28.0307063Z\",\n-     \"attributes\": 128,\n-     \"id\": \":sh:Documents:/xs-diff-20260127T035521.html\",\n-     \"type\": \"File html\"\n-   },\n-   {\n-     \"name\": \"tempfolder\",\n-     \"path\": \":sh:Documents:/tempfolder\",\n-     \"created\": \"2026-02-13T04:59:15.8350813Z\",\n-     \"modified\": \"2026-02-13T05:08:47.5895688Z\",\n-     \"attributes\": 16,\n-     \"isFolder\": true,\n-     \"id\": \":sh:Documents:/tempfolder\",\n-     \"type\": \"Folder\"\n-   },\n-   {\n-     \"name\": \"test.xlsx\",\n-     \"path\": \":sh:Documents:/test.xlsx\",\n-     \"created\": \"2026-02-13T04:54:28.0305794Z\",\n-     \"modified\": \"2026-02-13T04:54:28.0305794Z\",\n-     \"attributes\": 128,\n-     \"id\": \":sh:Documents:/test.xlsx\",\n-     \"type\": \"File xlsx\"\n-   },\n-   {\n-     \"name\": \"foo\",\n-     \"path\": \":sh:Documents:/foo\",\n-     \"created\": \"2026-02-13T04:54:28.0298515Z\",\n-     \"modified\": \"2026-02-13T05:08:37.8251984Z\",\n-     \"attributes\": 16,\n-     \"isFolder\": true,\n-     \"id\": \":sh:Documents:/foo\",\n-     \"type\": \"Folder\"\n-   }\n- ]\n+ [\n+   {\n+     \"name\": \".gitkeep\",\n+     \"path\": \":sh:Documents:/foo/.gitkeep\",\n+     \"created\": \"2026-02-13T04:54:28.0300541Z\",\n+     \"modified\": \"2026-02-13T04:54:28.0300541Z\",\n+     \"attributes\": 2,\n+     \"id\": \":sh:Documents:/foo/.gitkeep\",\n+     \"type\": \"File gitkeep\"\n+   },\n+   {\n+     \"name\": \"bar\",\n+     \"path\": \":sh:Documents:/foo/bar\",\n+     \"created\": \"2026-02-13T04:54:28.030171Z\",\n+     \"modified\": \"2026-02-13T04:54:28.0303361Z\",\n+     \"attributes\": 16,\n+     \"isFolder\": true,\n+     \"id\": \":sh:Documents:/foo/bar\",\n+     \"type\": \"Folder\"\n+   },\n+   {\n+     \"name\": \"hello.txt\",\n+     \"path\": \":sh:Documents:/foo/hello.txt\",\n+     \"created\": \"2026-02-13T04:54:28.0304545Z\",\n+     \"modified\": \"2026-02-13T04:54:28.0304545Z\",\n+     \"attributes\": 128,\n+     \"id\": \":sh:Documents:/foo/hello.txt\",\n+     \"type\": \"File txt\"\n+   }\n+ ]",
+    "diffJson": [
+      {
+        "path": "DataSource:fileCatalogData",
+        "type": "update",
+        "before": [
+          {
+            "name": "xs-diff-20260127T035521.html",
+            "path": ":sh:Documents:/xs-diff-20260127T035521.html",
+            "created": "2026-02-13T04:54:28.0307063Z",
+            "modified": "2026-02-13T04:54:28.0307063Z",
+            "attributes": 128,
+            "id": ":sh:Documents:/xs-diff-20260127T035521.html",
+            "type": "File html"
+          },
+          {
+            "name": "tempfolder",
+            "path": ":sh:Documents:/tempfolder",
+            "created": "2026-02-13T04:59:15.8350813Z",
+            "modified": "2026-02-13T05:08:47.5895688Z",
+            "attributes": 16,
+            "isFolder": true,
+            "id": ":sh:Documents:/tempfolder",
+            "type": "Folder"
+          },
+          {
+            "name": "test.xlsx",
+            "path": ":sh:Documents:/test.xlsx",
+            "created": "2026-02-13T04:54:28.0305794Z",
+            "modified": "2026-02-13T04:54:28.0305794Z",
+            "attributes": 128,
+            "id": ":sh:Documents:/test.xlsx",
+            "type": "File xlsx"
+          },
+          {
+            "name": "foo",
+            "path": ":sh:Documents:/foo",
+            "created": "2026-02-13T04:54:28.0298515Z",
+            "modified": "2026-02-13T05:08:37.8251984Z",
+            "attributes": 16,
+            "isFolder": true,
+            "id": ":sh:Documents:/foo",
+            "type": "Folder"
+          }
+        ],
+        "after": [
+          {
+            "name": ".gitkeep",
+            "path": ":sh:Documents:/foo/.gitkeep",
+            "created": "2026-02-13T04:54:28.0300541Z",
+            "modified": "2026-02-13T04:54:28.0300541Z",
+            "attributes": 2,
+            "id": ":sh:Documents:/foo/.gitkeep",
+            "type": "File gitkeep"
+          },
+          {
+            "name": "bar",
+            "path": ":sh:Documents:/foo/bar",
+            "created": "2026-02-13T04:54:28.030171Z",
+            "modified": "2026-02-13T04:54:28.0303361Z",
+            "attributes": 16,
+            "isFolder": true,
+            "id": ":sh:Documents:/foo/bar",
+            "type": "Folder"
+          },
+          {
+            "name": "hello.txt",
+            "path": ":sh:Documents:/foo/hello.txt",
+            "created": "2026-02-13T04:54:28.0304545Z",
+            "modified": "2026-02-13T04:54:28.0304545Z",
+            "attributes": 128,
+            "id": ":sh:Documents:/foo/hello.txt",
+            "type": "File txt"
+          }
+        ],
+        "beforeJson": "[\n  {\n    \"name\": \"xs-diff-20260127T035521.html\",\n    \"path\": \":sh:Documents:/xs-diff-20260127T035521.html\",\n    \"created\": \"2026-02-13T04:54:28.0307063Z\",\n    \"modified\": \"2026-02-13T04:54:28.0307063Z\",\n    \"attributes\": 128,\n    \"id\": \":sh:Documents:/xs-diff-20260127T035521.html\",\n    \"type\": \"File html\"\n  },\n  {\n    \"name\": \"tempfolder\",\n    \"path\": \":sh:Documents:/tempfolder\",\n    \"created\": \"2026-02-13T04:59:15.8350813Z\",\n    \"modified\": \"2026-02-13T05:08:47.5895688Z\",\n    \"attributes\": 16,\n    \"isFolder\": true,\n    \"id\": \":sh:Documents:/tempfolder\",\n    \"type\": \"Folder\"\n  },\n  {\n    \"name\": \"test.xlsx\",\n    \"path\": \":sh:Documents:/test.xlsx\",\n    \"created\": \"2026-02-13T04:54:28.0305794Z\",\n    \"modified\": \"2026-02-13T04:54:28.0305794Z\",\n    \"attributes\": 128,\n    \"id\": \":sh:Documents:/test.xlsx\",\n    \"type\": \"File xlsx\"\n  },\n  {\n    \"name\": \"foo\",\n    \"path\": \":sh:Documents:/foo\",\n    \"created\": \"2026-02-13T04:54:28.0298515Z\",\n    \"modified\": \"2026-02-13T05:08:37.8251984Z\",\n    \"attributes\": 16,\n    \"isFolder\": true,\n    \"id\": \":sh:Documents:/foo\",\n    \"type\": \"Folder\"\n  }\n]",
+        "afterJson": "[\n  {\n    \"name\": \".gitkeep\",\n    \"path\": \":sh:Documents:/foo/.gitkeep\",\n    \"created\": \"2026-02-13T04:54:28.0300541Z\",\n    \"modified\": \"2026-02-13T04:54:28.0300541Z\",\n    \"attributes\": 2,\n    \"id\": \":sh:Documents:/foo/.gitkeep\",\n    \"type\": \"File gitkeep\"\n  },\n  {\n    \"name\": \"bar\",\n    \"path\": \":sh:Documents:/foo/bar\",\n    \"created\": \"2026-02-13T04:54:28.030171Z\",\n    \"modified\": \"2026-02-13T04:54:28.0303361Z\",\n    \"attributes\": 16,\n    \"isFolder\": true,\n    \"id\": \":sh:Documents:/foo/bar\",\n    \"type\": \"Folder\"\n  },\n  {\n    \"name\": \"hello.txt\",\n    \"path\": \":sh:Documents:/foo/hello.txt\",\n    \"created\": \"2026-02-13T04:54:28.0304545Z\",\n    \"modified\": \"2026-02-13T04:54:28.0304545Z\",\n    \"attributes\": 128,\n    \"id\": \":sh:Documents:/foo/hello.txt\",\n    \"type\": \"File txt\"\n  }\n]",
+        "diffText": "path: DataSource:fileCatalogData\n- [\n  {\n    \"name\": \"xs-diff-20260127T035521.html\",\n    \"path\": \":sh:Documents:/xs-diff-20260127T035521.html\",\n    \"created\": \"2026-02-13T04:54:28.0307063Z\",\n    \"modified\": \"2026-02-13T04:54:28.0307063Z\",\n    \"attributes\": 128,\n    \"id\": \":sh:Documents:/xs-diff-20260127T035521.html\",\n    \"type\": \"File html\"\n  },\n  {\n    \"name\": \"tempfolder\",\n    \"path\": \":sh:Documents:/tempfolder\",\n    \"created\": \"2026-02-13T04:59:15.8350813Z\",\n    \"modified\": \"2026-02-13T05:08:47.5895688Z\",\n    \"attributes\": 16,\n    \"isFolder\": true,\n    \"id\": \":sh:Documents:/tempfolder\",\n    \"type\": \"Folder\"\n  },\n  {\n    \"name\": \"test.xlsx\",\n    \"path\": \":sh:Documents:/test.xlsx\",\n    \"created\": \"2026-02-13T04:54:28.0305794Z\",\n    \"modified\": \"2026-02-13T04:54:28.0305794Z\",\n    \"attributes\": 128,\n    \"id\": \":sh:Documents:/test.xlsx\",\n    \"type\": \"File xlsx\"\n  },\n  {\n    \"name\": \"foo\",\n    \"path\": \":sh:Documents:/foo\",\n    \"created\": \"2026-02-13T04:54:28.0298515Z\",\n    \"modified\": \"2026-02-13T05:08:37.8251984Z\",\n    \"attributes\": 16,\n    \"isFolder\": true,\n    \"id\": \":sh:Documents:/foo\",\n    \"type\": \"Folder\"\n  }\n]\n+ [\n  {\n    \"name\": \".gitkeep\",\n    \"path\": \":sh:Documents:/foo/.gitkeep\",\n    \"created\": \"2026-02-13T04:54:28.0300541Z\",\n    \"modified\": \"2026-02-13T04:54:28.0300541Z\",\n    \"attributes\": 2,\n    \"id\": \":sh:Documents:/foo/.gitkeep\",\n    \"type\": \"File gitkeep\"\n  },\n  {\n    \"name\": \"bar\",\n    \"path\": \":sh:Documents:/foo/bar\",\n    \"created\": \"2026-02-13T04:54:28.030171Z\",\n    \"modified\": \"2026-02-13T04:54:28.0303361Z\",\n    \"attributes\": 16,\n    \"isFolder\": true,\n    \"id\": \":sh:Documents:/foo/bar\",\n    \"type\": \"Folder\"\n  },\n  {\n    \"name\": \"hello.txt\",\n    \"path\": \":sh:Documents:/foo/hello.txt\",\n    \"created\": \"2026-02-13T04:54:28.0304545Z\",\n    \"modified\": \"2026-02-13T04:54:28.0304545Z\",\n    \"attributes\": 128,\n    \"id\": \":sh:Documents:/foo/hello.txt\",\n    \"type\": \"File txt\"\n  }\n]",
+        "diffPretty": "path: DataSource:fileCatalogData\n- [\n-   {\n-     \"name\": \"xs-diff-20260127T035521.html\",\n-     \"path\": \":sh:Documents:/xs-diff-20260127T035521.html\",\n-     \"created\": \"2026-02-13T04:54:28.0307063Z\",\n-     \"modified\": \"2026-02-13T04:54:28.0307063Z\",\n-     \"attributes\": 128,\n-     \"id\": \":sh:Documents:/xs-diff-20260127T035521.html\",\n-     \"type\": \"File html\"\n-   },\n-   {\n-     \"name\": \"tempfolder\",\n-     \"path\": \":sh:Documents:/tempfolder\",\n-     \"created\": \"2026-02-13T04:59:15.8350813Z\",\n-     \"modified\": \"2026-02-13T05:08:47.5895688Z\",\n-     \"attributes\": 16,\n-     \"isFolder\": true,\n-     \"id\": \":sh:Documents:/tempfolder\",\n-     \"type\": \"Folder\"\n-   },\n-   {\n-     \"name\": \"test.xlsx\",\n-     \"path\": \":sh:Documents:/test.xlsx\",\n-     \"created\": \"2026-02-13T04:54:28.0305794Z\",\n-     \"modified\": \"2026-02-13T04:54:28.0305794Z\",\n-     \"attributes\": 128,\n-     \"id\": \":sh:Documents:/test.xlsx\",\n-     \"type\": \"File xlsx\"\n-   },\n-   {\n-     \"name\": \"foo\",\n-     \"path\": \":sh:Documents:/foo\",\n-     \"created\": \"2026-02-13T04:54:28.0298515Z\",\n-     \"modified\": \"2026-02-13T05:08:37.8251984Z\",\n-     \"attributes\": 16,\n-     \"isFolder\": true,\n-     \"id\": \":sh:Documents:/foo\",\n-     \"type\": \"Folder\"\n-   }\n- ]\n+ [\n+   {\n+     \"name\": \".gitkeep\",\n+     \"path\": \":sh:Documents:/foo/.gitkeep\",\n+     \"created\": \"2026-02-13T04:54:28.0300541Z\",\n+     \"modified\": \"2026-02-13T04:54:28.0300541Z\",\n+     \"attributes\": 2,\n+     \"id\": \":sh:Documents:/foo/.gitkeep\",\n+     \"type\": \"File gitkeep\"\n+   },\n+   {\n+     \"name\": \"bar\",\n+     \"path\": \":sh:Documents:/foo/bar\",\n+     \"created\": \"2026-02-13T04:54:28.030171Z\",\n+     \"modified\": \"2026-02-13T04:54:28.0303361Z\",\n+     \"attributes\": 16,\n+     \"isFolder\": true,\n+     \"id\": \":sh:Documents:/foo/bar\",\n+     \"type\": \"Folder\"\n+   },\n+   {\n+     \"name\": \"hello.txt\",\n+     \"path\": \":sh:Documents:/foo/hello.txt\",\n+     \"created\": \"2026-02-13T04:54:28.0304545Z\",\n+     \"modified\": \"2026-02-13T04:54:28.0304545Z\",\n+     \"attributes\": 128,\n+     \"id\": \":sh:Documents:/foo/hello.txt\",\n+     \"type\": \"File txt\"\n+   }\n+ ]"
+      }
+    ]
+  },
+  {
+    "ts": 1770959334861,
+    "perfTs": 2862.199999988079,
+    "traceId": "startup-mlkfgmud",
+    "kind": "component:vars:change",
+    "uid": "FilesContainer",
+    "eventName": "sortedFiles",
+    "componentType": "Container",
+    "componentLabel": "FilesContainer",
+    "ownerFileId": "/src/components/filesContainer/FilesContainer.xmlui",
+    "ownerSource": {
+      "start": 120,
+      "end": 1572
+    },
+    "file": "/src/components/filesContainer/FilesContainer.xmlui",
+    "changes": [
+      {
+        "key": "sortedFiles",
+        "before": [
+          {
+            "name": "foo",
+            "path": ":sh:Documents:/foo",
+            "created": "2026-02-13T04:54:28.0298515Z",
+            "modified": "2026-02-13T05:08:37.8251984Z",
+            "attributes": 16,
+            "isFolder": true,
+            "id": ":sh:Documents:/foo",
+            "type": "Folder"
+          },
+          {
+            "name": "tempfolder",
+            "path": ":sh:Documents:/tempfolder",
+            "created": "2026-02-13T04:59:15.8350813Z",
+            "modified": "2026-02-13T05:08:47.5895688Z",
+            "attributes": 16,
+            "isFolder": true,
+            "id": ":sh:Documents:/tempfolder",
+            "type": "Folder"
+          },
+          {
+            "name": "test.xlsx",
+            "path": ":sh:Documents:/test.xlsx",
+            "created": "2026-02-13T04:54:28.0305794Z",
+            "modified": "2026-02-13T04:54:28.0305794Z",
+            "attributes": 128,
+            "id": ":sh:Documents:/test.xlsx",
+            "type": "File xlsx"
+          },
+          {
+            "name": "xs-diff-20260127T035521.html",
+            "path": ":sh:Documents:/xs-diff-20260127T035521.html",
+            "created": "2026-02-13T04:54:28.0307063Z",
+            "modified": "2026-02-13T04:54:28.0307063Z",
+            "attributes": 128,
+            "id": ":sh:Documents:/xs-diff-20260127T035521.html",
+            "type": "File html"
+          }
+        ],
+        "after": [
+          {
+            "name": ".gitkeep",
+            "path": ":sh:Documents:/foo/.gitkeep",
+            "created": "2026-02-13T04:54:28.0300541Z",
+            "modified": "2026-02-13T04:54:28.0300541Z",
+            "attributes": 2,
+            "id": ":sh:Documents:/foo/.gitkeep",
+            "type": "File gitkeep"
+          },
+          {
+            "name": "bar",
+            "path": ":sh:Documents:/foo/bar",
+            "created": "2026-02-13T04:54:28.030171Z",
+            "modified": "2026-02-13T04:54:28.0303361Z",
+            "attributes": 16,
+            "isFolder": true,
+            "id": ":sh:Documents:/foo/bar",
+            "type": "Folder"
+          },
+          {
+            "name": "hello.txt",
+            "path": ":sh:Documents:/foo/hello.txt",
+            "created": "2026-02-13T04:54:28.0304545Z",
+            "modified": "2026-02-13T04:54:28.0304545Z",
+            "attributes": 128,
+            "id": ":sh:Documents:/foo/hello.txt",
+            "type": "File txt"
+          }
+        ],
+        "changeKind": "change"
+      }
+    ],
+    "diff": [
+      {
+        "path": "sortedFiles",
+        "type": "update",
+        "before": [
+          {
+            "name": "foo",
+            "path": ":sh:Documents:/foo",
+            "created": "2026-02-13T04:54:28.0298515Z",
+            "modified": "2026-02-13T05:08:37.8251984Z",
+            "attributes": 16,
+            "isFolder": true,
+            "id": ":sh:Documents:/foo",
+            "type": "Folder"
+          },
+          {
+            "name": "tempfolder",
+            "path": ":sh:Documents:/tempfolder",
+            "created": "2026-02-13T04:59:15.8350813Z",
+            "modified": "2026-02-13T05:08:47.5895688Z",
+            "attributes": 16,
+            "isFolder": true,
+            "id": ":sh:Documents:/tempfolder",
+            "type": "Folder"
+          },
+          {
+            "name": "test.xlsx",
+            "path": ":sh:Documents:/test.xlsx",
+            "created": "2026-02-13T04:54:28.0305794Z",
+            "modified": "2026-02-13T04:54:28.0305794Z",
+            "attributes": 128,
+            "id": ":sh:Documents:/test.xlsx",
+            "type": "File xlsx"
+          },
+          {
+            "name": "xs-diff-20260127T035521.html",
+            "path": ":sh:Documents:/xs-diff-20260127T035521.html",
+            "created": "2026-02-13T04:54:28.0307063Z",
+            "modified": "2026-02-13T04:54:28.0307063Z",
+            "attributes": 128,
+            "id": ":sh:Documents:/xs-diff-20260127T035521.html",
+            "type": "File html"
+          }
+        ],
+        "after": [
+          {
+            "name": ".gitkeep",
+            "path": ":sh:Documents:/foo/.gitkeep",
+            "created": "2026-02-13T04:54:28.0300541Z",
+            "modified": "2026-02-13T04:54:28.0300541Z",
+            "attributes": 2,
+            "id": ":sh:Documents:/foo/.gitkeep",
+            "type": "File gitkeep"
+          },
+          {
+            "name": "bar",
+            "path": ":sh:Documents:/foo/bar",
+            "created": "2026-02-13T04:54:28.030171Z",
+            "modified": "2026-02-13T04:54:28.0303361Z",
+            "attributes": 16,
+            "isFolder": true,
+            "id": ":sh:Documents:/foo/bar",
+            "type": "Folder"
+          },
+          {
+            "name": "hello.txt",
+            "path": ":sh:Documents:/foo/hello.txt",
+            "created": "2026-02-13T04:54:28.0304545Z",
+            "modified": "2026-02-13T04:54:28.0304545Z",
+            "attributes": 128,
+            "id": ":sh:Documents:/foo/hello.txt",
+            "type": "File txt"
+          }
+        ],
+        "beforeJson": "[\n  {\n    \"name\": \"foo\",\n    \"path\": \":sh:Documents:/foo\",\n    \"created\": \"2026-02-13T04:54:28.0298515Z\",\n    \"modified\": \"2026-02-13T05:08:37.8251984Z\",\n    \"attributes\": 16,\n    \"isFolder\": true,\n    \"id\": \":sh:Documents:/foo\",\n    \"type\": \"Folder\"\n  },\n  {\n    \"name\": \"tempfolder\",\n    \"path\": \":sh:Documents:/tempfolder\",\n    \"created\": \"2026-02-13T04:59:15.8350813Z\",\n    \"modified\": \"2026-02-13T05:08:47.5895688Z\",\n    \"attributes\": 16,\n    \"isFolder\": true,\n    \"id\": \":sh:Documents:/tempfolder\",\n    \"type\": \"Folder\"\n  },\n  {\n    \"name\": \"test.xlsx\",\n    \"path\": \":sh:Documents:/test.xlsx\",\n    \"created\": \"2026-02-13T04:54:28.0305794Z\",\n    \"modified\": \"2026-02-13T04:54:28.0305794Z\",\n    \"attributes\": 128,\n    \"id\": \":sh:Documents:/test.xlsx\",\n    \"type\": \"File xlsx\"\n  },\n  {\n    \"name\": \"xs-diff-20260127T035521.html\",\n    \"path\": \":sh:Documents:/xs-diff-20260127T035521.html\",\n    \"created\": \"2026-02-13T04:54:28.0307063Z\",\n    \"modified\": \"2026-02-13T04:54:28.0307063Z\",\n    \"attributes\": 128,\n    \"id\": \":sh:Documents:/xs-diff-20260127T035521.html\",\n    \"type\": \"File html\"\n  }\n]",
+        "afterJson": "[\n  {\n    \"name\": \".gitkeep\",\n    \"path\": \":sh:Documents:/foo/.gitkeep\",\n    \"created\": \"2026-02-13T04:54:28.0300541Z\",\n    \"modified\": \"2026-02-13T04:54:28.0300541Z\",\n    \"attributes\": 2,\n    \"id\": \":sh:Documents:/foo/.gitkeep\",\n    \"type\": \"File gitkeep\"\n  },\n  {\n    \"name\": \"bar\",\n    \"path\": \":sh:Documents:/foo/bar\",\n    \"created\": \"2026-02-13T04:54:28.030171Z\",\n    \"modified\": \"2026-02-13T04:54:28.0303361Z\",\n    \"attributes\": 16,\n    \"isFolder\": true,\n    \"id\": \":sh:Documents:/foo/bar\",\n    \"type\": \"Folder\"\n  },\n  {\n    \"name\": \"hello.txt\",\n    \"path\": \":sh:Documents:/foo/hello.txt\",\n    \"created\": \"2026-02-13T04:54:28.0304545Z\",\n    \"modified\": \"2026-02-13T04:54:28.0304545Z\",\n    \"attributes\": 128,\n    \"id\": \":sh:Documents:/foo/hello.txt\",\n    \"type\": \"File txt\"\n  }\n]",
+        "diffPretty": "sortedFiles: [\n  {\n    \"name\": \"foo\",\n    \"path\": \":sh:Documents:/foo\",\n    \"created\": \"2026-02-13T04:54:28.0298515Z\",\n    \"modified\": \"2026-02-13T05:08:37.8251984Z\",\n    \"attributes\": 16,\n    \"isFolder\": true,\n    \"id\": \":sh:Documents:/foo\",\n    \"type\": \"Folder\"\n  },\n  {\n    \"name\": \"tempfolder\",\n    \"path\": \":sh:Documents:/tempfolder\",\n    \"created\": \"2026-02-13T04:59:15.8350813Z\",\n    \"modified\": \"2026-02-13T05:08:47.5895688Z\",\n    \"attributes\": 16,\n    \"isFolder\": true,\n    \"id\": \":sh:Documents:/tempfolder\",\n    \"type\": \"Folder\"\n  },\n  {\n    \"name\": \"test.xlsx\",\n    \"path\": \":sh:Documents:/test.xlsx\",\n    \"created\": \"2026-02-13T04:54:28.0305794Z\",\n    \"modified\": \"2026-02-13T04:54:28.0305794Z\",\n    \"attributes\": 128,\n    \"id\": \":sh:Documents:/test.xlsx\",\n    \"type\": \"File xlsx\"\n  },\n  {\n    \"name\": \"xs-diff-20260127T035521.html\",\n    \"path\": \":sh:Documents:/xs-diff-20260127T035521.html\",\n    \"created\": \"2026-02-13T04:54:28.0307063Z\",\n    \"modified\": \"2026-02-13T04:54:28.0307063Z\",\n    \"attributes\": 128,\n    \"id\": \":sh:Documents:/xs-diff-20260127T035521.html\",\n    \"type\": \"File html\"\n  }\n] → [\n  {\n    \"name\": \".gitkeep\",\n    \"path\": \":sh:Documents:/foo/.gitkeep\",\n    \"created\": \"2026-02-13T04:54:28.0300541Z\",\n    \"modified\": \"2026-02-13T04:54:28.0300541Z\",\n    \"attributes\": 2,\n    \"id\": \":sh:Documents:/foo/.gitkeep\",\n    \"type\": \"File gitkeep\"\n  },\n  {\n    \"name\": \"bar\",\n    \"path\": \":sh:Documents:/foo/bar\",\n    \"created\": \"2026-02-13T04:54:28.030171Z\",\n    \"modified\": \"2026-02-13T04:54:28.0303361Z\",\n    \"attributes\": 16,\n    \"isFolder\": true,\n    \"id\": \":sh:Documents:/foo/bar\",\n    \"type\": \"Folder\"\n  },\n  {\n    \"name\": \"hello.txt\",\n    \"path\": \":sh:Documents:/foo/hello.txt\",\n    \"created\": \"2026-02-13T04:54:28.0304545Z\",\n    \"modified\": \"2026-02-13T04:54:28.0304545Z\",\n    \"attributes\": 128,\n    \"id\": \":sh:Documents:/foo/hello.txt\",\n    \"type\": \"File txt\"\n  }\n]"
+      }
+    ],
+    "diffPretty": "file: /src/components/filesContainer/FilesContainer.xmlui\nsortedFiles: [\n  {\n    \"name\": \"foo\",\n    \"path\": \":sh:Documents:/foo\",\n    \"created\": \"2026-02-13T04:54:28.0298515Z\",\n    \"modified\": \"2026-02-13T05:08:37.8251984Z\",\n    \"attributes\": 16,\n    \"isFolder\": true,\n    \"id\": \":sh:Documents:/foo\",\n    \"type\": \"Folder\"\n  },\n  {\n    \"name\": \"tempfolder\",\n    \"path\": \":sh:Documents:/tempfolder\",\n    \"created\": \"2026-02-13T04:59:15.8350813Z\",\n    \"modified\": \"2026-02-13T05:08:47.5895688Z\",\n    \"attributes\": 16,\n    \"isFolder\": true,\n    \"id\": \":sh:Documents:/tempfolder\",\n    \"type\": \"Folder\"\n  },\n  {\n    \"name\": \"test.xlsx\",\n    \"path\": \":sh:Documents:/test.xlsx\",\n    \"created\": \"2026-02-13T04:54:28.0305794Z\",\n    \"modified\": \"2026-02-13T04:54:28.0305794Z\",\n    \"attributes\": 128,\n    \"id\": \":sh:Documents:/test.xlsx\",\n    \"type\": \"File xlsx\"\n  },\n  {\n    \"name\": \"xs-diff-20260127T035521.html\",\n    \"path\": \":sh:Documents:/xs-diff-20260127T035521.html\",\n    \"created\": \"2026-02-13T04:54:28.0307063Z\",\n    \"modified\": \"2026-02-13T04:54:28.0307063Z\",\n    \"attributes\": 128,\n    \"id\": \":sh:Documents:/xs-diff-20260127T035521.html\",\n    \"type\": \"File html\"\n  }\n] → [\n  {\n    \"name\": \".gitkeep\",\n    \"path\": \":sh:Documents:/foo/.gitkeep\",\n    \"created\": \"2026-02-13T04:54:28.0300541Z\",\n    \"modified\": \"2026-02-13T04:54:28.0300541Z\",\n    \"attributes\": 2,\n    \"id\": \":sh:Documents:/foo/.gitkeep\",\n    \"type\": \"File gitkeep\"\n  },\n  {\n    \"name\": \"bar\",\n    \"path\": \":sh:Documents:/foo/bar\",\n    \"created\": \"2026-02-13T04:54:28.030171Z\",\n    \"modified\": \"2026-02-13T04:54:28.0303361Z\",\n    \"attributes\": 16,\n    \"isFolder\": true,\n    \"id\": \":sh:Documents:/foo/bar\",\n    \"type\": \"Folder\"\n  },\n  {\n    \"name\": \"hello.txt\",\n    \"path\": \":sh:Documents:/foo/hello.txt\",\n    \"created\": \"2026-02-13T04:54:28.0304545Z\",\n    \"modified\": \"2026-02-13T04:54:28.0304545Z\",\n    \"attributes\": 128,\n    \"id\": \":sh:Documents:/foo/hello.txt\",\n    \"type\": \"File txt\"\n  }\n]"
+  },
+  {
+    "ts": 1770959334910,
+    "perfTs": 2888.800000011921,
+    "kind": "state:changes",
+    "eventName": "AppState:fileCatalogSelection",
+    "uid": "fileCatalogSelection",
+    "traceId": "startup-mlkfgmud",
+    "diffPretty": "path: AppState:fileCatalogSelection\n- {\n-   \"selectedItems\": [],\n-   \"selectedIds\": [\n-     \":sh:Documents:/foo\"\n-   ]\n- }\n+ {\n+   \"selectedItems\": [],\n+   \"selectedIds\": []\n+ }",
+    "diffJson": [
+      {
+        "path": "AppState:fileCatalogSelection",
+        "type": "update",
+        "before": {
+          "selectedItems": [],
+          "selectedIds": [
+            ":sh:Documents:/foo"
+          ]
+        },
+        "after": {
+          "selectedItems": [],
+          "selectedIds": []
+        },
+        "beforeJson": "{\n  \"selectedItems\": [],\n  \"selectedIds\": [\n    \":sh:Documents:/foo\"\n  ]\n}",
+        "afterJson": "{\n  \"selectedItems\": [],\n  \"selectedIds\": []\n}",
+        "diffText": "path: AppState:fileCatalogSelection\n- {\n  \"selectedItems\": [],\n  \"selectedIds\": [\n    \":sh:Documents:/foo\"\n  ]\n}\n+ {\n  \"selectedItems\": [],\n  \"selectedIds\": []\n}",
+        "diffPretty": "path: AppState:fileCatalogSelection\n- {\n-   \"selectedItems\": [],\n-   \"selectedIds\": [\n-     \":sh:Documents:/foo\"\n-   ]\n- }\n+ {\n+   \"selectedItems\": [],\n+   \"selectedIds\": []\n+ }"
+      }
+    ]
+  },
+  {
+    "ts": 1770959335005,
+    "perfTs": 3006.5999999940395,
+    "traceId": "startup-mlkfgmud",
+    "text": "[\n  \"handler:start\",\n  {\n    \"uid\": \"tree\",\n    \"eventName\": \"selectionDidChange\",\n    \"componentType\": \"Tree\",\n    \"componentLabel\": \"tree\",\n    \"args\": [\n      {\n        \"previousNode\": null,\n        \"newNode\": {\n          \"id\": \":sh:Documents:/\",\n          \"path\": [\n            \"Documents\"\n          ],\n          \"displayName\": \"Documents\",\n          \"parentIds\": [],\n          \"selectable\": true,\n          \"loaded\": true,\n          \"name\": \"Documents\",\n          \"icon\": \"shared_folder\",\n          \"dynamic\": true,\n          \"children\": [],\n          \"key\": \":sh:Documents:/\",\n          \"isExpanded\": false,\n          \"depth\": 0,\n          \"hasChildren\": false\n        }\n      }\n    ],\n    \"ownerFileId\": \"/src/components/foldersTree/FoldersTree.xmlui\",\n    \"ownerSource\": {\n      \"start\": 932,\n      \"end\": 1736\n    },\n    \"handlerCode\": \"(event) => navigateTo(event.newNode)\"\n  }\n]",
+    "kind": "handler:start",
+    "eventName": "selectionDidChange",
+    "componentType": "Tree",
+    "componentLabel": "tree",
+    "uid": "tree",
+    "ownerFileId": "/src/components/foldersTree/FoldersTree.xmlui",
+    "ownerSource": {
+      "start": 932,
+      "end": 1736
+    },
+    "handlerCode": "(event) => navigateTo(event.newNode)",
+    "eventArgs": [
+      {
+        "previousNode": null,
+        "newNode": {
+          "id": ":sh:Documents:/",
+          "path": [
+            "Documents"
+          ],
+          "displayName": "Documents",
+          "parentIds": [],
+          "selectable": true,
+          "loaded": true,
+          "name": "Documents",
+          "icon": "shared_folder",
+          "dynamic": true,
+          "children": [],
+          "key": ":sh:Documents:/",
+          "isExpanded": false,
+          "depth": 0,
+          "hasChildren": false
+        }
+      }
+    ]
+  },
+  {
+    "ts": 1770959335024,
+    "perfTs": 3025.199999988079,
+    "traceId": "startup-mlkfgmud",
+    "kind": "navigate",
+    "from": "/my-files",
+    "to": "/my-files?drive=%3Ash%3ADocuments%3A%2F"
+  },
+  {
+    "ts": 1770959335056,
+    "perfTs": 3057.800000011921,
+    "traceId": "startup-mlkfgmud",
+    "instanceId": "ds-42y2ma-mlkfgntr",
+    "dataSourceUrl": "/ListFolder?path={window.MwdHelpers.joinPath(drive, folder)}",
+    "ownerUid": "fileCatalogData",
+    "ownerFileId": "/src/components/filesContainer/FilesContainer.xmlui",
+    "ownerSource": {
+      "start": 347,
+      "end": 612
+    },
+    "text": "[\n  \"state:changes\",\n  {\n    \"uid\": \"fileCatalogData\",\n    \"eventName\": \"DataSource:fileCatalogData\",\n    \"instanceId\": \"ds-42y2ma-mlkfgntr\",\n    \"diff\": [\n      {\n        \"path\": \"DataSource:fileCatalogData\",\n        \"type\": \"update\",\n        \"before\": [\n          {\n            \"name\": \".gitkeep\",\n            \"path\": \":sh:Documents:/foo/.gitkeep\",\n            \"created\": \"2026-02-13T04:54:28.0300541Z\",\n            \"modified\": \"2026-02-13T04:54:28.0300541Z\",\n            \"attributes\": 2,\n            \"id\": \":sh:Documents:/foo/.gitkeep\",\n            \"type\": \"File gitkeep\"\n          },\n          {\n            \"name\": \"bar\",\n            \"path\": \":sh:Documents:/foo/bar\",\n            \"created\": \"2026-02-13T04:54:28.030171Z\",\n            \"modified\": \"2026-02-13T04:54:28.0303361Z\",\n            \"attributes\": 16,\n            \"isFolder\": true,\n            \"id\": \":sh:Documents:/foo/bar\",\n            \"type\": \"Folder\"\n          },\n          {\n            \"name\": \"hello.txt\",\n            \"path\": \":sh:Documents:/foo/hello.txt\",\n            \"created\": \"2026-02-13T04:54:28.0304545Z\",\n            \"modified\": \"2026-02-13T04:54:28.0304545Z\",\n            \"attributes\": 128,\n            \"id\": \":sh:Documents:/foo/hello.txt\",\n            \"type\": \"File txt\"\n          }\n        ],\n        \"after\": [\n          {\n            \"name\": \"xs-diff-20260127T035521.html\",\n            \"path\": \":sh:Documents:/xs-diff-20260127T035521.html\",\n            \"created\": \"2026-02-13T04:54:28.0307063Z\",\n            \"modified\": \"2026-02-13T04:54:28.0307063Z\",\n            \"attributes\": 128,\n            \"id\": \":sh:Documents:/xs-diff-20260127T035521.html\",\n            \"type\": \"File html\"\n          },\n          {\n            \"name\": \"tempfolder\",\n            \"path\": \":sh:Documents:/tempfolder\",\n            \"created\": \"2026-02-13T04:59:15.8350813Z\",\n            \"modified\": \"2026-02-13T05:08:47.5895688Z\",\n            \"attributes\": 16,\n            \"isFolder\": true,\n            \"id\": \":sh:Documents:/tempfolder\",\n            \"type\": \"Folder\"\n          },\n          {\n            \"name\": \"test.xlsx\",\n            \"path\": \":sh:Documents:/test.xlsx\",\n            \"created\": \"2026-02-13T04:54:28.0305794Z\",\n            \"modified\": \"2026-02-13T04:54:28.0305794Z\",\n            \"attributes\": 128,\n            \"id\": \":sh:Documents:/test.xlsx\",\n            \"type\": \"File xlsx\"\n          },\n          {\n            \"name\": \"foo\",\n            \"path\": \":sh:Documents:/foo\",\n            \"created\": \"2026-02-13T04:54:28.0298515Z\",\n            \"modified\": \"2026-02-13T05:08:37.8251984Z\",\n            \"attributes\": 16,\n            \"isFolder\": true,\n            \"id\": \":sh:Documents:/foo\",\n            \"type\": \"Folder\"\n          }\n        ],\n        \"beforeJson\": \"[\\n  {\\n    \\\"name\\\": \\\".gitkeep\\\",\\n    \\\"path\\\": \\\":sh:Documents:/foo/.gitkeep\\\",\\n    \\\"created\\\": \\\"2026-02-13T04:54:28.0300541Z\\\",\\n    \\\"modified\\\": \\\"2026-02-13T04:54:28.0300541Z\\\",\\n    \\\"attributes\\\": 2,\\n    \\\"id\\\": \\\":sh:Documents:/foo/.gitkeep\\\",\\n    \\\"type\\\": \\\"File gitkeep\\\"\\n  },\\n  {\\n    \\\"name\\\": \\\"bar\\\",\\n    \\\"path\\\": \\\":sh:Documents:/foo/bar\\\",\\n    \\\"created\\\": \\\"2026-02-13T04:54:28.030171Z\\\",\\n    \\\"modified\\\": \\\"2026-02-13T04:54:28.0303361Z\\\",\\n    \\\"attributes\\\": 16,\\n    \\\"isFolder\\\": true,\\n    \\\"id\\\": \\\":sh:Documents:/foo/bar\\\",\\n    \\\"type\\\": \\\"Folder\\\"\\n  },\\n  {\\n    \\\"name\\\": \\\"hello.txt\\\",\\n    \\\"path\\\": \\\":sh:Documents:/foo/hello.txt\\\",\\n    \\\"created\\\": \\\"2026-02-13T04:54:28.0304545Z\\\",\\n    \\\"modified\\\": \\\"2026-02-13T04:54:28.0304545Z\\\",\\n    \\\"attributes\\\": 128,\\n    \\\"id\\\": \\\":sh:Documents:/foo/hello.txt\\\",\\n    \\\"type\\\": \\\"File txt\\\"\\n  }\\n]\",\n        \"afterJson\": \"[\\n  {\\n    \\\"name\\\": \\\"xs-diff-20260127T035521.html\\\",\\n    \\\"path\\\": \\\":sh:Documents:/xs-diff-20260127T035521.html\\\",\\n    \\\"created\\\": \\\"2026-02-13T04:54:28.0307063Z\\\",\\n    \\\"modified\\\": \\\"2026-02-13T04:54:28.0307063Z\\\",\\n    \\\"attributes\\\": 128,\\n    \\\"id\\\": \\\":sh:Documents:/xs-diff-20260127T035521.html\\\",\\n    \\\"type\\\": \\\"File html\\\"\\n  },\\n  {\\n    \\\"name\\\": \\\"tempfolder\\\",\\n    \\\"path\\\": \\\":sh:Documents:/tempfolder\\\",\\n    \\\"created\\\": \\\"2026-02-13T04:59:15.8350813Z\\\",\\n    \\\"modified\\\": \\\"2026-02-13T05:08:47.5895688Z\\\",\\n    \\\"attributes\\\": 16,\\n    \\\"isFolder\\\": true,\\n    \\\"id\\\": \\\":sh:Documents:/tempfolder\\\",\\n    \\\"type\\\": \\\"Folder\\\"\\n  },\\n  {\\n    \\\"name\\\": \\\"test.xlsx\\\",\\n    \\\"path\\\": \\\":sh:Documents:/test.xlsx\\\",\\n    \\\"created\\\": \\\"2026-02-13T04:54:28.0305794Z\\\",\\n    \\\"modified\\\": \\\"2026-02-13T04:54:28.0305794Z\\\",\\n    \\\"attributes\\\": 128,\\n    \\\"id\\\": \\\":sh:Documents:/test.xlsx\\\",\\n    \\\"type\\\": \\\"File xlsx\\\"\\n  },\\n  {\\n    \\\"name\\\": \\\"foo\\\",\\n    \\\"path\\\": \\\":sh:Documents:/foo\\\",\\n    \\\"created\\\": \\\"2026-02-13T04:54:28.0298515Z\\\",\\n    \\\"modified\\\": \\\"2026-02-13T05:08:37.8251984Z\\\",\\n    \\\"attributes\\\": 16,\\n    \\\"isFolder\\\": true,\\n    \\\"id\\\": \\\":sh:Documents:/foo\\\",\\n    \\\"type\\\": \\\"Folder\\\"\\n  }\\n]\",\n        \"diffText\": \"path: DataSource:fileCatalogData\\n- [\\n  {\\n    \\\"name\\\": \\\".gitkeep\\\",\\n    \\\"path\\\": \\\":sh:Documents:/foo/.gitkeep\\\",\\n    \\\"created\\\": \\\"2026-02-13T04:54:28.0300541Z\\\",\\n    \\\"modified\\\": \\\"2026-02-13T04:54:28.0300541Z\\\",\\n    \\\"attributes\\\": 2,\\n    \\\"id\\\": \\\":sh:Documents:/foo/.gitkeep\\\",\\n    \\\"type\\\": \\\"File gitkeep\\\"\\n  },\\n  {\\n    \\\"name\\\": \\\"bar\\\",\\n    \\\"path\\\": \\\":sh:Documents:/foo/bar\\\",\\n    \\\"created\\\": \\\"2026-02-13T04:54:28.030171Z\\\",\\n    \\\"modified\\\": \\\"2026-02-13T04:54:28.0303361Z\\\",\\n    \\\"attributes\\\": 16,\\n    \\\"isFolder\\\": true,\\n    \\\"id\\\": \\\":sh:Documents:/foo/bar\\\",\\n    \\\"type\\\": \\\"Folder\\\"\\n  },\\n  {\\n    \\\"name\\\": \\\"hello.txt\\\",\\n    \\\"path\\\": \\\":sh:Documents:/foo/hello.txt\\\",\\n    \\\"created\\\": \\\"2026-02-13T04:54:28.0304545Z\\\",\\n    \\\"modified\\\": \\\"2026-02-13T04:54:28.0304545Z\\\",\\n    \\\"attributes\\\": 128,\\n    \\\"id\\\": \\\":sh:Documents:/foo/hello.txt\\\",\\n    \\\"type\\\": \\\"File txt\\\"\\n  }\\n]\\n+ [\\n  {\\n    \\\"name\\\": \\\"xs-diff-20260127T035521.html\\\",\\n    \\\"path\\\": \\\":sh:Documents:/xs-diff-20260127T035521.html\\\",\\n    \\\"created\\\": \\\"2026-02-13T04:54:28.0307063Z\\\",\\n    \\\"modified\\\": \\\"2026-02-13T04:54:28.0307063Z\\\",\\n    \\\"attributes\\\": 128,\\n    \\\"id\\\": \\\":sh:Documents:/xs-diff-20260127T035521.html\\\",\\n    \\\"type\\\": \\\"File html\\\"\\n  },\\n  {\\n    \\\"name\\\": \\\"tempfolder\\\",\\n    \\\"path\\\": \\\":sh:Documents:/tempfolder\\\",\\n    \\\"created\\\": \\\"2026-02-13T04:59:15.8350813Z\\\",\\n    \\\"modified\\\": \\\"2026-02-13T05:08:47.5895688Z\\\",\\n    \\\"attributes\\\": 16,\\n    \\\"isFolder\\\": true,\\n    \\\"id\\\": \\\":sh:Documents:/tempfolder\\\",\\n    \\\"type\\\": \\\"Folder\\\"\\n  },\\n  {\\n    \\\"name\\\": \\\"test.xlsx\\\",\\n    \\\"path\\\": \\\":sh:Documents:/test.xlsx\\\",\\n    \\\"created\\\": \\\"2026-02-13T04:54:28.0305794Z\\\",\\n    \\\"modified\\\": \\\"2026-02-13T04:54:28.0305794Z\\\",\\n    \\\"attributes\\\": 128,\\n    \\\"id\\\": \\\":sh:Documents:/test.xlsx\\\",\\n    \\\"type\\\": \\\"File xlsx\\\"\\n  },\\n  {\\n    \\\"name\\\": \\\"foo\\\",\\n    \\\"path\\\": \\\":sh:Documents:/foo\\\",\\n    \\\"created\\\": \\\"2026-02-13T04:54:28.0298515Z\\\",\\n    \\\"modified\\\": \\\"2026-02-13T05:08:37.8251984Z\\\",\\n    \\\"attributes\\\": 16,\\n    \\\"isFolder\\\": true,\\n    \\\"id\\\": \\\":sh:Documents:/foo\\\",\\n    \\\"type\\\": \\\"Folder\\\"\\n  }\\n]\",\n        \"diffPretty\": \"path: DataSource:fileCatalogData\\n- [\\n-   {\\n-     \\\"name\\\": \\\".gitkeep\\\",\\n-     \\\"path\\\": \\\":sh:Documents:/foo/.gitkeep\\\",\\n-     \\\"created\\\": \\\"2026-02-13T04:54:28.0300541Z\\\",\\n-     \\\"modified\\\": \\\"2026-02-13T04:54:28.0300541Z\\\",\\n-     \\\"attributes\\\": 2,\\n-     \\\"id\\\": \\\":sh:Documents:/foo/.gitkeep\\\",\\n-     \\\"type\\\": \\\"File gitkeep\\\"\\n-   },\\n-   {\\n-     \\\"name\\\": \\\"bar\\\",\\n-     \\\"path\\\": \\\":sh:Documents:/foo/bar\\\",\\n-     \\\"created\\\": \\\"2026-02-13T04:54:28.030171Z\\\",\\n-     \\\"modified\\\": \\\"2026-02-13T04:54:28.0303361Z\\\",\\n-     \\\"attributes\\\": 16,\\n-     \\\"isFolder\\\": true,\\n-     \\\"id\\\": \\\":sh:Documents:/foo/bar\\\",\\n-     \\\"type\\\": \\\"Folder\\\"\\n-   },\\n-   {\\n-     \\\"name\\\": \\\"hello.txt\\\",\\n-     \\\"path\\\": \\\":sh:Documents:/foo/hello.txt\\\",\\n-     \\\"created\\\": \\\"2026-02-13T04:54:28.0304545Z\\\",\\n-     \\\"modified\\\": \\\"2026-02-13T04:54:28.0304545Z\\\",\\n-     \\\"attributes\\\": 128,\\n-     \\\"id\\\": \\\":sh:Documents:/foo/hello.txt\\\",\\n-     \\\"type\\\": \\\"File txt\\\"\\n-   }\\n- ]\\n+ [\\n+   {\\n+     \\\"name\\\": \\\"xs-diff-20260127T035521.html\\\",\\n+     \\\"path\\\": \\\":sh:Documents:/xs-diff-20260127T035521.html\\\",\\n+     \\\"created\\\": \\\"2026-02-13T04:54:28.0307063Z\\\",\\n+     \\\"modified\\\": \\\"2026-02-13T04:54:28.0307063Z\\\",\\n+     \\\"attributes\\\": 128,\\n+     \\\"id\\\": \\\":sh:Documents:/xs-diff-20260127T035521.html\\\",\\n+     \\\"type\\\": \\\"File html\\\"\\n+   },\\n+   {\\n+     \\\"name\\\": \\\"tempfolder\\\",\\n+     \\\"path\\\": \\\":sh:Documents:/tempfolder\\\",\\n+     \\\"created\\\": \\\"2026-02-13T04:59:15.8350813Z\\\",\\n+     \\\"modified\\\": \\\"2026-02-13T05:08:47.5895688Z\\\",\\n+     \\\"attributes\\\": 16,\\n+     \\\"isFolder\\\": true,\\n+     \\\"id\\\": \\\":sh:Documents:/tempfolder\\\",\\n+     \\\"type\\\": \\\"Folder\\\"\\n+   },\\n+   {\\n+     \\\"name\\\": \\\"test.xlsx\\\",\\n+     \\\"path\\\": \\\":sh:Documents:/test.xlsx\\\",\\n+     \\\"created\\\": \\\"2026-02-13T04:54:28.0305794Z\\\",\\n+     \\\"modified\\\": \\\"2026-02-13T04:54:28.0305794Z\\\",\\n+     \\\"attributes\\\": 128,\\n+     \\\"id\\\": \\\":sh:Documents:/test.xlsx\\\",\\n+     \\\"type\\\": \\\"File xlsx\\\"\\n+   },\\n+   {\\n+     \\\"name\\\": \\\"foo\\\",\\n+     \\\"path\\\": \\\":sh:Documents:/foo\\\",\\n+     \\\"created\\\": \\\"2026-02-13T04:54:28.0298515Z\\\",\\n+     \\\"modified\\\": \\\"2026-02-13T05:08:37.8251984Z\\\",\\n+     \\\"attributes\\\": 16,\\n+     \\\"isFolder\\\": true,\\n+     \\\"id\\\": \\\":sh:Documents:/foo\\\",\\n+     \\\"type\\\": \\\"Folder\\\"\\n+   }\\n+ ]\"\n      }\n    ]\n  }\n]",
+    "kind": "state:changes",
+    "eventName": "DataSource:fileCatalogData",
+    "uid": "fileCatalogData",
+    "componentType": "DataSource",
+    "diffPretty": "path: DataSource:fileCatalogData\n- [\n-   {\n-     \"name\": \".gitkeep\",\n-     \"path\": \":sh:Documents:/foo/.gitkeep\",\n-     \"created\": \"2026-02-13T04:54:28.0300541Z\",\n-     \"modified\": \"2026-02-13T04:54:28.0300541Z\",\n-     \"attributes\": 2,\n-     \"id\": \":sh:Documents:/foo/.gitkeep\",\n-     \"type\": \"File gitkeep\"\n-   },\n-   {\n-     \"name\": \"bar\",\n-     \"path\": \":sh:Documents:/foo/bar\",\n-     \"created\": \"2026-02-13T04:54:28.030171Z\",\n-     \"modified\": \"2026-02-13T04:54:28.0303361Z\",\n-     \"attributes\": 16,\n-     \"isFolder\": true,\n-     \"id\": \":sh:Documents:/foo/bar\",\n-     \"type\": \"Folder\"\n-   },\n-   {\n-     \"name\": \"hello.txt\",\n-     \"path\": \":sh:Documents:/foo/hello.txt\",\n-     \"created\": \"2026-02-13T04:54:28.0304545Z\",\n-     \"modified\": \"2026-02-13T04:54:28.0304545Z\",\n-     \"attributes\": 128,\n-     \"id\": \":sh:Documents:/foo/hello.txt\",\n-     \"type\": \"File txt\"\n-   }\n- ]\n+ [\n+   {\n+     \"name\": \"xs-diff-20260127T035521.html\",\n+     \"path\": \":sh:Documents:/xs-diff-20260127T035521.html\",\n+     \"created\": \"2026-02-13T04:54:28.0307063Z\",\n+     \"modified\": \"2026-02-13T04:54:28.0307063Z\",\n+     \"attributes\": 128,\n+     \"id\": \":sh:Documents:/xs-diff-20260127T035521.html\",\n+     \"type\": \"File html\"\n+   },\n+   {\n+     \"name\": \"tempfolder\",\n+     \"path\": \":sh:Documents:/tempfolder\",\n+     \"created\": \"2026-02-13T04:59:15.8350813Z\",\n+     \"modified\": \"2026-02-13T05:08:47.5895688Z\",\n+     \"attributes\": 16,\n+     \"isFolder\": true,\n+     \"id\": \":sh:Documents:/tempfolder\",\n+     \"type\": \"Folder\"\n+   },\n+   {\n+     \"name\": \"test.xlsx\",\n+     \"path\": \":sh:Documents:/test.xlsx\",\n+     \"created\": \"2026-02-13T04:54:28.0305794Z\",\n+     \"modified\": \"2026-02-13T04:54:28.0305794Z\",\n+     \"attributes\": 128,\n+     \"id\": \":sh:Documents:/test.xlsx\",\n+     \"type\": \"File xlsx\"\n+   },\n+   {\n+     \"name\": \"foo\",\n+     \"path\": \":sh:Documents:/foo\",\n+     \"created\": \"2026-02-13T04:54:28.0298515Z\",\n+     \"modified\": \"2026-02-13T05:08:37.8251984Z\",\n+     \"attributes\": 16,\n+     \"isFolder\": true,\n+     \"id\": \":sh:Documents:/foo\",\n+     \"type\": \"Folder\"\n+   }\n+ ]",
+    "diffJson": [
+      {
+        "path": "DataSource:fileCatalogData",
+        "type": "update",
+        "before": [
+          {
+            "name": ".gitkeep",
+            "path": ":sh:Documents:/foo/.gitkeep",
+            "created": "2026-02-13T04:54:28.0300541Z",
+            "modified": "2026-02-13T04:54:28.0300541Z",
+            "attributes": 2,
+            "id": ":sh:Documents:/foo/.gitkeep",
+            "type": "File gitkeep"
+          },
+          {
+            "name": "bar",
+            "path": ":sh:Documents:/foo/bar",
+            "created": "2026-02-13T04:54:28.030171Z",
+            "modified": "2026-02-13T04:54:28.0303361Z",
+            "attributes": 16,
+            "isFolder": true,
+            "id": ":sh:Documents:/foo/bar",
+            "type": "Folder"
+          },
+          {
+            "name": "hello.txt",
+            "path": ":sh:Documents:/foo/hello.txt",
+            "created": "2026-02-13T04:54:28.0304545Z",
+            "modified": "2026-02-13T04:54:28.0304545Z",
+            "attributes": 128,
+            "id": ":sh:Documents:/foo/hello.txt",
+            "type": "File txt"
+          }
+        ],
+        "after": [
+          {
+            "name": "xs-diff-20260127T035521.html",
+            "path": ":sh:Documents:/xs-diff-20260127T035521.html",
+            "created": "2026-02-13T04:54:28.0307063Z",
+            "modified": "2026-02-13T04:54:28.0307063Z",
+            "attributes": 128,
+            "id": ":sh:Documents:/xs-diff-20260127T035521.html",
+            "type": "File html"
+          },
+          {
+            "name": "tempfolder",
+            "path": ":sh:Documents:/tempfolder",
+            "created": "2026-02-13T04:59:15.8350813Z",
+            "modified": "2026-02-13T05:08:47.5895688Z",
+            "attributes": 16,
+            "isFolder": true,
+            "id": ":sh:Documents:/tempfolder",
+            "type": "Folder"
+          },
+          {
+            "name": "test.xlsx",
+            "path": ":sh:Documents:/test.xlsx",
+            "created": "2026-02-13T04:54:28.0305794Z",
+            "modified": "2026-02-13T04:54:28.0305794Z",
+            "attributes": 128,
+            "id": ":sh:Documents:/test.xlsx",
+            "type": "File xlsx"
+          },
+          {
+            "name": "foo",
+            "path": ":sh:Documents:/foo",
+            "created": "2026-02-13T04:54:28.0298515Z",
+            "modified": "2026-02-13T05:08:37.8251984Z",
+            "attributes": 16,
+            "isFolder": true,
+            "id": ":sh:Documents:/foo",
+            "type": "Folder"
+          }
+        ],
+        "beforeJson": "[\n  {\n    \"name\": \".gitkeep\",\n    \"path\": \":sh:Documents:/foo/.gitkeep\",\n    \"created\": \"2026-02-13T04:54:28.0300541Z\",\n    \"modified\": \"2026-02-13T04:54:28.0300541Z\",\n    \"attributes\": 2,\n    \"id\": \":sh:Documents:/foo/.gitkeep\",\n    \"type\": \"File gitkeep\"\n  },\n  {\n    \"name\": \"bar\",\n    \"path\": \":sh:Documents:/foo/bar\",\n    \"created\": \"2026-02-13T04:54:28.030171Z\",\n    \"modified\": \"2026-02-13T04:54:28.0303361Z\",\n    \"attributes\": 16,\n    \"isFolder\": true,\n    \"id\": \":sh:Documents:/foo/bar\",\n    \"type\": \"Folder\"\n  },\n  {\n    \"name\": \"hello.txt\",\n    \"path\": \":sh:Documents:/foo/hello.txt\",\n    \"created\": \"2026-02-13T04:54:28.0304545Z\",\n    \"modified\": \"2026-02-13T04:54:28.0304545Z\",\n    \"attributes\": 128,\n    \"id\": \":sh:Documents:/foo/hello.txt\",\n    \"type\": \"File txt\"\n  }\n]",
+        "afterJson": "[\n  {\n    \"name\": \"xs-diff-20260127T035521.html\",\n    \"path\": \":sh:Documents:/xs-diff-20260127T035521.html\",\n    \"created\": \"2026-02-13T04:54:28.0307063Z\",\n    \"modified\": \"2026-02-13T04:54:28.0307063Z\",\n    \"attributes\": 128,\n    \"id\": \":sh:Documents:/xs-diff-20260127T035521.html\",\n    \"type\": \"File html\"\n  },\n  {\n    \"name\": \"tempfolder\",\n    \"path\": \":sh:Documents:/tempfolder\",\n    \"created\": \"2026-02-13T04:59:15.8350813Z\",\n    \"modified\": \"2026-02-13T05:08:47.5895688Z\",\n    \"attributes\": 16,\n    \"isFolder\": true,\n    \"id\": \":sh:Documents:/tempfolder\",\n    \"type\": \"Folder\"\n  },\n  {\n    \"name\": \"test.xlsx\",\n    \"path\": \":sh:Documents:/test.xlsx\",\n    \"created\": \"2026-02-13T04:54:28.0305794Z\",\n    \"modified\": \"2026-02-13T04:54:28.0305794Z\",\n    \"attributes\": 128,\n    \"id\": \":sh:Documents:/test.xlsx\",\n    \"type\": \"File xlsx\"\n  },\n  {\n    \"name\": \"foo\",\n    \"path\": \":sh:Documents:/foo\",\n    \"created\": \"2026-02-13T04:54:28.0298515Z\",\n    \"modified\": \"2026-02-13T05:08:37.8251984Z\",\n    \"attributes\": 16,\n    \"isFolder\": true,\n    \"id\": \":sh:Documents:/foo\",\n    \"type\": \"Folder\"\n  }\n]",
+        "diffText": "path: DataSource:fileCatalogData\n- [\n  {\n    \"name\": \".gitkeep\",\n    \"path\": \":sh:Documents:/foo/.gitkeep\",\n    \"created\": \"2026-02-13T04:54:28.0300541Z\",\n    \"modified\": \"2026-02-13T04:54:28.0300541Z\",\n    \"attributes\": 2,\n    \"id\": \":sh:Documents:/foo/.gitkeep\",\n    \"type\": \"File gitkeep\"\n  },\n  {\n    \"name\": \"bar\",\n    \"path\": \":sh:Documents:/foo/bar\",\n    \"created\": \"2026-02-13T04:54:28.030171Z\",\n    \"modified\": \"2026-02-13T04:54:28.0303361Z\",\n    \"attributes\": 16,\n    \"isFolder\": true,\n    \"id\": \":sh:Documents:/foo/bar\",\n    \"type\": \"Folder\"\n  },\n  {\n    \"name\": \"hello.txt\",\n    \"path\": \":sh:Documents:/foo/hello.txt\",\n    \"created\": \"2026-02-13T04:54:28.0304545Z\",\n    \"modified\": \"2026-02-13T04:54:28.0304545Z\",\n    \"attributes\": 128,\n    \"id\": \":sh:Documents:/foo/hello.txt\",\n    \"type\": \"File txt\"\n  }\n]\n+ [\n  {\n    \"name\": \"xs-diff-20260127T035521.html\",\n    \"path\": \":sh:Documents:/xs-diff-20260127T035521.html\",\n    \"created\": \"2026-02-13T04:54:28.0307063Z\",\n    \"modified\": \"2026-02-13T04:54:28.0307063Z\",\n    \"attributes\": 128,\n    \"id\": \":sh:Documents:/xs-diff-20260127T035521.html\",\n    \"type\": \"File html\"\n  },\n  {\n    \"name\": \"tempfolder\",\n    \"path\": \":sh:Documents:/tempfolder\",\n    \"created\": \"2026-02-13T04:59:15.8350813Z\",\n    \"modified\": \"2026-02-13T05:08:47.5895688Z\",\n    \"attributes\": 16,\n    \"isFolder\": true,\n    \"id\": \":sh:Documents:/tempfolder\",\n    \"type\": \"Folder\"\n  },\n  {\n    \"name\": \"test.xlsx\",\n    \"path\": \":sh:Documents:/test.xlsx\",\n    \"created\": \"2026-02-13T04:54:28.0305794Z\",\n    \"modified\": \"2026-02-13T04:54:28.0305794Z\",\n    \"attributes\": 128,\n    \"id\": \":sh:Documents:/test.xlsx\",\n    \"type\": \"File xlsx\"\n  },\n  {\n    \"name\": \"foo\",\n    \"path\": \":sh:Documents:/foo\",\n    \"created\": \"2026-02-13T04:54:28.0298515Z\",\n    \"modified\": \"2026-02-13T05:08:37.8251984Z\",\n    \"attributes\": 16,\n    \"isFolder\": true,\n    \"id\": \":sh:Documents:/foo\",\n    \"type\": \"Folder\"\n  }\n]",
+        "diffPretty": "path: DataSource:fileCatalogData\n- [\n-   {\n-     \"name\": \".gitkeep\",\n-     \"path\": \":sh:Documents:/foo/.gitkeep\",\n-     \"created\": \"2026-02-13T04:54:28.0300541Z\",\n-     \"modified\": \"2026-02-13T04:54:28.0300541Z\",\n-     \"attributes\": 2,\n-     \"id\": \":sh:Documents:/foo/.gitkeep\",\n-     \"type\": \"File gitkeep\"\n-   },\n-   {\n-     \"name\": \"bar\",\n-     \"path\": \":sh:Documents:/foo/bar\",\n-     \"created\": \"2026-02-13T04:54:28.030171Z\",\n-     \"modified\": \"2026-02-13T04:54:28.0303361Z\",\n-     \"attributes\": 16,\n-     \"isFolder\": true,\n-     \"id\": \":sh:Documents:/foo/bar\",\n-     \"type\": \"Folder\"\n-   },\n-   {\n-     \"name\": \"hello.txt\",\n-     \"path\": \":sh:Documents:/foo/hello.txt\",\n-     \"created\": \"2026-02-13T04:54:28.0304545Z\",\n-     \"modified\": \"2026-02-13T04:54:28.0304545Z\",\n-     \"attributes\": 128,\n-     \"id\": \":sh:Documents:/foo/hello.txt\",\n-     \"type\": \"File txt\"\n-   }\n- ]\n+ [\n+   {\n+     \"name\": \"xs-diff-20260127T035521.html\",\n+     \"path\": \":sh:Documents:/xs-diff-20260127T035521.html\",\n+     \"created\": \"2026-02-13T04:54:28.0307063Z\",\n+     \"modified\": \"2026-02-13T04:54:28.0307063Z\",\n+     \"attributes\": 128,\n+     \"id\": \":sh:Documents:/xs-diff-20260127T035521.html\",\n+     \"type\": \"File html\"\n+   },\n+   {\n+     \"name\": \"tempfolder\",\n+     \"path\": \":sh:Documents:/tempfolder\",\n+     \"created\": \"2026-02-13T04:59:15.8350813Z\",\n+     \"modified\": \"2026-02-13T05:08:47.5895688Z\",\n+     \"attributes\": 16,\n+     \"isFolder\": true,\n+     \"id\": \":sh:Documents:/tempfolder\",\n+     \"type\": \"Folder\"\n+   },\n+   {\n+     \"name\": \"test.xlsx\",\n+     \"path\": \":sh:Documents:/test.xlsx\",\n+     \"created\": \"2026-02-13T04:54:28.0305794Z\",\n+     \"modified\": \"2026-02-13T04:54:28.0305794Z\",\n+     \"attributes\": 128,\n+     \"id\": \":sh:Documents:/test.xlsx\",\n+     \"type\": \"File xlsx\"\n+   },\n+   {\n+     \"name\": \"foo\",\n+     \"path\": \":sh:Documents:/foo\",\n+     \"created\": \"2026-02-13T04:54:28.0298515Z\",\n+     \"modified\": \"2026-02-13T05:08:37.8251984Z\",\n+     \"attributes\": 16,\n+     \"isFolder\": true,\n+     \"id\": \":sh:Documents:/foo\",\n+     \"type\": \"Folder\"\n+   }\n+ ]"
+      }
+    ]
+  },
+  {
+    "ts": 1770959335062,
+    "perfTs": 3063.0999999940395,
+    "traceId": "startup-mlkfgmud",
+    "kind": "component:vars:change",
+    "uid": "Toolbar",
+    "eventName": "folder",
+    "componentType": "Container",
+    "componentLabel": "Toolbar",
+    "ownerFileId": "/src/components/Toolbar.xmlui",
+    "ownerSource": {
+      "start": 97,
+      "end": 5146
+    },
+    "file": "/src/components/Toolbar.xmlui",
+    "changes": [
+      {
+        "key": "folder",
+        "before": "foo",
+        "after": "",
+        "changeKind": "change"
+      }
+    ],
+    "diff": [
+      {
+        "path": "folder",
+        "type": "update",
+        "before": "foo",
+        "after": "",
+        "beforeJson": "\"foo\"",
+        "afterJson": "\"\"",
+        "diffPretty": "folder: \"foo\" → \"\""
+      }
+    ],
+    "diffPretty": "file: /src/components/Toolbar.xmlui\nfolder: \"foo\" → \"\""
+  },
+  {
+    "ts": 1770959335062,
+    "perfTs": 3063.300000011921,
+    "traceId": "startup-mlkfgmud",
+    "kind": "component:vars:change",
+    "uid": "Toolbar",
+    "eventName": "folder",
+    "componentType": "Container",
+    "componentLabel": "Toolbar",
+    "ownerFileId": "/src/components/Toolbar.xmlui",
+    "ownerSource": {
+      "start": 97,
+      "end": 5146
+    },
+    "file": "/src/components/Toolbar.xmlui",
+    "changes": [
+      {
+        "key": "folder",
+        "before": "foo",
+        "after": "",
+        "changeKind": "change"
+      }
+    ],
+    "diff": [
+      {
+        "path": "folder",
+        "type": "update",
+        "before": "foo",
+        "after": "",
+        "beforeJson": "\"foo\"",
+        "afterJson": "\"\"",
+        "diffPretty": "folder: \"foo\" → \"\""
+      }
+    ],
+    "diffPretty": "file: /src/components/Toolbar.xmlui\nfolder: \"foo\" → \"\""
+  },
+  {
+    "ts": 1770959335063,
+    "perfTs": 3064.5999999940395,
+    "traceId": "startup-mlkfgmud",
+    "kind": "api:start",
+    "url": "/ListFolder",
+    "method": "GET",
+    "instanceId": "ds-42y2ma-mlkfgntr"
+  },
+  {
+    "ts": 1770959335064,
+    "perfTs": 3065.0999999940395,
+    "traceId": "startup-mlkfgmud",
+    "kind": "component:vars:change",
+    "uid": "FilesContainerBreadcrumbs",
+    "eventName": "folder, decoded, crumbs",
+    "componentType": "Container",
+    "componentLabel": "FilesContainerBreadcrumbs",
+    "ownerFileId": "/src/components/filesContainer/FilesContainerBreadcrumbs.xmlui",
+    "ownerSource": {
+      "start": 129,
+      "end": 1143
+    },
+    "file": "/src/components/filesContainer/FilesContainerBreadcrumbs.xmlui",
+    "changes": [
+      {
+        "key": "folder",
+        "before": "foo",
+        "after": "",
+        "changeKind": "change"
+      },
+      {
+        "key": "decoded",
+        "before": "foo",
+        "after": "",
+        "changeKind": "change"
+      },
+      {
+        "key": "crumbs",
+        "before": [
+          {
+            "name": "foo",
+            "folder": "foo"
+          }
+        ],
+        "after": [],
+        "changeKind": "change"
+      }
+    ],
+    "diff": [
+      {
+        "path": "folder",
+        "type": "update",
+        "before": "foo",
+        "after": "",
+        "beforeJson": "\"foo\"",
+        "afterJson": "\"\"",
+        "diffPretty": "folder: \"foo\" → \"\""
+      },
+      {
+        "path": "decoded",
+        "type": "update",
+        "before": "foo",
+        "after": "",
+        "beforeJson": "\"foo\"",
+        "afterJson": "\"\"",
+        "diffPretty": "decoded: \"foo\" → \"\""
+      },
+      {
+        "path": "crumbs",
+        "type": "update",
+        "before": [
+          {
+            "name": "foo",
+            "folder": "foo"
+          }
+        ],
+        "after": [],
+        "beforeJson": "[\n  {\n    \"name\": \"foo\",\n    \"folder\": \"foo\"\n  }\n]",
+        "afterJson": "[]",
+        "diffPretty": "crumbs: [\n  {\n    \"name\": \"foo\",\n    \"folder\": \"foo\"\n  }\n] → []"
+      }
+    ],
+    "diffPretty": "file: /src/components/filesContainer/FilesContainerBreadcrumbs.xmlui\nfolder: \"foo\" → \"\"\ndecoded: \"foo\" → \"\"\ncrumbs: [\n  {\n    \"name\": \"foo\",\n    \"folder\": \"foo\"\n  }\n] → []"
+  },
+  {
+    "ts": 1770959335064,
+    "perfTs": 3065.5,
+    "traceId": "startup-mlkfgmud",
+    "kind": "component:vars:change",
+    "uid": "FilesContainer",
+    "eventName": "folder",
+    "componentType": "Container",
+    "componentLabel": "FilesContainer",
+    "ownerFileId": "/src/components/filesContainer/FilesContainer.xmlui",
+    "ownerSource": {
+      "start": 120,
+      "end": 1572
+    },
+    "file": "/src/components/filesContainer/FilesContainer.xmlui",
+    "changes": [
+      {
+        "key": "folder",
+        "before": "foo",
+        "after": "",
+        "changeKind": "change"
+      }
+    ],
+    "diff": [
+      {
+        "path": "folder",
+        "type": "update",
+        "before": "foo",
+        "after": "",
+        "beforeJson": "\"foo\"",
+        "afterJson": "\"\"",
+        "diffPretty": "folder: \"foo\" → \"\""
+      }
+    ],
+    "diffPretty": "file: /src/components/filesContainer/FilesContainer.xmlui\nfolder: \"foo\" → \"\""
+  },
+  {
+    "ts": 1770959335085,
+    "perfTs": 3086.0999999940395,
+    "traceId": "startup-mlkfgmud",
+    "kind": "component:vars:change",
+    "uid": "FilesContainer",
+    "eventName": "sortedFiles",
+    "componentType": "Container",
+    "componentLabel": "FilesContainer",
+    "ownerFileId": "/src/components/filesContainer/FilesContainer.xmlui",
+    "ownerSource": {
+      "start": 120,
+      "end": 1572
+    },
+    "file": "/src/components/filesContainer/FilesContainer.xmlui",
+    "changes": [
+      {
+        "key": "sortedFiles",
+        "before": [
+          {
+            "name": ".gitkeep",
+            "path": ":sh:Documents:/foo/.gitkeep",
+            "created": "2026-02-13T04:54:28.0300541Z",
+            "modified": "2026-02-13T04:54:28.0300541Z",
+            "attributes": 2,
+            "id": ":sh:Documents:/foo/.gitkeep",
+            "type": "File gitkeep"
+          },
+          {
+            "name": "bar",
+            "path": ":sh:Documents:/foo/bar",
+            "created": "2026-02-13T04:54:28.030171Z",
+            "modified": "2026-02-13T04:54:28.0303361Z",
+            "attributes": 16,
+            "isFolder": true,
+            "id": ":sh:Documents:/foo/bar",
+            "type": "Folder"
+          },
+          {
+            "name": "hello.txt",
+            "path": ":sh:Documents:/foo/hello.txt",
+            "created": "2026-02-13T04:54:28.0304545Z",
+            "modified": "2026-02-13T04:54:28.0304545Z",
+            "attributes": 128,
+            "id": ":sh:Documents:/foo/hello.txt",
+            "type": "File txt"
+          }
+        ],
+        "after": [
+          {
+            "name": "foo",
+            "path": ":sh:Documents:/foo",
+            "created": "2026-02-13T04:54:28.0298515Z",
+            "modified": "2026-02-13T05:08:37.8251984Z",
+            "attributes": 16,
+            "isFolder": true,
+            "id": ":sh:Documents:/foo",
+            "type": "Folder"
+          },
+          {
+            "name": "tempfolder",
+            "path": ":sh:Documents:/tempfolder",
+            "created": "2026-02-13T04:59:15.8350813Z",
+            "modified": "2026-02-13T05:08:47.5895688Z",
+            "attributes": 16,
+            "isFolder": true,
+            "id": ":sh:Documents:/tempfolder",
+            "type": "Folder"
+          },
+          {
+            "name": "test.xlsx",
+            "path": ":sh:Documents:/test.xlsx",
+            "created": "2026-02-13T04:54:28.0305794Z",
+            "modified": "2026-02-13T04:54:28.0305794Z",
+            "attributes": 128,
+            "id": ":sh:Documents:/test.xlsx",
+            "type": "File xlsx"
+          },
+          {
+            "name": "xs-diff-20260127T035521.html",
+            "path": ":sh:Documents:/xs-diff-20260127T035521.html",
+            "created": "2026-02-13T04:54:28.0307063Z",
+            "modified": "2026-02-13T04:54:28.0307063Z",
+            "attributes": 128,
+            "id": ":sh:Documents:/xs-diff-20260127T035521.html",
+            "type": "File html"
+          }
+        ],
+        "changeKind": "change"
+      }
+    ],
+    "diff": [
+      {
+        "path": "sortedFiles",
+        "type": "update",
+        "before": [
+          {
+            "name": ".gitkeep",
+            "path": ":sh:Documents:/foo/.gitkeep",
+            "created": "2026-02-13T04:54:28.0300541Z",
+            "modified": "2026-02-13T04:54:28.0300541Z",
+            "attributes": 2,
+            "id": ":sh:Documents:/foo/.gitkeep",
+            "type": "File gitkeep"
+          },
+          {
+            "name": "bar",
+            "path": ":sh:Documents:/foo/bar",
+            "created": "2026-02-13T04:54:28.030171Z",
+            "modified": "2026-02-13T04:54:28.0303361Z",
+            "attributes": 16,
+            "isFolder": true,
+            "id": ":sh:Documents:/foo/bar",
+            "type": "Folder"
+          },
+          {
+            "name": "hello.txt",
+            "path": ":sh:Documents:/foo/hello.txt",
+            "created": "2026-02-13T04:54:28.0304545Z",
+            "modified": "2026-02-13T04:54:28.0304545Z",
+            "attributes": 128,
+            "id": ":sh:Documents:/foo/hello.txt",
+            "type": "File txt"
+          }
+        ],
+        "after": [
+          {
+            "name": "foo",
+            "path": ":sh:Documents:/foo",
+            "created": "2026-02-13T04:54:28.0298515Z",
+            "modified": "2026-02-13T05:08:37.8251984Z",
+            "attributes": 16,
+            "isFolder": true,
+            "id": ":sh:Documents:/foo",
+            "type": "Folder"
+          },
+          {
+            "name": "tempfolder",
+            "path": ":sh:Documents:/tempfolder",
+            "created": "2026-02-13T04:59:15.8350813Z",
+            "modified": "2026-02-13T05:08:47.5895688Z",
+            "attributes": 16,
+            "isFolder": true,
+            "id": ":sh:Documents:/tempfolder",
+            "type": "Folder"
+          },
+          {
+            "name": "test.xlsx",
+            "path": ":sh:Documents:/test.xlsx",
+            "created": "2026-02-13T04:54:28.0305794Z",
+            "modified": "2026-02-13T04:54:28.0305794Z",
+            "attributes": 128,
+            "id": ":sh:Documents:/test.xlsx",
+            "type": "File xlsx"
+          },
+          {
+            "name": "xs-diff-20260127T035521.html",
+            "path": ":sh:Documents:/xs-diff-20260127T035521.html",
+            "created": "2026-02-13T04:54:28.0307063Z",
+            "modified": "2026-02-13T04:54:28.0307063Z",
+            "attributes": 128,
+            "id": ":sh:Documents:/xs-diff-20260127T035521.html",
+            "type": "File html"
+          }
+        ],
+        "beforeJson": "[\n  {\n    \"name\": \".gitkeep\",\n    \"path\": \":sh:Documents:/foo/.gitkeep\",\n    \"created\": \"2026-02-13T04:54:28.0300541Z\",\n    \"modified\": \"2026-02-13T04:54:28.0300541Z\",\n    \"attributes\": 2,\n    \"id\": \":sh:Documents:/foo/.gitkeep\",\n    \"type\": \"File gitkeep\"\n  },\n  {\n    \"name\": \"bar\",\n    \"path\": \":sh:Documents:/foo/bar\",\n    \"created\": \"2026-02-13T04:54:28.030171Z\",\n    \"modified\": \"2026-02-13T04:54:28.0303361Z\",\n    \"attributes\": 16,\n    \"isFolder\": true,\n    \"id\": \":sh:Documents:/foo/bar\",\n    \"type\": \"Folder\"\n  },\n  {\n    \"name\": \"hello.txt\",\n    \"path\": \":sh:Documents:/foo/hello.txt\",\n    \"created\": \"2026-02-13T04:54:28.0304545Z\",\n    \"modified\": \"2026-02-13T04:54:28.0304545Z\",\n    \"attributes\": 128,\n    \"id\": \":sh:Documents:/foo/hello.txt\",\n    \"type\": \"File txt\"\n  }\n]",
+        "afterJson": "[\n  {\n    \"name\": \"foo\",\n    \"path\": \":sh:Documents:/foo\",\n    \"created\": \"2026-02-13T04:54:28.0298515Z\",\n    \"modified\": \"2026-02-13T05:08:37.8251984Z\",\n    \"attributes\": 16,\n    \"isFolder\": true,\n    \"id\": \":sh:Documents:/foo\",\n    \"type\": \"Folder\"\n  },\n  {\n    \"name\": \"tempfolder\",\n    \"path\": \":sh:Documents:/tempfolder\",\n    \"created\": \"2026-02-13T04:59:15.8350813Z\",\n    \"modified\": \"2026-02-13T05:08:47.5895688Z\",\n    \"attributes\": 16,\n    \"isFolder\": true,\n    \"id\": \":sh:Documents:/tempfolder\",\n    \"type\": \"Folder\"\n  },\n  {\n    \"name\": \"test.xlsx\",\n    \"path\": \":sh:Documents:/test.xlsx\",\n    \"created\": \"2026-02-13T04:54:28.0305794Z\",\n    \"modified\": \"2026-02-13T04:54:28.0305794Z\",\n    \"attributes\": 128,\n    \"id\": \":sh:Documents:/test.xlsx\",\n    \"type\": \"File xlsx\"\n  },\n  {\n    \"name\": \"xs-diff-20260127T035521.html\",\n    \"path\": \":sh:Documents:/xs-diff-20260127T035521.html\",\n    \"created\": \"2026-02-13T04:54:28.0307063Z\",\n    \"modified\": \"2026-02-13T04:54:28.0307063Z\",\n    \"attributes\": 128,\n    \"id\": \":sh:Documents:/xs-diff-20260127T035521.html\",\n    \"type\": \"File html\"\n  }\n]",
+        "diffPretty": "sortedFiles: [\n  {\n    \"name\": \".gitkeep\",\n    \"path\": \":sh:Documents:/foo/.gitkeep\",\n    \"created\": \"2026-02-13T04:54:28.0300541Z\",\n    \"modified\": \"2026-02-13T04:54:28.0300541Z\",\n    \"attributes\": 2,\n    \"id\": \":sh:Documents:/foo/.gitkeep\",\n    \"type\": \"File gitkeep\"\n  },\n  {\n    \"name\": \"bar\",\n    \"path\": \":sh:Documents:/foo/bar\",\n    \"created\": \"2026-02-13T04:54:28.030171Z\",\n    \"modified\": \"2026-02-13T04:54:28.0303361Z\",\n    \"attributes\": 16,\n    \"isFolder\": true,\n    \"id\": \":sh:Documents:/foo/bar\",\n    \"type\": \"Folder\"\n  },\n  {\n    \"name\": \"hello.txt\",\n    \"path\": \":sh:Documents:/foo/hello.txt\",\n    \"created\": \"2026-02-13T04:54:28.0304545Z\",\n    \"modified\": \"2026-02-13T04:54:28.0304545Z\",\n    \"attributes\": 128,\n    \"id\": \":sh:Documents:/foo/hello.txt\",\n    \"type\": \"File txt\"\n  }\n] → [\n  {\n    \"name\": \"foo\",\n    \"path\": \":sh:Documents:/foo\",\n    \"created\": \"2026-02-13T04:54:28.0298515Z\",\n    \"modified\": \"2026-02-13T05:08:37.8251984Z\",\n    \"attributes\": 16,\n    \"isFolder\": true,\n    \"id\": \":sh:Documents:/foo\",\n    \"type\": \"Folder\"\n  },\n  {\n    \"name\": \"tempfolder\",\n    \"path\": \":sh:Documents:/tempfolder\",\n    \"created\": \"2026-02-13T04:59:15.8350813Z\",\n    \"modified\": \"2026-02-13T05:08:47.5895688Z\",\n    \"attributes\": 16,\n    \"isFolder\": true,\n    \"id\": \":sh:Documents:/tempfolder\",\n    \"type\": \"Folder\"\n  },\n  {\n    \"name\": \"test.xlsx\",\n    \"path\": \":sh:Documents:/test.xlsx\",\n    \"created\": \"2026-02-13T04:54:28.0305794Z\",\n    \"modified\": \"2026-02-13T04:54:28.0305794Z\",\n    \"attributes\": 128,\n    \"id\": \":sh:Documents:/test.xlsx\",\n    \"type\": \"File xlsx\"\n  },\n  {\n    \"name\": \"xs-diff-20260127T035521.html\",\n    \"path\": \":sh:Documents:/xs-diff-20260127T035521.html\",\n    \"created\": \"2026-02-13T04:54:28.0307063Z\",\n    \"modified\": \"2026-02-13T04:54:28.0307063Z\",\n    \"attributes\": 128,\n    \"id\": \":sh:Documents:/xs-diff-20260127T035521.html\",\n    \"type\": \"File html\"\n  }\n]"
+      }
+    ],
+    "diffPretty": "file: /src/components/filesContainer/FilesContainer.xmlui\nsortedFiles: [\n  {\n    \"name\": \".gitkeep\",\n    \"path\": \":sh:Documents:/foo/.gitkeep\",\n    \"created\": \"2026-02-13T04:54:28.0300541Z\",\n    \"modified\": \"2026-02-13T04:54:28.0300541Z\",\n    \"attributes\": 2,\n    \"id\": \":sh:Documents:/foo/.gitkeep\",\n    \"type\": \"File gitkeep\"\n  },\n  {\n    \"name\": \"bar\",\n    \"path\": \":sh:Documents:/foo/bar\",\n    \"created\": \"2026-02-13T04:54:28.030171Z\",\n    \"modified\": \"2026-02-13T04:54:28.0303361Z\",\n    \"attributes\": 16,\n    \"isFolder\": true,\n    \"id\": \":sh:Documents:/foo/bar\",\n    \"type\": \"Folder\"\n  },\n  {\n    \"name\": \"hello.txt\",\n    \"path\": \":sh:Documents:/foo/hello.txt\",\n    \"created\": \"2026-02-13T04:54:28.0304545Z\",\n    \"modified\": \"2026-02-13T04:54:28.0304545Z\",\n    \"attributes\": 128,\n    \"id\": \":sh:Documents:/foo/hello.txt\",\n    \"type\": \"File txt\"\n  }\n] → [\n  {\n    \"name\": \"foo\",\n    \"path\": \":sh:Documents:/foo\",\n    \"created\": \"2026-02-13T04:54:28.0298515Z\",\n    \"modified\": \"2026-02-13T05:08:37.8251984Z\",\n    \"attributes\": 16,\n    \"isFolder\": true,\n    \"id\": \":sh:Documents:/foo\",\n    \"type\": \"Folder\"\n  },\n  {\n    \"name\": \"tempfolder\",\n    \"path\": \":sh:Documents:/tempfolder\",\n    \"created\": \"2026-02-13T04:59:15.8350813Z\",\n    \"modified\": \"2026-02-13T05:08:47.5895688Z\",\n    \"attributes\": 16,\n    \"isFolder\": true,\n    \"id\": \":sh:Documents:/tempfolder\",\n    \"type\": \"Folder\"\n  },\n  {\n    \"name\": \"test.xlsx\",\n    \"path\": \":sh:Documents:/test.xlsx\",\n    \"created\": \"2026-02-13T04:54:28.0305794Z\",\n    \"modified\": \"2026-02-13T04:54:28.0305794Z\",\n    \"attributes\": 128,\n    \"id\": \":sh:Documents:/test.xlsx\",\n    \"type\": \"File xlsx\"\n  },\n  {\n    \"name\": \"xs-diff-20260127T035521.html\",\n    \"path\": \":sh:Documents:/xs-diff-20260127T035521.html\",\n    \"created\": \"2026-02-13T04:54:28.0307063Z\",\n    \"modified\": \"2026-02-13T04:54:28.0307063Z\",\n    \"attributes\": 128,\n    \"id\": \":sh:Documents:/xs-diff-20260127T035521.html\",\n    \"type\": \"File html\"\n  }\n]"
+  },
+  {
+    "ts": 1770959335108,
+    "perfTs": 3109.5,
+    "traceId": "startup-mlkfgmud",
+    "text": "[\n  \"handler:complete\",\n  {\n    \"uid\": \"tree\",\n    \"eventName\": \"selectionDidChange\",\n    \"componentType\": \"Tree\",\n    \"componentLabel\": \"tree\",\n    \"duration\": 103.10000002384186,\n    \"startPerfTs\": 3006.199999988079,\n    \"ownerFileId\": \"/src/components/foldersTree/FoldersTree.xmlui\",\n    \"ownerSource\": {\n      \"start\": 932,\n      \"end\": 1736\n    },\n    \"handlerCode\": \"(event) => navigateTo(event.newNode)\",\n    \"traceId\": \"startup-mlkfgmud\"\n  }\n]",
+    "kind": "handler:complete",
+    "eventName": "selectionDidChange",
+    "componentType": "Tree",
+    "componentLabel": "tree",
+    "uid": "tree",
+    "ownerFileId": "/src/components/foldersTree/FoldersTree.xmlui",
+    "ownerSource": {
+      "start": 932,
+      "end": 1736
+    },
+    "duration": 103.10000002384186,
+    "startPerfTs": 3006.199999988079,
+    "handlerCode": "(event) => navigateTo(event.newNode)"
+  },
+  {
+    "ts": 1770959335110,
+    "perfTs": 3111.300000011921,
+    "eventTs": 3002.5999999940395,
+    "kind": "interaction",
+    "eventName": "click",
+    "uid": "tree",
+    "traceId": "i-mlkfgog6-y3o353",
+    "componentType": "Tree",
+    "componentLabel": "Tree",
+    "interaction": "click",
+    "ariaRole": "treeitem",
+    "ariaName": "Documents",
+    "detail": {
+      "componentId": "tree",
+      "targetTag": "DIV",
+      "selectorPath": "[data-testid=\"tree\"] >> text=Documents",
+      "text": "DocumentsPicturesProjects",
+      "ariaRole": "treeitem",
+      "ariaName": "Documents",
+      "button": 0
+    },
+    "text": "{\n  \"componentId\": \"tree\",\n  \"targetTag\": \"DIV\",\n  \"selectorPath\": \"[data-testid=\\\"tree\\\"] >> text=Documents\",\n  \"text\": \"DocumentsPicturesProjects\",\n  \"ariaRole\": \"treeitem\",\n  \"ariaName\": \"Documents\",\n  \"button\": 0\n}"
+  },
+  {
+    "ts": 1770959335164,
+    "perfTs": 3165.0999999940395,
+    "traceId": "startup-mlkfgmud",
+    "kind": "api:complete",
+    "url": "/ListFolder",
+    "method": "GET",
+    "instanceId": "ds-42y2ma-mlkfgntr",
+    "result": [
+      {
+        "name": "xs-diff-20260127T035521.html",
+        "path": ":sh:Documents:/xs-diff-20260127T035521.html",
+        "created": "2026-02-13T04:54:28.0307063Z",
+        "modified": "2026-02-13T04:54:28.0307063Z",
+        "attributes": 128
+      },
+      {
+        "name": "tempfolder",
+        "path": ":sh:Documents:/tempfolder",
+        "created": "2026-02-13T04:59:15.8350813Z",
+        "modified": "2026-02-13T05:08:47.5895688Z",
+        "attributes": 16,
+        "isFolder": true
+      },
+      {
+        "name": "test.xlsx",
+        "path": ":sh:Documents:/test.xlsx",
+        "created": "2026-02-13T04:54:28.0305794Z",
+        "modified": "2026-02-13T04:54:28.0305794Z",
+        "attributes": 128
+      },
+      {
+        "name": "foo",
+        "path": ":sh:Documents:/foo",
+        "created": "2026-02-13T04:54:28.0298515Z",
+        "modified": "2026-02-13T05:08:37.8251984Z",
+        "attributes": 16,
+        "isFolder": true
+      }
+    ]
+  }
+]
