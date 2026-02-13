@@ -4,7 +4,6 @@
   Properties:
   - `fileEntries`: The list of file entries to display
   - `loading`: Whether the data is currently loading
-  - `height`: The height of the component
 
 -->
 <Component name="FilesTableView">

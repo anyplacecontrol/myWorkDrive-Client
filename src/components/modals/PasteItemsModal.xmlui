@@ -20,8 +20,6 @@
 
   <!--
     This modal dialog shows the progress of paste (copy/cut) operations.
-
-    Clipboard data is stored in the `fileClipboard` variable.
   -->
 
   <ModalDialog

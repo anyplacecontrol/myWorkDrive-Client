@@ -9,8 +9,6 @@
   <MessageListener onMessageReceived="msg => handleMessageReceived(msg)"/>
   <!--
     This modal dialog allows the user to rename an item.
-
-    Item to be renamed is stored in the `itemToRename` variable.
   -->
   <ModalDialog
     when="{isDialogOpen}"

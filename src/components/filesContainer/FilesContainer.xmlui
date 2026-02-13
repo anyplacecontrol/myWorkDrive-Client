@@ -46,12 +46,10 @@
     />
 
     <!-- Display the files  -->
-    <!-- Use the table or tiles view according to the current app state -->
     <FilesTableView
       when="{isAnyFiles()}"
       fileEntries="{getSortedFiles()}"
       loading="{fileCatalogData.loading}"
-      height="*"
     />
 
   </FileUploadDropZone

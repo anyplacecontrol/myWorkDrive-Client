@@ -1,10 +1,5 @@
 <!--
   This component provides the folders tree view for navigating folders.
-
-
-  Messages for inter-component communication:
-  - `renameTreeNode`: Sent when a folder or file has been renamed.
-    Payload: { oldPath: string, newPath: string }
 -->
 
 <Component name="FoldersTree"
