@@ -24,7 +24,7 @@
   "include": [
     "src",
     "index.ts"
-  ],
+, "src/FoldersTree.xmlui.xs"  ],
   "exclude": [
     "/**/*.xmlui.xs"
   ]

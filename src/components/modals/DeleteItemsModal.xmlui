@@ -9,8 +9,6 @@
   <MessageListener onMessageReceived="msg => handleMessageReceived(msg)" />
   <!--
     This modal dialog asks the user to confirm deletion of items.
-
-    Items to be deleted are stored in the `itemsToDelete` variable.
   -->
 
   <ModalDialog

@@ -4,7 +4,6 @@
   Properties:
   - `fileEntries`: The list of file entries to display
   - `loading`: Whether the data is currently loading
-  - `height`: The height of the component
 
 -->
 <Component name="FilesTableView">
@@ -12,7 +11,7 @@
   <AppState id="selectionState" bucket="fileCatalogSelection" />
 
   <script>
-    import { navigateTo, copyOrCut, paste, getCurrentDrive, getCurrentFolder } from "../../shared.xs";
+    import { navigateTo, copyOrCut, paste } from "../../shared.xs";
   </script>
 
   <ContextMenu id="contextMenu" menuWidth="240px">

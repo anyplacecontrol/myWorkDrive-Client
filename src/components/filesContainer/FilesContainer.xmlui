@@ -3,10 +3,6 @@
 -->
 <Component name="FilesContainer"
 >
-  <script>
-    import { getCurrentDrive, getCurrentFolder } from "../../shared.xs";
-  </script>
-
   <MessageListener onMessageReceived="(msg) => {
     if (msg.type === 'FilesContainer:refresh') fileCatalogData.refetch();
   }"/>
@@ -14,8 +10,8 @@
     <!-- Get the content of the folder (ignore the file property) -->
   <DataSource
     id="fileCatalogData"
-    when="{drive}"
-    url=`/ListFolder?path={window.MwdHelpers.joinPath(drive, folder)}`
+    when="{$queryParams.drive}"
+    url=`/ListFolder?path={window.MwdHelpers.joinPath($queryParams.drive || '', $queryParams.folder || '')}`
     transformResult="{(result) => transformResult(result)}"
   />
 
@@ -41,21 +37,19 @@
     </ContextMenu>
 
     <FilesContainerHeader
-      when="{drive}"
-      isAnyFiles="{isAnyFiles}"
+      when="{$queryParams.drive}"
+      isAnyFiles="{isAnyFiles()}"
     />
 
     <EmptyDataView
-      when="{drive && !isAnyFiles}"
+      when="{$queryParams.drive && !isAnyFiles()}"
     />
 
     <!-- Display the files  -->
-    <!-- Use the table or tiles view according to the current app state -->
     <FilesTableView
-      when="{isAnyFiles}"
-      fileEntries="{sortedFiles}"
+      when="{isAnyFiles()}"
+      fileEntries="{getSortedFiles()}"
       loading="{fileCatalogData.loading}"
-      height="*"
     />
 
   </FileUploadDropZone

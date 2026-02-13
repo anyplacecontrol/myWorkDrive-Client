@@ -41,6 +41,7 @@ function handleDriveOrSharesChange({ prevValue, newValue }) {
 
 	hasRedirected = true;
 	const targetUrl = window.MwdHelpers.buildNavigationUrl(shares[0].drivePath);
+
 	if (targetUrl) Actions.navigate(targetUrl);
 }
 

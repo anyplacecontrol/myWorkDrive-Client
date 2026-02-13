@@ -2,6 +2,7 @@
 // Handle incoming pub/sub messages for folder tree operations.
 // `msg` shape: { type: string, payload: any }
 // Supported types and payloads are documented on each handler below.
+
 function handleMessageReceived(msg) {
   if (msg.type === "FoldersTree:rename") handleRenameTreeNode(msg.payload);
   else if (msg.type === "FoldersTree:insert") handleInsertFolder(msg.payload);
@@ -108,7 +109,6 @@ function handleDeleteFolders(payload) {
     const normalizedPath = window.MwdHelpers.normalizeTreeNodeId(path);
     const node = tree.getNodeById(normalizedPath);
     if (node) {
-      console.log('----------------removed node', normalizedPath);
       tree.removeNode(normalizedPath);
     }
   });
@@ -130,14 +130,12 @@ function handleInsertFolder(payload) {
   const parentNode = tree.getNodeById(normalizedParentFolder);
   if (!parentNode) return;
 
-
   for (const n of folderNames) {
     const normalizedPath = window.MwdHelpers.joinPath(normalizedParentFolder, n);
     if (tree.getNodeById(normalizedPath)) {
       //if node already exists, collapse it
       collapseNode(normalizedPath);
     } else {
-      console.log('----------------inserting node', normalizedPath);
       // Insert new node
       const newNode = {
         id: normalizedPath,
@@ -153,7 +151,6 @@ function handleInsertFolder(payload) {
 function collapseNode(path) {
   if (!path) return;
   const normalizedPath = window.MwdHelpers.normalizeTreeNodeId(path);
-  console.log('----------------collapsing node', normalizedPath);
   tree.markNodeUnloaded(normalizedPath);
   delay(300);
   tree.collapseNode(normalizedPath);
@@ -171,4 +168,8 @@ function handleCollapseNodes(payload) {
   paths.forEach((path) => {
     collapseNode(path);
   });
+}
+
+function getRootNodes() {
+  return buildRootNodes($props.shares);
 }

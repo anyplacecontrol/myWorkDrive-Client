@@ -1,14 +1,8 @@
 <!--
   This component provides the folders tree view for navigating folders.
-
-
-  Messages for inter-component communication:
-  - `renameTreeNode`: Sent when a folder or file has been renamed.
-    Payload: { oldPath: string, newPath: string }
 -->
 
 <Component name="FoldersTree"
-  var.rootNodes="{buildRootNodes($props.shares)}"
 >
   <script>
     import { navigateTo } from "../../shared.xs";
@@ -20,6 +14,7 @@
   <ContextMenu id="contextMenu" menuWidth="220px">
     <FilesContextMenu />
   </ContextMenu>
+
 
   <!-- Panel with fixed toolbar (46px) and scrollable tree area below -->
   <VStack
@@ -34,9 +29,8 @@
     <Text color="$textColor--disabled" paddingLeft="$space-1">
       My Folders
     </Text>
-    <!-- Tree container: fills remaining space and scrolls independently
-    onNodeDidCollapse="onNodeCollapse"
-    -->
+
+    <!-- Tree container -->
     <Tree
       id="tree"
       spinnerDelay="250"
@@ -45,7 +39,7 @@
       dataFormat="hierarchy"
       overflowX="hidden"
       iconSize="$space-6"
-      data="{rootNodes}"
+      data="{getRootNodes()}"
       onLoadChildren="loadChildren"
       onSelectionDidChange="(event) => navigateTo(event.newNode)"
       onContextMenu="ev => handleTreeContextMenu(ev, $item, contextMenu)"

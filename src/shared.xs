@@ -22,15 +22,6 @@ function navigateTo(pathOrItem) {
   }
 }
 
-function getCurrentDrive() {
-  return defaultTo($queryParams.drive, window.AppConfig.rootDrive);
-}
-
-function getCurrentFolder() {
-  return $queryParams.folder || '' //defaultTo($queryParams.folder, '/');
-}
-
-
 function downloadFile(file) {
   if (!file || !file.path) return;
 

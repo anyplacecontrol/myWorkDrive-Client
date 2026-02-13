@@ -149,6 +149,8 @@ This app uses [trace-tools](https://github.com/xmlui-org/trace-tools) to auto-ge
 
 ### Quick start
 
+Note: clone trace-tools inside this application's project folder (so it sits next to this app's `traces/` directory). Running the clone from the app root ensures generated tests and captured traces integrate with the local `traces/` paths.
+
 ```bash
 git clone https://github.com/xmlui-org/trace-tools.git
 cd trace-tools && npm install && npx playwright install chromium && cd ..

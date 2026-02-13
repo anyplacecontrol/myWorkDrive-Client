@@ -14,6 +14,9 @@ TRACE_TOOLS="$(dirname "$0")/trace-tools"
 BASELINES="$(dirname "$0")/traces/baselines"
 CAPTURES="$(dirname "$0")/traces/captures"
 
+# Ensure captures directory exists so cp doesn't fail when saving captures
+mkdir -p "$CAPTURES"
+
 if [ ! -d "$TRACE_TOOLS" ]; then
   echo "trace-tools not found. Run:"
   echo "  git clone https://github.com/xmlui-org/trace-tools.git"
@@ -100,7 +103,7 @@ case "${1:-help}" in
       SEMANTIC_OUTPUT=$(node compare-traces.js --semantic "$ABS_BASELINE" "$CAPTURED" 2>&1)
       echo "$SEMANTIC_OUTPUT"
       echo ""
-      if echo "$SEMANTIC_OUTPUT" | grep -q "Traces match semantically"; then
+      if echo "$SEMANTIC_OUTPUT" | grep -qE "Traces match semantically|SEMANTIC_MATCH"; then
         echo "SEMANTIC: PASS — Same APIs, forms, and navigation"
       else
         echo "SEMANTIC: FAIL — Behavioral regression detected"

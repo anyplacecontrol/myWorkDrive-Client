@@ -6,9 +6,6 @@
   var.itemsToPaste="{[]}"
   var.isDialogOpen="{false}"
 >
-  <script>
-    import { getCurrentDrive, getCurrentFolder } from "../../shared.xs";
-  </script>
 
   <MessageListener onMessageReceived="msg => onPasteMessageReceived(msg)" />
 
@@ -23,8 +20,6 @@
 
   <!--
     This modal dialog shows the progress of paste (copy/cut) operations.
-
-    Clipboard data is stored in the `fileClipboard` variable.
   -->
 
   <ModalDialog
