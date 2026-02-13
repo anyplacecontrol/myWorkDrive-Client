@@ -86,10 +86,19 @@ case "${1:-help}" in
       grep -A 10 "Error:" "$TEST_OUTPUT" | head -15
     fi
 
-    # Show XMLUI runtime errors and browser errors from test output
-    if grep -q "XMLUI RUNTIME ERRORS\|BROWSER ERRORS" "$TEST_OUTPUT"; then
+    # Show XMLUI runtime errors from test output
+    if grep -q "XMLUI RUNTIME ERRORS" "$TEST_OUTPUT"; then
       echo ""
-      grep -A 50 "XMLUI RUNTIME ERRORS\|BROWSER ERRORS" "$TEST_OUTPUT"
+      grep -A 50 "XMLUI RUNTIME ERRORS" "$TEST_OUTPUT"
+    fi
+
+    # Show unexpected modals and visible rows (diagnostics)
+    if grep -q "MODALS" "$TEST_OUTPUT"; then
+      echo ""
+      sed -n '/MODALS/,/^$/p' "$TEST_OUTPUT"
+    fi
+    if grep -q "VISIBLE ROWS" "$TEST_OUTPUT"; then
+      grep "VISIBLE ROWS" "$TEST_OUTPUT"
     fi
     echo ""
 
