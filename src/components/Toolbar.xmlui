@@ -2,12 +2,10 @@
   This component provides the toolbar for the file browser.
 -->
 
-<Component name="Toolbar"
->
+<Component name="Toolbar">
   <script>
     import { navigateTo } from "../shared.xs";
   </script>
-
 
   <ModalDialog
     id="xsLogDialog"
@@ -99,29 +97,17 @@
           height="$space-6"
           marginHorizontal="$space-3"
         />
-        <DropdownMenu>
-          <template name="triggerTemplate">
-            <Button
-              testId="dropdown-button-new"
-              variant="ghost"
-              contextualLabel="Upload"
-            >
-              <Icon height="$size-Icon" name="btn_upload" size="sm" />
-              <Fragment when="{mediaSize.largeScreen}">
-                Upload
-              </Fragment>
-              <Icon
-                when="{mediaSize.largeScreen}"
-                name="chevrondown"
-                size="sm"
-              />
-            </Button>
-          </template>
-          <MenuItem
-            label="Upload"
-            onClick="toast.error('Not implemented yet')"
-          />
-        </DropdownMenu>
+
+        <Button
+          label="{mediaSize.largeScreen ? 'Upload' : undefined}"
+          contextualLabel="Upload"
+          icon="btn_upload"
+          variant="ghost"
+          onClick="() => {
+              const targetPath = window.MwdHelpers.joinPath($queryParams.drive || '', $queryParams.folder || '');
+              window.publishTopic('UploadFiles:open', { targetPath });
+            }"
+        />
 
         <DropdownMenu>
           <template name="triggerTemplate">
@@ -144,7 +130,7 @@
           <MenuItem
             label="New Folder"
             icon="btn_folders"
-             onClick="() => { window.publishTopic('NewFolderModal:open'); }"
+            onClick="() => { window.publishTopic('NewFolderModal:open'); }"
           />
         </DropdownMenu>
         <SpaceFiller />

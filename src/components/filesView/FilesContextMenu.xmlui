@@ -17,19 +17,12 @@
 
   <!-- Upload group -->
   <MenuItem
-    icon="cmd_upload_files"
-    when="{isSingleSelection()}"
-    onClick="toast.success('Upload files')"
+    icon="btn_upload"
+    onClick="window.publishTopic('UploadFiles:open', { targetPath: $context.targetPath })"
   >
     Upload files
   </MenuItem>
-  <MenuItem
-    when="{isSingleSelection()}"
-    icon="cmd_upload_folder"
-    onClick="toast.success('Upload folder')"
-  >
-    Upload folder
-  </MenuItem>
+
   <MenuSeparator />
 
   <!-- File-specific actions (single file only) -->

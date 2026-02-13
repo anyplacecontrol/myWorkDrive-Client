@@ -76,6 +76,7 @@
     <NewFolderModal />
     <DeleteItemsModal />
     <PasteItemsModal />
+    <UploadItemsModal />
   </Theme>
 
 

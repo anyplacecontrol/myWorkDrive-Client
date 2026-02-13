@@ -6,6 +6,12 @@ function isAnyFiles() {
   return $queryParams.drive ? getSortedFiles().length > 0 && !fileCatalogData.loading : false;
 }
 
+function onDroppedUpload(files) {
+  const targetPath = window.MwdHelpers.joinPath($queryParams.drive || "", $queryParams.folder || "");
+  window.MwdHelpers.setWindowProperty("pendingUploadFiles", files);
+  window.publishTopic("UploadItemsModal:startPending", { targetPath });
+}
+
 function handleTreeContextMenu(ev) {
   const targetPath = window.MwdHelpers.joinPath($queryParams.drive, $queryParams.folder);
   dropZoneContextMenu.openAt(ev, { selectedItems: [], targetPath });

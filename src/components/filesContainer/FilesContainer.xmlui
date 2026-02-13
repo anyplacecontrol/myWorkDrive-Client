@@ -26,7 +26,7 @@
   <FileUploadDropZone
     id="fileUploadDialog"
     height="100%"
-    onUpload="()=>{}"
+    onUpload="(files) => onDroppedUpload(files)"
     overflowX="hidden"
     border="none"
     onContextMenu="ev => handleTreeContextMenu(ev)"

@@ -1,0 +1,49 @@
+<!--
+  This component represents a modal dialog that handles file upload operations.
+-->
+<Component
+  name="UploadItemsModal"
+  var.selectedUploadFiles="{[]}"
+  var.uploadQueueItems="{[]}"
+  var.uploadTargetPath="{''}"
+  var.isUploadDialogOpen="{false}"
+  var.uploadProgress="{0}"
+  var.totalUploadBytes="{0}"
+  var.processedUploadBytes="{0}"
+  var.currentUploadBytes="{0}"
+>
+  <MessageListener onMessageReceived="msg => onUploadMessageReceived(msg)" />
+
+  <Queue
+    when="{isUploadDialogOpen==true}"
+    id="uploadQueue"
+    onProcess="onProcessUploadQueuedItem"
+    onComplete="onUploadComplete"
+    clearAfterFinish="true"
+  />
+
+  <Stack height="0px" width="0px" overflow="hidden">
+    <FileInput
+      id="uploadFileInput"
+      multiple="true"
+      onDidChange="(files) => onUploadFilesSelected(files)"
+    />
+  </Stack>
+
+  <ModalDialog
+    when="{isUploadDialogOpen==true}"
+    title=""
+    maxWidth="400px"
+    onClose="handleUploadClose"
+  >
+    <VStack gap="$space-3">
+      <InProgressPanel
+        message="{ 'Uploading files... Remains: ' + uploadQueue.getQueueLength() + ' item(s)' }"
+      />
+      <ProgressBar value="{uploadProgress}" />
+      <Text
+        value="{ Math.round(uploadProgress * 100) + '% • ' + formatFileSizeInBytes(processedUploadBytes + currentUploadBytes) + ' / ' + formatFileSizeInBytes(totalUploadBytes) }"
+      />
+    </VStack>
+  </ModalDialog>
+</Component>
