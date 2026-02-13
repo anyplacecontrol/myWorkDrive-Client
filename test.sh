@@ -110,9 +110,9 @@ case "${1:-help}" in
     if [ -f "$CAPTURED" ]; then
       cp "$CAPTURED" "$ABS_CAPTURES/$2.json"
       SEMANTIC_OUTPUT=$(node compare-traces.js --semantic "$ABS_BASELINE" "$CAPTURED" 2>&1)
-      echo "$SEMANTIC_OUTPUT"
+      echo "$SEMANTIC_OUTPUT" | grep -v "^SEMANTIC_M"
       echo ""
-      if echo "$SEMANTIC_OUTPUT" | grep -q "Traces match semantically"; then
+      if echo "$SEMANTIC_OUTPUT" | grep -q "SEMANTIC_MATCH"; then
         echo "SEMANTIC: PASS — Same APIs, forms, and navigation"
         # Auto-update baseline on semantic pass (experimental)
         cp "$ABS_BASELINE" "${ABS_BASELINE%.json}.prev.json"
@@ -131,7 +131,7 @@ case "${1:-help}" in
     rm -f "$TEST_FILE"
 
     # Exit 0 if semantics match even if a selector failed
-    if [ $TEST_EXIT -ne 0 ] && echo "$SEMANTIC_OUTPUT" | grep -q "Traces match semantically"; then
+    if [ $TEST_EXIT -ne 0 ] && echo "$SEMANTIC_OUTPUT" | grep -q "SEMANTIC_MATCH"; then
       exit 0
     fi
     exit $TEST_EXIT
