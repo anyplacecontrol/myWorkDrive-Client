@@ -4,8 +4,8 @@
 # Usage:
 #   ./test.sh list                          List available baselines
 #   ./test.sh save <trace.json> <journey>   Save an exported trace as baseline
-#   ./test.sh run <journey>                 Generate test, run it, compare
-#   ./test.sh run-all                       Run all baselines
+#   ./test.sh run <journey> [--browser-errors]  Generate test, run it, compare
+#   ./test.sh run-all [--browser-errors]       Run all baselines
 #   ./test.sh update <journey>              Promote latest capture to baseline
 #   ./test.sh compare <journey>             Compare latest capture vs baseline
 #   ./test.sh summary <journey>             Show journey summary
@@ -26,6 +26,7 @@ case "${1:-help}" in
     echo "Available baselines:"
     for f in "$BASELINES"/*.json; do
       [ -f "$f" ] || continue
+      [[ "$f" == *.prev.json ]] && continue
       name=$(basename "$f" .json)
       events=$(node -e "console.log(JSON.parse(require('fs').readFileSync('$f','utf8')).length)")
       echo "  $name ($events events)"
@@ -61,8 +62,10 @@ case "${1:-help}" in
     ABS_CAPTURES="$(cd "$(dirname "$CAPTURES")" && pwd)/$(basename "$CAPTURES")"
 
     # Generate test
+    GEN_FLAGS=""
+    if [[ "$*" == *"--browser-errors"* ]]; then GEN_FLAGS="--browser-errors"; fi
     TEST_FILE="$TRACE_TOOLS/generated-$2.spec.ts"
-    node "$TRACE_TOOLS/generate-playwright.js" "$ABS_BASELINE" "$2" > "$TEST_FILE"
+    node "$TRACE_TOOLS/generate-playwright.js" "$ABS_BASELINE" "$2" $GEN_FLAGS > "$TEST_FILE"
     echo "Generated: $TEST_FILE"
 
     # Run test (clean stale capture first)
@@ -111,6 +114,9 @@ case "${1:-help}" in
       echo ""
       if echo "$SEMANTIC_OUTPUT" | grep -q "Traces match semantically"; then
         echo "SEMANTIC: PASS — Same APIs, forms, and navigation"
+        # Auto-update baseline on semantic pass (experimental)
+        cp "$ABS_BASELINE" "${ABS_BASELINE%.json}.prev.json"
+        cp "$CAPTURED" "$ABS_BASELINE"
       else
         echo "SEMANTIC: FAIL — Behavioral regression detected"
       fi
@@ -137,6 +143,7 @@ case "${1:-help}" in
     FAILED=()
     for f in "$BASELINES"/*.json; do
       [ -f "$f" ] || continue
+      [[ "$f" == *.prev.json ]] && continue
       name=$(basename "$f" .json)
       echo "--- Running: $name ---"
       "$0" run "$name"
