@@ -50,6 +50,7 @@
         >
           <Button
             label="{mediaSize.largeScreen ? 'Folders' : undefined}"
+            contextualLabel="Folders"
             icon="btn_folders"
             variant="ghost"
             onClick="() => { isFoldersVisible = !isFoldersVisible; }"
@@ -57,6 +58,7 @@
         </Theme>
         <Button
           label="{mediaSize.largeScreen ? 'Favorites' : undefined}"
+          contextualLabel="Favorites"
           icon="btn_favorites"
           variant="ghost"
           onClick="toast.error('Not implemented yet')"
@@ -82,6 +84,7 @@
 
         <Button
           label="{mediaSize.largeScreen ? 'Refresh' : undefined}"
+          contextualLabel="Refresh"
           icon="btn_refresh"
           variant="ghost"
           onClick="() => {
@@ -101,6 +104,7 @@
             <Button
               testId="dropdown-button-new"
               variant="ghost"
+              contextualLabel="Upload"
             >
               <Icon height="$size-Icon" name="btn_upload" size="sm" />
               <Fragment when="{mediaSize.largeScreen}">
@@ -124,6 +128,7 @@
             <Button
               testId="dropdown-button-new"
               variant="ghost"
+              contextualLabel="New"
             >
               <Icon height="$size-Icon" name="btn_new" size="sm" />
               <Fragment when="{mediaSize.largeScreen}">
@@ -149,6 +154,7 @@
             <Button
               testId="dropdown-button-new"
               variant="ghost"
+              contextualLabel="View"
             >
               <Icon height="$size-Icon" name="btn_view" size="sm" />
               <Fragment when="{mediaSize.largeScreen}">
